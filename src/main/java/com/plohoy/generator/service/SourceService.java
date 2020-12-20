@@ -3,7 +3,7 @@ package com.plohoy.generator.service;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.response.SourceResponse;
-import com.plohoy.generator.model.tool.Tool;
+import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.strategy.Strategy;
 import com.plohoy.generator.strategy.StrategyHandler;
 
@@ -18,7 +18,7 @@ public class SourceService {
 
         Source source = strategy.buildSource(request.getEntities());
 
-        for (Tool tool : request.getTools()) {
+        for (AbstractTool tool : request.getTools()) {
             source = tool.generateCode(source);
         }
 

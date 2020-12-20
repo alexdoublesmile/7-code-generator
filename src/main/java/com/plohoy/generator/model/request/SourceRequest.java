@@ -2,14 +2,14 @@ package com.plohoy.generator.model.request;
 
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.entity.Entity;
-import com.plohoy.generator.model.tool.Tool;
+import com.plohoy.generator.model.tool.AbstractTool;
 
 import java.util.List;
 
 public class SourceRequest {
     private ArchitectureType architecture;
     private List<Entity> entities;
-    private List<Tool> tools;
+    private List<AbstractTool> tools;
     private String version;
 
     public ArchitectureType getArchitecture() {
@@ -28,11 +28,11 @@ public class SourceRequest {
         this.entities = entities;
     }
 
-    public List<Tool> getTools() {
+    public List<AbstractTool> getTools() {
         return tools;
     }
 
-    public void setTools(List<Tool> tools) {
+    public void setTools(List<AbstractTool> tools) {
         this.tools = tools;
     }
 

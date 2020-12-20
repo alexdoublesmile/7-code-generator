@@ -7,6 +7,7 @@ import com.plohoy.generator.model.entity.Field;
 import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.response.SourceResponse;
 import com.plohoy.generator.model.tool.*;
+import com.plohoy.generator.model.tool.impl.*;
 import com.plohoy.generator.service.SourceService;
 
 import java.util.ArrayList;
@@ -55,21 +56,21 @@ public class GeneratorApplication {
 
         request.setEntities(entities);
 
-        List<Tool> tools = new ArrayList<Tool>();
-        Tool springTool = new SpringTool("5.2.9.RELEASE");
-        Tool springBootTool = new SpringBootTool("2.3.4.RELEASE");
-        Tool lombokTool = new LombokTool("1.18.12");
-        Tool mapstructTool = new MapstructTool("1.3.1.Final");
-        Tool jacksonTool = new JacksonTool("2.11.2");
-        Tool jakartaValidationTool = new JakartaValidationTool("2.0.2");
-        Tool swaggerTool = new SwaggerTool("2.1.2");
-        Tool springDocTool = new SpringDocTool("1.3.9");
-        Tool javaDocTool = new JavaDocTool();
-        Tool postgresTool = new PostgresTool();
-        Tool liquibaseTool = new LiquibaseTool();
-        Tool gitTool = new GitTool();
-        Tool dockerTool = new DockerTool();
-        Tool readMeTool = new ReadMeTool();
+        List<AbstractTool> tools = new ArrayList<AbstractTool>();
+        AbstractTool springTool = new SpringTool("5.2.9.RELEASE");
+        AbstractTool springBootTool = new SpringBootTool("2.3.4.RELEASE");
+        AbstractTool lombokTool = new LombokTool("1.18.12");
+        AbstractTool mapstructTool = new MapstructTool("1.3.1.Final");
+        AbstractTool jacksonTool = new JacksonTool("2.11.2");
+        AbstractTool jakartaValidationTool = new JakartaValidationTool("2.0.2");
+        AbstractTool swaggerTool = new SwaggerTool("2.1.2");
+        AbstractTool springDocTool = new SpringDocTool("1.3.9");
+        AbstractTool javaDocTool = new JavaDocTool();
+        AbstractTool postgresTool = new PostgresTool();
+        AbstractTool liquibaseTool = new LiquibaseTool();
+        AbstractTool gitTool = new GitTool();
+        AbstractTool dockerTool = new DockerTool();
+        AbstractTool readMeTool = new ReadMeTool();
 
         tools.add(springTool);
         tools.add(springBootTool);
@@ -90,8 +91,9 @@ public class GeneratorApplication {
 
         request.setVersion("11");
 
-        SourceResponse sourceResponse = controller.buildSource(request);
+        SourceResponse response = controller.buildSource(request);
 
-        System.out.println(sourceResponse.getResponse());
+        System.out.println(request);
+        System.out.println(response);
     }
 }

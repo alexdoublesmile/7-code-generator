@@ -9,7 +9,7 @@
     <version>0.0.1</version>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <spring.version>5.2.9.RELEASE</spring.version>
         <lombok.version>1.18.12</lombok.version>
     </properties>

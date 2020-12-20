@@ -1,8 +1,9 @@
-package com.plohoy.generator.model.tool;
+package com.plohoy.generator.model.tool.impl;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.tool.AbstractTool;
 
-public class MapstructTool extends Tool {
+public class MapstructTool extends AbstractTool {
     public MapstructTool(String version) {
         super(version);
     }

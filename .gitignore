@@ -209,7 +209,7 @@ local.properties
 # TeXlipse plugin
 .texlipse
 
-# STS (Spring Tool Suite)
+# STS (Spring AbstractTool Suite)
 .springBeans
 
 # Code Recommenders

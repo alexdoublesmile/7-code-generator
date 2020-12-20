@@ -1,8 +1,9 @@
-package com.plohoy.generator.model.tool;
+package com.plohoy.generator.model.tool.impl;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.tool.AbstractTool;
 
-public class JakartaValidationTool extends Tool {
+public class JakartaValidationTool extends AbstractTool {
     public JakartaValidationTool(String version) {
         super(version);
     }

@@ -31,4 +31,13 @@ public class Source {
     public void setArchive(boolean archive) {
         isArchive = archive;
     }
+
+    @Override
+    public String toString() {
+        return "Source{" +
+                "name='" + name + '\'' +
+                ", files=" + files +
+                ", isArchive=" + isArchive +
+                '}';
+    }
 }

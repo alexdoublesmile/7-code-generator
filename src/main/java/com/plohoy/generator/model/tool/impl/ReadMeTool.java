@@ -1,8 +1,9 @@
-package com.plohoy.generator.model.tool;
+package com.plohoy.generator.model.tool.impl;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.tool.AbstractTool;
 
-public class ReadMeTool extends Tool {
+public class ReadMeTool extends AbstractTool {
     public ReadMeTool(String version) {
         super(version);
     }

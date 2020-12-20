@@ -1,8 +1,9 @@
-package com.plohoy.generator.model.tool;
+package com.plohoy.generator.model.tool.impl;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.tool.AbstractTool;
 
-public class SwaggerTool extends Tool {
+public class SwaggerTool extends AbstractTool {
     public SwaggerTool(String version) {
         super(version);
     }

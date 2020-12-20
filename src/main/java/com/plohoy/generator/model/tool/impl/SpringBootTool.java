@@ -1,8 +1,9 @@
-package com.plohoy.generator.model.tool;
+package com.plohoy.generator.model.tool.impl;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.tool.AbstractTool;
 
-public class SpringBootTool extends Tool {
+public class SpringBootTool extends AbstractTool {
     public SpringBootTool(String version) {
         super(version);
     }
