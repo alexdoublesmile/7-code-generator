@@ -1,4 +1,4 @@
-package com.plohoy.generator.strategy;
+package com.plohoy.generator.service.strategy;
 
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.entity.Entity;

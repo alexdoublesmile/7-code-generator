@@ -3,15 +3,18 @@ package com.plohoy.generator.model.response;
 import com.plohoy.generator.model.Source;
 
 public class SourceResponse {
-    private String response;
+    private String responseMessage;
     private Source source;
 
-    public SourceResponse(String response) {
-        this.response = response;
+    public SourceResponse(Source source) {
+        this.source = source;
+        if (source != null) {
+            responseMessage = "OK";
+        }
     }
 
-    public String getResponse() {
-        return response;
+    public String getResponseMessage() {
+        return responseMessage;
     }
 
     public Source getSource() {
@@ -21,7 +24,7 @@ public class SourceResponse {
     @Override
     public String toString() {
         return "SourceResponse{" +
-                "response='" + response + '\'' +
+                "responseMessage='" + responseMessage + '\'' +
                 "\n-- source=" + source +
                 '}';
     }

@@ -1,7 +1,7 @@
-package com.plohoy.generator.strategy;
+package com.plohoy.generator.service.strategy;
 
 import com.plohoy.generator.model.ArchitectureType;
-import com.plohoy.generator.strategy.impl.MicroserviceSimpleStrategy;
+import com.plohoy.generator.service.strategy.impl.MicroserviceSimpleStrategy;
 
 import java.util.HashMap;
 

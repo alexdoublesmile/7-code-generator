@@ -4,8 +4,8 @@ import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.response.SourceResponse;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.strategy.Strategy;
-import com.plohoy.generator.strategy.StrategyHandler;
+import com.plohoy.generator.service.strategy.Strategy;
+import com.plohoy.generator.service.strategy.StrategyHandler;
 
 public class SourceService {
     private Strategy strategy;
@@ -22,6 +22,6 @@ public class SourceService {
             source = tool.generateCode(source);
         }
 
-        return new SourceResponse("OK");
+        return new SourceResponse(source);
     }
 }

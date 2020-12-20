@@ -5,8 +5,7 @@ import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.entity.Entity;
 import com.plohoy.generator.model.entity.Field;
 import com.plohoy.generator.model.request.SourceRequest;
-import com.plohoy.generator.model.response.SourceResponse;
-import com.plohoy.generator.model.tool.*;
+import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.impl.*;
 import com.plohoy.generator.service.SourceService;
 
@@ -15,12 +14,16 @@ import java.util.List;
 
 public class GeneratorApplication {
     public static void main(String[] args) {
+        SourceController controller = new SourceController(new SourceService());
+
+        System.out.println(controller
+                .buildSource(getNewRequest())
+                .getResponseMessage());
+    }
+
+    private static SourceRequest getNewRequest() {
         SourceRequest request = new SourceRequest();
         request.setArchitecture(ArchitectureType.MICROSERVICE_SIMPLE);
-
-        SourceService service = new SourceService();
-        SourceController controller = new SourceController(service);
-
 
         List<Entity> entities = new ArrayList<Entity>();
 
@@ -91,9 +94,6 @@ public class GeneratorApplication {
 
         request.setVersion("11");
 
-        SourceResponse response = controller.buildSource(request);
-
-        System.out.println(request);
-        System.out.println(response);
+        return request;
     }
 }

@@ -12,6 +12,6 @@ public class MapstructTool extends AbstractTool {
     }
 
     public Source generateCode(Source source) {
-        return null;
+        return source;
     }
 }
