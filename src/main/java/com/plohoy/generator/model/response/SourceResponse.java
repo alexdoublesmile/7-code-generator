@@ -6,4 +6,8 @@ public class SourceResponse {
     public SourceResponse(String response) {
         this.response = response;
     }
+
+    public String getResponse() {
+        return response;
+    }
 }
