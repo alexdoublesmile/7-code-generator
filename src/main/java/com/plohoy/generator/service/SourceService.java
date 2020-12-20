@@ -2,7 +2,7 @@ package com.plohoy.generator.service;
 
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.Source;
-import com.plohoy.generator.model.Tool;
+import com.plohoy.generator.model.tool.Tool;
 import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.response.SourceResponse;
 import com.plohoy.generator.strategy.Strategy;

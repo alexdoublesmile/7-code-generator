@@ -1,8 +1,8 @@
 package com.plohoy.generator.model.request;
 
 import com.plohoy.generator.model.ArchitectureType;
-import com.plohoy.generator.model.Entity;
-import com.plohoy.generator.model.Tool;
+import com.plohoy.generator.model.entity.Entity;
+import com.plohoy.generator.model.tool.Tool;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ public class SourceRequest {
     private ArchitectureType architecture;
     private List<Entity> entities;
     private List<Tool> tools;
+    private String version;
 
     public ArchitectureType getArchitecture() {
         return architecture;
@@ -33,5 +34,13 @@ public class SourceRequest {
 
     public void setTools(List<Tool> tools) {
         this.tools = tools;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
