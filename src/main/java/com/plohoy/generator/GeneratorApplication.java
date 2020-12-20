@@ -1,5 +1,6 @@
 package com.plohoy.generator;
 
+import com.plohoy.generator.config.AppConfig;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.entity.Entity;
@@ -7,29 +8,40 @@ import com.plohoy.generator.model.entity.Field;
 import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.impl.*;
-import com.plohoy.generator.service.SourceService;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GeneratorApplication {
+
     public static void main(String[] args) {
-        SourceController controller = new SourceController(new SourceService());
+        AnnotationConfigApplicationContext ctx =
+                new AnnotationConfigApplicationContext();
+        ctx.register(AppConfig.class);
+        ctx.scan("com.plohoy.generator");
+        ctx.refresh();
+
+        SourceController controller = (SourceController) ctx.getBean("controller");
 
         System.out.println(controller
-                .buildSource(getNewRequest())
+                .buildSource(getTestRequest())
                 .getResponseMessage());
     }
 
-    private static SourceRequest getNewRequest() {
+    private static SourceRequest getTestRequest() {
         SourceRequest request = new SourceRequest();
+        request.setSourceName("person-service");
+        request.setPackageName("com/plohoy/personservice");
+
         request.setArchitecture(ArchitectureType.MICROSERVICE_SIMPLE);
 
         List<Entity> entities = new ArrayList<Entity>();
 
-        Entity entity = new Entity();
+        Entity personEntity = new Entity();
+//        Entity addressEntity = new Entity();
 
-        entity.setName("Person");
+        personEntity.setName("Person");
 
         List<Field> fields = new ArrayList<Field>();
         Field firstNameField = new Field();
@@ -53,9 +65,37 @@ public class GeneratorApplication {
         fields.add(patronymicField);
         fields.add(ageField);
 
-        entity.setFields(fields);
+        personEntity.setFields(fields);
 
-        entities.add(entity);
+
+//        addressEntity.setName("Address");
+//
+//        List<Field> addressFields = new ArrayList<Field>();
+//        Field countryField = new Field();
+//        countryField.setType("String");
+//        countryField.setName("country");
+//
+//        Field cityField = new Field();
+//        cityField.setType("String");
+//        cityField.setName("city");
+//
+//        Field streetField = new Field();
+//        streetField.setType("String");
+//        streetField.setName("street");
+//
+//        Field houseField = new Field();
+//        houseField.setType("String");
+//        houseField.setName("house");
+//
+//        addressFields.add(countryField);
+//        addressFields.add(cityField);
+//        addressFields.add(streetField);
+//        addressFields.add(houseField);
+//
+//        addressEntity.setFields(addressFields);
+
+        entities.add(personEntity);
+//        entities.add(addressEntity);
 
         request.setEntities(entities);
 
