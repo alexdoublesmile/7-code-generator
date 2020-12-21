@@ -44,6 +44,10 @@ public class GeneratorApplication {
         personEntity.setName("Person");
 
         List<Field> fields = new ArrayList<Field>();
+        Field idField = new Field();
+        idField.setType("UUID");
+        idField.setName("id");
+
         Field firstNameField = new Field();
         firstNameField.setType("String");
         firstNameField.setName("firstName");
@@ -60,6 +64,7 @@ public class GeneratorApplication {
         ageField.setType("String");
         ageField.setName("age");
 
+        fields.add(idField);
         fields.add(firstNameField);
         fields.add(lastNameField);
         fields.add(patronymicField);
