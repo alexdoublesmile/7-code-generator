@@ -1,4 +1,4 @@
-# Created by .ignore support plugin (hsz.mobi)
+# Created by .ignore support buildsection (hsz.mobi)
 ### JDeveloper template
 # default application storage directory used by the IDE Performance Cache feature
 .data/
@@ -9,7 +9,6 @@ temp/
 # default output directories
 classes/
 deploy/
-javadoc/
 
 # lock file, a part of Oracle Credential Store Framework
 cwallet.sso.lck
@@ -85,7 +84,7 @@ hs_err_pid*
 # CMake
 cmake-build-*/
 
-# Mongo Explorer plugin
+# Mongo Explorer buildsection
 .idea/**/mongoSettings.xml
 
 # File-based project format
@@ -94,16 +93,16 @@ cmake-build-*/
 # IntelliJ
 out/
 
-# mpeltonen/sbt-idea plugin
+# mpeltonen/sbt-idea buildsection
 .idea_modules/
 
-# JIRA plugin
+# JIRA buildsection
 atlassian-ide-plugin.xml
 
-# Cursive Clojure plugin
+# Cursive Clojure buildsection
 .idea/replstate.xml
 
-# Crashlytics plugin (for Android Studio and IntelliJ)
+# Crashlytics buildsection (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
@@ -133,7 +132,7 @@ sftp-config.json
 
 # Package control specific files
 Package Control.last-run
-Package Control.ca-list
+Package Control.ca-element
 Package Control.ca-bundle
 Package Control.system-ca-bundle
 Package Control.cache/
@@ -200,13 +199,13 @@ local.properties
 # PDT-specific (PHP Development Tools)
 .buildpath
 
-# sbteclipse plugin
+# sbteclipse buildsection
 .target
 
-# Tern plugin
+# Tern buildsection
 .tern-project
 
-# TeXlipse plugin
+# TeXlipse buildsection
 .texlipse
 
 # STS (Spring AbstractTool Suite)
@@ -365,13 +364,13 @@ Temporary Items
 jobs/**
 !jobs/**/
 
-#uncomment the following line to save next build numbers with config
+#uncomment the following line to save next buildsection numbers with config
 #!jobs/**/nextBuildNumber
 
 #exclude only config.xml files in repository subdirectories
 !config.xml
 
-#don't track workspaces (when users build on the master)
+#don't track workspaces (when users buildsection on the master)
 jobs/**/*workspace
 
 #as a result only settings and job config.xml files in JENKINS_HOME will be tracked by git
@@ -402,7 +401,6 @@ $RECYCLE.BIN/
 **/nbproject/private/
 **/nbproject/Makefile-*.mk
 **/nbproject/Package-*.bash
-build/
 nbbuild/
 dist/
 nbdist/

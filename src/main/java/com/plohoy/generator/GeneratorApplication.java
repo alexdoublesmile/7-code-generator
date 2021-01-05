@@ -3,14 +3,29 @@ package com.plohoy.generator;
 import com.plohoy.generator.config.AppConfig;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
-import com.plohoy.generator.model.entity.Entity;
-import com.plohoy.generator.model.entity.Field;
-import com.plohoy.generator.model.request.SourceRequest;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.model.tool.impl.*;
+import com.plohoy.generator.model.tool.ToolType;
+import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
+import com.plohoy.generator.model.tool.impl.docker.DockerTool;
+import com.plohoy.generator.model.tool.impl.git.GitTool;
+import com.plohoy.generator.model.tool.impl.jackson.JacksonTool;
+import com.plohoy.generator.model.tool.impl.liquibase.LiquibaseTool;
+import com.plohoy.generator.model.tool.impl.lombok.LombokTool;
+import com.plohoy.generator.model.tool.impl.mapstruct.MapstructTool;
+import com.plohoy.generator.model.tool.impl.postgres.PostgresTool;
+import com.plohoy.generator.model.tool.impl.readme.ReadMeTool;
+import com.plohoy.generator.model.tool.impl.spring.SpringBootTool;
+import com.plohoy.generator.model.tool.impl.spring.SpringTool;
+import com.plohoy.generator.model.tool.impl.swagger.SpringDocTool;
+import com.plohoy.generator.model.tool.impl.swagger.SwaggerTool;
+import com.plohoy.generator.model.tool.impl.validation.JakartaValidationTool;
+import com.plohoy.generator.view.request.Entity;
+import com.plohoy.generator.view.request.Field;
+import com.plohoy.generator.view.request.SourceRequest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GeneratorApplication {
@@ -25,44 +40,75 @@ public class GeneratorApplication {
         SourceController controller = (SourceController) ctx.getBean("controller");
 
         System.out.println(controller
-                .buildSource(getTestRequest())
-                .getResponseMessage());
+                .buildSource(getTestRequest()).getStatusCode());
     }
 
     private static SourceRequest getTestRequest() {
-        SourceRequest request = new SourceRequest();
-        request.setSourceName("person-service");
-        request.setPackageName("com/plohoy/personservice");
+        return SourceRequest.builder()
+                .sourcePath("../uploads/generated/")
+                .groupName("com.plohoy")
+                .artifactName("person-service")
+                .jdkVersion("11")
+                .architecture(ArchitectureType.REST_SIMPLE)
+                .isMicroService(true)
+                .isArchive(false)
+                .mainEntities(getTestMainEntities())
+                .secondaryEntities(getTestEntities())
+                .tools(getTestTools())
+                .build();
+    }
 
-        request.setArchitecture(ArchitectureType.MICROSERVICE_SIMPLE);
+    private static List<Entity> getTestMainEntities() {
+        List<Entity> mainEntities = new ArrayList<>();
+        Entity personEntity = Entity.builder()
+                .name("Person")
+                .fields(getTestPersonFields())
+                .build();
 
-        List<Entity> entities = new ArrayList<Entity>();
+        mainEntities.add(personEntity);
 
-        Entity personEntity = new Entity();
-//        Entity addressEntity = new Entity();
+        return mainEntities;
+    }
 
-        personEntity.setName("Person");
+    private static List<Entity> getTestEntities() {
+        List<Entity> entities = new ArrayList<>();
 
-        List<Field> fields = new ArrayList<Field>();
-        Field idField = new Field();
-        idField.setType("UUID");
-        idField.setName("id");
+        Entity addressEntity = Entity.builder()
+                .name("Address")
+                .fields(getTestAddressFields())
+                .build();
 
-        Field firstNameField = new Field();
-        firstNameField.setType("String");
-        firstNameField.setName("firstName");
+        entities.add(addressEntity);
 
-        Field lastNameField = new Field();
-        lastNameField.setType("String");
-        lastNameField.setName("lastName");
+        return entities;
+    }
 
-        Field patronymicField = new Field();
-        patronymicField.setType("String");
-        patronymicField.setName("patronymic");
+    private static List<Field> getTestPersonFields() {
+        List<Field> fields = new ArrayList<>();
+        Field idField = Field.builder()
+                .type("UUID")
+                .name("id")
+                .build();
 
-        Field ageField = new Field();
-        ageField.setType("String");
-        ageField.setName("age");
+        Field firstNameField = Field.builder()
+                .type("String")
+                .name("firstName")
+                .build();
+
+        Field lastNameField = Field.builder()
+                .type("String")
+                .name("lastName")
+                .build();
+
+        Field patronymicField = Field.builder()
+                .type("String")
+                .name("patronymic")
+                .build();
+
+        Field ageField = Field.builder()
+                .type("String")
+                .name("age")
+                .build();
 
         fields.add(idField);
         fields.add(firstNameField);
@@ -70,41 +116,42 @@ public class GeneratorApplication {
         fields.add(patronymicField);
         fields.add(ageField);
 
-        personEntity.setFields(fields);
+        return fields;
+    }
 
+    private static List<Field> getTestAddressFields() {
+        List<Field> addressFields = new ArrayList<>();
 
-//        addressEntity.setName("Address");
-//
-//        List<Field> addressFields = new ArrayList<Field>();
-//        Field countryField = new Field();
-//        countryField.setType("String");
-//        countryField.setName("country");
-//
-//        Field cityField = new Field();
-//        cityField.setType("String");
-//        cityField.setName("city");
-//
-//        Field streetField = new Field();
-//        streetField.setType("String");
-//        streetField.setName("street");
-//
-//        Field houseField = new Field();
-//        houseField.setType("String");
-//        houseField.setName("house");
-//
-//        addressFields.add(countryField);
-//        addressFields.add(cityField);
-//        addressFields.add(streetField);
-//        addressFields.add(houseField);
-//
-//        addressEntity.setFields(addressFields);
+        Field countryField = Field.builder()
+                .type("String")
+                .name("country")
+                .build();
 
-        entities.add(personEntity);
-//        entities.add(addressEntity);
+        Field cityField = Field.builder()
+                .type("String")
+                .name("city")
+                .build();
 
-        request.setEntities(entities);
+        Field streetField = Field.builder()
+                .type("String")
+                .name("street")
+                .build();
 
-        List<AbstractTool> tools = new ArrayList<AbstractTool>();
+        Field houseField = Field.builder()
+                .type("String")
+                .name("house")
+                .build();
+
+        addressFields.add(countryField);
+        addressFields.add(cityField);
+        addressFields.add(streetField);
+        addressFields.add(houseField);
+
+        return addressFields;
+    }
+
+    private static HashMap<ToolType, AbstractTool> getTestTools() {
+        HashMap<ToolType, AbstractTool> tools = new HashMap<>();
         AbstractTool springTool = new SpringTool("5.2.9.RELEASE");
         AbstractTool springBootTool = new SpringBootTool("2.3.4.RELEASE");
         AbstractTool lombokTool = new LombokTool("1.18.12");
@@ -120,25 +167,21 @@ public class GeneratorApplication {
         AbstractTool dockerTool = new DockerTool();
         AbstractTool readMeTool = new ReadMeTool();
 
-        tools.add(springTool);
-        tools.add(springBootTool);
-        tools.add(lombokTool);
-        tools.add(mapstructTool);
-        tools.add(jacksonTool);
-        tools.add(jakartaValidationTool);
-        tools.add(swaggerTool);
-        tools.add(springDocTool);
-        tools.add(javaDocTool);
-        tools.add(postgresTool);
-        tools.add(liquibaseTool);
-        tools.add(gitTool);
-        tools.add(dockerTool);
-        tools.add(readMeTool);
+        tools.put(ToolType.SPRING, springTool);
+        tools.put(ToolType.SPRING_BOOT, springBootTool);
+        tools.put(ToolType.LOMBOK, lombokTool);
+        tools.put(ToolType.MAPSTRUCT, mapstructTool);
+        tools.put(ToolType.JACKSON, jacksonTool);
+        tools.put(ToolType.JAKARTA_VALIDATION, jakartaValidationTool);
+        tools.put(ToolType.SWAGGER, swaggerTool);
+        tools.put(ToolType.SPRING_DOC, springDocTool);
+        tools.put(ToolType.JAVA_DOC, javaDocTool);
+        tools.put(ToolType.POSTGRES, postgresTool);
+        tools.put(ToolType.LIQUIBASE, liquibaseTool);
+        tools.put(ToolType.GIT, gitTool);
+        tools.put(ToolType.DOCKER, dockerTool);
+        tools.put(ToolType.READ_ME, readMeTool);
 
-        request.setTools(tools);
-
-        request.setVersion("11");
-
-        return request;
+        return tools;
     }
 }
