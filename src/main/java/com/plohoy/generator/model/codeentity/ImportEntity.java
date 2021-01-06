@@ -12,6 +12,6 @@ public class ImportEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return IMPORT_WORD + SPACE_SYMBOL + value;
+        return getTab(0, this) + IMPORT_WORD + SPACE_SYMBOL + value;
     }
 }

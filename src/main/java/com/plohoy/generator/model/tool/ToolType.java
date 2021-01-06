@@ -3,6 +3,7 @@ package com.plohoy.generator.model.tool;
 public enum ToolType {
     SPRING,
     SPRING_BOOT,
+    SLF4J,
     LOMBOK,
     MAPSTRUCT,
     JACKSON,

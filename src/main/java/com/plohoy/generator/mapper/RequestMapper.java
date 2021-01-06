@@ -1,5 +1,6 @@
 package com.plohoy.generator.mapper;
 
+import com.plohoy.generator.model.EntryPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.ClassEntity;
 import com.plohoy.generator.model.codeentity.FieldEntity;
@@ -25,6 +26,7 @@ public class RequestMapper {
                 .path(request.getSourcePath())
                 .relativeRootPaths(pathHelper.getRootPathList(request))
                 .corePackagePath(pathHelper.getPackagePath(request))
+                .dtoPackagePath(pathHelper.getDtoPackagePath(request))
                 .corePackageName(String.format(
                         "%s.%s",
                         request.getGroupName(),
@@ -36,6 +38,7 @@ public class RequestMapper {
                 .secondaryEntities(mapRequestEntitiesToSource(request.getSecondaryEntities()))
                 .isArchive(request.isArchive())
                 .sourceData(initSourceData())
+                .entryPoints(initEntryPoints(request.getEntryPoints()))
                 .build();
     }
 
@@ -76,5 +79,14 @@ public class RequestMapper {
         }
 
         return sourceData;
+    }
+
+    private HashMap<EntryPointType, String> initEntryPoints(HashMap<EntryPointType, String> requestEntryPoints) {
+        HashMap<EntryPointType, String> entryPoints = new HashMap<>();
+        for (EntryPointType entryPointType : EntryPointType.values()) {
+            entryPoints.put(entryPointType, requestEntryPoints.get(entryPointType));
+        }
+
+        return entryPoints;
     }
 }

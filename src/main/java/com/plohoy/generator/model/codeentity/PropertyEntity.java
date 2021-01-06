@@ -15,4 +15,14 @@ public class PropertyEntity extends CodeEntity {
     public String toString() {
         return EMPTY_STRING + name + value;
     }
+
+    public void setName(PropertyNameEntity name) {
+        this.name = name;
+        this.name.setParentEntity(this);
+    }
+
+    public void setValue(PropertyValueEntity value) {
+        this.value = value;
+        this.value.setParentEntity(this);
+    }
 }

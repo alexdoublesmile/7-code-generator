@@ -19,18 +19,22 @@ public class PathHelper {
                 .getRootPathList(request);
     }
 
-//    public List<String> getSourcePathList(SourceRequest request) {
-//        return sourceTreeHandler
-//                .getSourceTrees()
-//                .get(request.isMicroService())
-//                .getSourcePathList(request);
-//    }
-
     public String getPackagePath(SourceRequest request) {
         return sourceTreeHandler
                 .getSourceTrees()
                 .get(request.isMicroService())
                 .getPackagePath(request);
+    }
+
+    public String getDtoPackagePath(SourceRequest request) {
+        return sourceTreeHandler
+                .getSourceTrees()
+                .get(request.isMicroService())
+                .getDtoPackagePath(request);
+    }
+
+    public String getResourcePath() {
+        return "src/main/resources";
     }
 
     @Getter

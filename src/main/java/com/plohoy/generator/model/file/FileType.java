@@ -10,5 +10,6 @@ public enum FileType {
     MAPPER,
     EXCEPTION,
     LAUNCHER,
-    SIMPLE_FILE
+    PROPERTY_FILE,
+    EXTERNAL_FILE
 }

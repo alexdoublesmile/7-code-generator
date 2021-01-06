@@ -1,6 +1,7 @@
 package com.plohoy.generator.view.request;
 
 import com.plohoy.generator.model.ArchitectureType;
+import com.plohoy.generator.model.EntryPointType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import lombok.Builder;
@@ -22,4 +23,5 @@ public class SourceRequest {
     private List<Entity> mainEntities;
     private List<Entity> secondaryEntities;
     private HashMap<ToolType, AbstractTool> tools;
+    private HashMap<EntryPointType, String> entryPoints;
 }

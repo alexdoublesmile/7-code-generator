@@ -4,32 +4,28 @@ import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
+import static com.plohoy.generator.util.codegenhelper.CodeTemplate.SLASH_SYMBOL;
+
 public class SimpleSourceTree extends AbstractSourceTree {
     @Override
     public List<String> getRootPathList(SourceRequest request) {
-        rootPathList.add(SLASH);
+        rootPathList.add(SLASH_SYMBOL);
 
         return rootPathList;
     }
 
     @Override
-    public String getPackagePath(SourceRequest request) {
-        packagePath = SLASH
+    public String  getPackagePath(SourceRequest request) {
+        packagePath = SLASH_SYMBOL
                 + "/src/main/java/"
                 + request.getGroupName().replace(".", "/")
-                + SLASH + request.getArtifactName();
+                + SLASH_SYMBOL + request.getArtifactName();
 
         return packagePath;
     }
 
-//    @Override
-//    public List<String> getSourcePathList(SourceRequest request) {
-//        addSrcTree(
-//                SLASH,
-//                request.getGroupName(),
-//                request.getArtifactName(),
-//                true);
-//
-//        return pathList;
-//    }
+    @Override
+    public String getDtoPackagePath(SourceRequest request) {
+        return getPackagePath(request);
+    }
 }

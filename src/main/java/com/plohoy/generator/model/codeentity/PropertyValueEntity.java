@@ -10,6 +10,8 @@ import lombok.Data;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.plohoy.generator.util.codegenhelper.CodeTemplate.getTab;
+
 @Data
 @Builder
 public class PropertyValueEntity extends CodeEntity {
@@ -21,7 +23,7 @@ public class PropertyValueEntity extends CodeEntity {
             return new QuoteWrapper<>(DelimiterType.NONE, values).toString();
         } else {
             List<String> quotedValues = values.stream()
-                    .map(element -> new QuoteWrapper<>(DelimiterType.NONE, element).toString())
+                    .map(element -> getTab(1, this) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
                     .collect(Collectors.toList());
 
             return new BodyBracketWrapper<>(DelimiterType.INDENT, new IndentList<>(DelimiterType.COMMA, false, quotedValues)).toString();

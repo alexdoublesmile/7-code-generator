@@ -18,10 +18,12 @@ public class Source {
     private String artifactName;
     private List<String> relativeRootPaths;
     private String corePackagePath;
+    private String dtoPackagePath;
     private String corePackageName;
     private List<ClassEntity> mainEntities;
     private List<ClassEntity> secondaryEntities;
     private String jdkVersion;
     private boolean isArchive;
     private HashMap<FileType, List<AbstractSourceFile>> sourceData;
+    private HashMap<EntryPointType, String> entryPoints;
 }

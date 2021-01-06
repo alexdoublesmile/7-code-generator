@@ -121,6 +121,10 @@ public class GeneratorApplication {
 
     private static List<Field> getTestAddressFields() {
         List<Field> addressFields = new ArrayList<>();
+        Field idField = Field.builder()
+                .type("UUID")
+                .name("id")
+                .build();
 
         Field countryField = Field.builder()
                 .type("String")
@@ -142,6 +146,7 @@ public class GeneratorApplication {
                 .name("house")
                 .build();
 
+        addressFields.add(idField);
         addressFields.add(countryField);
         addressFields.add(cityField);
         addressFields.add(streetField);

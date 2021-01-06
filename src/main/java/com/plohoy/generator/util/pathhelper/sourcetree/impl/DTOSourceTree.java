@@ -4,12 +4,15 @@ import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
+import static com.plohoy.generator.util.codegenhelper.CodeTemplate.SLASH_SYMBOL;
+
 public class DTOSourceTree extends AbstractSourceTree {
+
     @Override
     public List<String> getRootPathList(SourceRequest request) {
-        rootPathList.add(SLASH);
-        rootPathList.add(SLASH + String.format("%s-api", request.getArtifactName()));
-        rootPathList.add(SLASH + String.format("%s-core", request.getArtifactName()));
+        rootPathList.add(SLASH_SYMBOL);
+        rootPathList.add(SLASH_SYMBOL + String.format("%s-api", request.getArtifactName()));
+        rootPathList.add(SLASH_SYMBOL + String.format("%s-core", request.getArtifactName()));
 
         return rootPathList;
     }
@@ -19,27 +22,18 @@ public class DTOSourceTree extends AbstractSourceTree {
         packagePath = String.format("/%s-core", request.getArtifactName())
                 + "/src/main/java/"
                 + request.getGroupName().replace(".", "/")
-                + SLASH + request.getArtifactName() + SLASH;
+                + SLASH_SYMBOL + request.getArtifactName() + SLASH_SYMBOL;
 
         return packagePath;
     }
 
-//    @Override
-//    public List<String> getSourcePathList(SourceRequest request) {
-//        addSrcTree(
-//                String.format("/%s-core", request.getArtifactName()),
-//                request.getGroupName(),
-//                request.getArtifactName(),
-//                true);
-//
-//        String apiPackagePath = addSrcTree(
-//                String.format("/%s-api", request.getArtifactName()),
-//                request.getGroupName(),
-//                request.getArtifactName(),
-//                false);
-//
-//        pathList.add(apiPackagePath + SLASH + "dto");
-//
-//        return pathList;
-//    }
+    @Override
+    public String getDtoPackagePath(SourceRequest request) {
+        dtoPackagePath = String.format("/%s-dto", request.getArtifactName())
+                + "/src/main/java/"
+                + request.getGroupName().replace(".", "/")
+                + SLASH_SYMBOL + request.getArtifactName() + SLASH_SYMBOL;
+
+        return null;
+    }
 }
