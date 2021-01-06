@@ -1,13 +1,14 @@
-package com.plohoy.generator.util.codegenhelper;
+package com.plohoy.generator.util.codegenhelper.codebuilder;
 
 import com.plohoy.generator.model.EntryPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.ClassEntity;
 import com.plohoy.generator.model.codeentity.ClassType;
+import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.*;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @SuppressWarnings("Duplicates")
 public class CodeBuilder {

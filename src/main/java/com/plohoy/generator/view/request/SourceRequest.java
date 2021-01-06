@@ -20,8 +20,8 @@ public class SourceRequest {
     private ArchitectureType architecture;
     private boolean isMicroService;
     private boolean isArchive;
-    private List<Entity> mainEntities;
-    private List<Entity> secondaryEntities;
+    private List<RequestEntity> mainEntities;
+    private List<RequestEntity> secondaryEntities;
     private HashMap<ToolType, AbstractTool> tools;
     private HashMap<EntryPointType, String> entryPoints;
 }

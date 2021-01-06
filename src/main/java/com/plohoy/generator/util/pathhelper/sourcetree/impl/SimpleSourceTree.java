@@ -1,10 +1,11 @@
 package com.plohoy.generator.util.pathhelper.sourcetree.impl;
 
+import com.plohoy.generator.util.pathhelper.sourcetree.AbstractSourceTree;
 import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.SLASH_SYMBOL;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH_SYMBOL;
 
 public class SimpleSourceTree extends AbstractSourceTree {
     @Override

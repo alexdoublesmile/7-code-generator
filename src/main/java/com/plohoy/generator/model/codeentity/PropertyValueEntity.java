@@ -1,7 +1,7 @@
 package com.plohoy.generator.model.codeentity;
 
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import com.plohoy.generator.util.stringhelper.wrapper.BodyBracketWrapper;
 import com.plohoy.generator.util.stringhelper.wrapper.QuoteWrapper;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.getTab;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.getTab;
 
 @Data
 @Builder

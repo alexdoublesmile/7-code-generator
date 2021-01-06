@@ -3,8 +3,8 @@ package com.plohoy.generator.model.codeentity;
 import lombok.Builder;
 import lombok.Data;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.EQUALS;
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.SPACE_SYMBOL;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EQUALS;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SPACE_SYMBOL;
 
 @Data
 @Builder

@@ -4,7 +4,7 @@ import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 
 import java.util.Objects;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.*;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public class RoundBracketWrapper<E> {
     private DelimiterType delimiter;

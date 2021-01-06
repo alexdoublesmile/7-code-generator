@@ -3,7 +3,7 @@ package com.plohoy.generator.model.codeentity;
 import lombok.Builder;
 import lombok.Data;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.EMPTY_STRING;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY_STRING;
 
 @Data
 @Builder

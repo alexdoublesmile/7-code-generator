@@ -1,8 +1,9 @@
-package com.plohoy.generator.util.codegenhelper;
+package com.plohoy.generator.util.codegenhelper.filebuilder;
 
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.ClassEntity;
 import com.plohoy.generator.model.file.*;
+import com.plohoy.generator.util.codegenhelper.codebuilder.CodeBuilder;
 import com.plohoy.generator.util.pathhelper.PathHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.plohoy.generator.model.file.FileType.*;
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.*;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public class FileBuilder {
     private CodeBuilder codeBuilder = new CodeBuilder();

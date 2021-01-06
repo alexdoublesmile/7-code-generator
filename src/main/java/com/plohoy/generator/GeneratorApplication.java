@@ -19,8 +19,8 @@ import com.plohoy.generator.model.tool.impl.spring.SpringTool;
 import com.plohoy.generator.model.tool.impl.swagger.SpringDocTool;
 import com.plohoy.generator.model.tool.impl.swagger.SwaggerTool;
 import com.plohoy.generator.model.tool.impl.validation.JakartaValidationTool;
-import com.plohoy.generator.view.request.Entity;
-import com.plohoy.generator.view.request.Field;
+import com.plohoy.generator.view.request.RequestEntity;
+import com.plohoy.generator.view.request.RequestEntityField;
 import com.plohoy.generator.view.request.SourceRequest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -58,54 +58,54 @@ public class GeneratorApplication {
                 .build();
     }
 
-    private static List<Entity> getTestMainEntities() {
-        List<Entity> mainEntities = new ArrayList<>();
-        Entity personEntity = Entity.builder()
+    private static List<RequestEntity> getTestMainEntities() {
+        List<RequestEntity> mainEntities = new ArrayList<>();
+        RequestEntity personRequestEntity = RequestEntity.builder()
                 .name("Person")
                 .fields(getTestPersonFields())
                 .build();
 
-        mainEntities.add(personEntity);
+        mainEntities.add(personRequestEntity);
 
         return mainEntities;
     }
 
-    private static List<Entity> getTestEntities() {
-        List<Entity> entities = new ArrayList<>();
+    private static List<RequestEntity> getTestEntities() {
+        List<RequestEntity> entities = new ArrayList<>();
 
-        Entity addressEntity = Entity.builder()
+        RequestEntity addressRequestEntity = RequestEntity.builder()
                 .name("Address")
                 .fields(getTestAddressFields())
                 .build();
 
-        entities.add(addressEntity);
+        entities.add(addressRequestEntity);
 
         return entities;
     }
 
-    private static List<Field> getTestPersonFields() {
-        List<Field> fields = new ArrayList<>();
-        Field idField = Field.builder()
+    private static List<RequestEntityField> getTestPersonFields() {
+        List<RequestEntityField> fields = new ArrayList<>();
+        RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
                 .build();
 
-        Field firstNameField = Field.builder()
+        RequestEntityField firstNameField = RequestEntityField.builder()
                 .type("String")
                 .name("firstName")
                 .build();
 
-        Field lastNameField = Field.builder()
+        RequestEntityField lastNameField = RequestEntityField.builder()
                 .type("String")
                 .name("lastName")
                 .build();
 
-        Field patronymicField = Field.builder()
+        RequestEntityField patronymicField = RequestEntityField.builder()
                 .type("String")
                 .name("patronymic")
                 .build();
 
-        Field ageField = Field.builder()
+        RequestEntityField ageField = RequestEntityField.builder()
                 .type("String")
                 .name("age")
                 .build();
@@ -119,29 +119,29 @@ public class GeneratorApplication {
         return fields;
     }
 
-    private static List<Field> getTestAddressFields() {
-        List<Field> addressFields = new ArrayList<>();
-        Field idField = Field.builder()
+    private static List<RequestEntityField> getTestAddressFields() {
+        List<RequestEntityField> addressFields = new ArrayList<>();
+        RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
                 .build();
 
-        Field countryField = Field.builder()
+        RequestEntityField countryField = RequestEntityField.builder()
                 .type("String")
                 .name("country")
                 .build();
 
-        Field cityField = Field.builder()
+        RequestEntityField cityField = RequestEntityField.builder()
                 .type("String")
                 .name("city")
                 .build();
 
-        Field streetField = Field.builder()
+        RequestEntityField streetField = RequestEntityField.builder()
                 .type("String")
                 .name("street")
                 .build();
 
-        Field houseField = Field.builder()
+        RequestEntityField houseField = RequestEntityField.builder()
                 .type("String")
                 .name("house")
                 .build();

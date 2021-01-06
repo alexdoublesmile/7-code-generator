@@ -11,8 +11,8 @@ public class AppConfig {
 //    }
 //
 //    @Bean
-//    public SimpleSourceService service() {
-//        return new SimpleSourceService();
+//    public SourceService service() {
+//        return new SourceService();
 //    }
 //
 //    @Bean

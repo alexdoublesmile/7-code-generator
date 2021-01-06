@@ -2,7 +2,7 @@ package com.plohoy.generator.util.stringhelper.list;
 
 import java.util.*;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.*;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public abstract class CustomList<T> extends ArrayList<T> {
 

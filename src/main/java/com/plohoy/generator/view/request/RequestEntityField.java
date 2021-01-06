@@ -3,12 +3,9 @@ package com.plohoy.generator.view.request;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
-public class Entity {
+public class RequestEntityField {
+    private String type;
     private String name;
-    private List<Field> fields;
-
 }

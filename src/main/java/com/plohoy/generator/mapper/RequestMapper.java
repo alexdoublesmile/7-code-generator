@@ -5,12 +5,12 @@ import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.ClassEntity;
 import com.plohoy.generator.model.codeentity.FieldEntity;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.util.pathhelper.PathHelper;
-import com.plohoy.generator.view.request.Entity;
-import com.plohoy.generator.view.request.Field;
+import com.plohoy.generator.view.request.RequestEntity;
+import com.plohoy.generator.view.request.RequestEntityField;
 import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.ArrayList;
@@ -42,10 +42,10 @@ public class RequestMapper {
                 .build();
     }
 
-    private List<ClassEntity> mapRequestEntitiesToSource(List<Entity> requestEntities) {
+    private List<ClassEntity> mapRequestEntitiesToSource(List<RequestEntity> requestEntities) {
         List<ClassEntity> entities = new ArrayList<>();
 
-        for (Entity requestEntity : requestEntities) {
+        for (RequestEntity requestEntity : requestEntities) {
             ClassEntity entity = ClassEntity.builder()
                     .name(requestEntity.getName())
                     .fields(mapRequestFieldsToSource(requestEntity.getFields()))
@@ -57,10 +57,10 @@ public class RequestMapper {
         return entities;
     }
 
-    private IndentList<FieldEntity> mapRequestFieldsToSource(List<Field> requestFields) {
+    private IndentList<FieldEntity> mapRequestFieldsToSource(List<RequestEntityField> requestFields) {
         List<FieldEntity> fields = new ArrayList<>();
 
-        for (Field requestField : requestFields) {
+        for (RequestEntityField requestField : requestFields) {
             FieldEntity field = FieldEntity.builder()
                     .type(requestField.getType())
                     .name(requestField.getName())

@@ -1,4 +1,4 @@
-package com.plohoy.generator.util.pathhelper.sourcetree.impl;
+package com.plohoy.generator.util.pathhelper.sourcetree;
 
 import com.plohoy.generator.util.pathhelper.sourcetree.SourceTree;
 

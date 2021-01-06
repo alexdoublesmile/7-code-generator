@@ -1,9 +1,9 @@
-package com.plohoy.generator.util.codegenhelper;
+package com.plohoy.generator.util.codegenhelper.codetemplate;
 
 import com.plohoy.generator.model.codeentity.*;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.EnumerationList;
-import com.plohoy.generator.util.stringhelper.list.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class CodeTemplate {
     public static final String DTO_SUFFIX = "Dto";
     public static final String DAO_SUFFIX = "Dao";
     public static final String CONFIG_SUFFIX = "Config";
-    public static final String ENTITY_SUFFIX = "Entity";
+    public static final String ENTITY_SUFFIX = "RequestEntity";
     public static final String EXCEPTION_SUFFIX= "Exception";
 
     public static final String APPLICATION_PROPERTIES_NAME = "application.properties";

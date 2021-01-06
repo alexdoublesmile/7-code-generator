@@ -1,13 +1,13 @@
 package com.plohoy.generator.model.codeentity;
 
-import com.plohoy.generator.util.stringhelper.list.EnumerationList;
-import com.plohoy.generator.util.stringhelper.list.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.Objects;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.*;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @Data
 @Builder

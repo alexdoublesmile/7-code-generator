@@ -4,8 +4,8 @@ import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 
 import java.util.Objects;
 
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.EMPTY_STRING;
-import static com.plohoy.generator.util.codegenhelper.CodeTemplate.QUOTE;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY_STRING;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.QUOTE;
 
 public class QuoteWrapper<E> {
     private DelimiterType delimiter;
