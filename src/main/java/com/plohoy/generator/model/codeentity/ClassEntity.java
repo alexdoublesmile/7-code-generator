@@ -1,11 +1,10 @@
 package com.plohoy.generator.model.codeentity;
 
+import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Objects;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
@@ -30,15 +29,15 @@ public class ClassEntity extends CodeEntity {
     public String toString() {
         return (
             getTab(0, this) + packageString
-            + (Objects.nonNull(imports) ? imports + getIndent() : NULL_STRING)
+            + StringUtil.checkForNull(imports, imports + getIndent())
             + annotations
             + modifiers
-            + classType.getTypeName() + SPACE_SYMBOL
+            + StringUtil.checkForNull(classType, classType.getTypeName() + SPACE_SYMBOL)
             + name + SPACE_SYMBOL
-            + (Objects.nonNull(extendsClass) ? EXTEND_WORD + SPACE_SYMBOL + extendsClass + SPACE_SYMBOL : NULL_STRING)
+            + StringUtil.checkForNull(extendsClass, EXTEND_WORD + SPACE_SYMBOL + extendsClass + SPACE_SYMBOL)
             + implInterfaces
             + OPEN_BODY_BRACKET + getIndent()
-            + fields
+            + StringUtil.checkForNull(fields, fields + INDENT)
             + blocks
             + constructors
             + methods

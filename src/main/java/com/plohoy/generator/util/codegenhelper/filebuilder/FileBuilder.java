@@ -50,21 +50,21 @@ public class FileBuilder {
         return this;
     }
 
-    public FileBuilder addSimpleService() {
-        for (ClassEntity mainEntity : source.getMainEntities()) {
-            String fileName = StringUtil.toCamelCase(mainEntity.getName()) + SERVICE_SUFFIX;
-
-            source.getSourceData()
-                    .get(SERVICE)
-                    .add(ServiceFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                            .data(codeBuilder.buildServiceCode(source, fileName, mainEntity))
-                            .build()
-                    );
-        }
-        return this;
-    }
+//    public FileBuilder addSimpleService() {
+//        for (ClassEntity mainEntity : source.getMainEntities()) {
+//            String fileName = StringUtil.toCamelCase(mainEntity.getName()) + SERVICE_SUFFIX;
+//
+//            source.getSourceData()
+//                    .get(SERVICE)
+//                    .add(ServiceFile.builder()
+//                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .data(codeBuilder.buildServiceCode(source, fileName, mainEntity))
+//                            .build()
+//                    );
+//        }
+//        return this;
+//    }
 
     public FileBuilder addSimpleRepository() {
         for (ClassEntity mainEntity : source.getMainEntities()) {
@@ -82,108 +82,108 @@ public class FileBuilder {
         return this;
     }
 
-    public FileBuilder addMapper() {
-        for (ClassEntity mainEntity : source.getMainEntities()) {
-            String fileName = StringUtil.toCamelCase(mainEntity.getName()) + MAPPER_SUFFIX;
-
-            source.getSourceData()
-                    .get(MAPPER)
-                    .add(MapperFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                            .data(codeBuilder.buildMapperCode(source, fileName, mainEntity))
-                            .build()
-                    );
-        }
-        return this;
-    }
-
-    public FileBuilder addDomain() {
-        List<ClassEntity> allEntities = Stream.of(
-                    source.getMainEntities(), source.getSecondaryEntities())
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-
-        for (ClassEntity entity : allEntities) {
-            String fileName = StringUtil.toCamelCase(entity.getName());
-
-            source.getSourceData()
-                    .get(ENTITY)
-                    .add(EntityFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + ENTITY_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                            .data(codeBuilder.buildEntityCode(source, fileName, entity))
-                            .build()
-                    );
-
-            if (!source.getDtoPackagePath().isEmpty()) {
-                String dtoFileName = fileName + DTO_SUFFIX;
-
-                source.getSourceData()
-                        .get(DTO)
-                        .add(DTOFile.builder()
-                                .fileName(dtoFileName + DEFAULT_JAVA_EXTENSION)
-                                .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                                .data(codeBuilder.buildDtoCode(source, dtoFileName, entity))
-                                .build()
-                        );
-            }
-        }
-        return this;
-    }
-
-    public FileBuilder addException() {
-        source.getSourceData()
-                .get(EXCEPTION)
-                .add(ExceptionFile.builder()
-                        .fileName("" + DEFAULT_JAVA_EXTENSION)
-                        .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                        .data(codeBuilder.buildDefaultExceptionHandler(source))
-                        .build()
-                );
-
-        return this;
-    }
-
-    public FileBuilder addProperties() {
-        source.getSourceData()
-                .get(PROPERTY_FILE)
-                .add(PropertyFile.builder()
-                        .fileName("application.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
-                        .data(codeBuilder.buildApplicationProperty())
-                        .build()
-                );
-
-        source.getSourceData()
-                .get(PROPERTY_FILE)
-                .add(PropertyFile.builder()
-                        .fileName("application-dev.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
-                        .data(codeBuilder.buildApplicationDevProperty())
-                        .build()
-                );
-
-        source.getSourceData()
-                .get(PROPERTY_FILE)
-                .add(PropertyFile.builder()
-                        .fileName("message.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
-                        .data(codeBuilder.buildMessageProperty())
-                        .build()
-                );
-
-        source.getSourceData()
-                .get(PROPERTY_FILE)
-                .add(PropertyFile.builder()
-                        .fileName("db.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
-                        .data(codeBuilder.buildDBProperty())
-                        .build()
-                );
-
-        return this;
-    }
+//    public FileBuilder addMapper() {
+//        for (ClassEntity mainEntity : source.getMainEntities()) {
+//            String fileName = StringUtil.toCamelCase(mainEntity.getName()) + MAPPER_SUFFIX;
+//
+//            source.getSourceData()
+//                    .get(MAPPER)
+//                    .add(MapperFile.builder()
+//                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .data(codeBuilder.buildMapperCode(source, fileName, mainEntity))
+//                            .build()
+//                    );
+//        }
+//        return this;
+//    }
+//
+//    public FileBuilder addDomain() {
+//        List<ClassEntity> allEntities = Stream.of(
+//                    source.getMainEntities(), source.getSecondaryEntities())
+//                .flatMap(Collection::stream)
+//                .collect(Collectors.toList());
+//
+//        for (ClassEntity entity : allEntities) {
+//            String fileName = StringUtil.toCamelCase(entity.getName());
+//
+//            source.getSourceData()
+//                    .get(ENTITY)
+//                    .add(EntityFile.builder()
+//                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + ENTITY_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .data(codeBuilder.buildEntityCode(source, fileName, entity))
+//                            .build()
+//                    );
+//
+//            if (!source.getDtoPackagePath().isEmpty()) {
+//                String dtoFileName = fileName + DTO_SUFFIX;
+//
+//                source.getSourceData()
+//                        .get(DTO)
+//                        .add(DTOFile.builder()
+//                                .fileName(dtoFileName + DEFAULT_JAVA_EXTENSION)
+//                                .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                                .data(codeBuilder.buildDtoCode(source, dtoFileName, entity))
+//                                .build()
+//                        );
+//            }
+//        }
+//        return this;
+//    }
+//
+//    public FileBuilder addException() {
+//        source.getSourceData()
+//                .get(EXCEPTION)
+//                .add(ExceptionFile.builder()
+//                        .fileName("" + DEFAULT_JAVA_EXTENSION)
+//                        .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                        .data(codeBuilder.buildDefaultExceptionHandler(source))
+//                        .build()
+//                );
+//
+//        return this;
+//    }
+//
+//    public FileBuilder addProperties() {
+//        source.getSourceData()
+//                .get(PROPERTY_FILE)
+//                .add(PropertyFile.builder()
+//                        .fileName("application.property")
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .data(codeBuilder.buildApplicationProperty())
+//                        .build()
+//                );
+//
+//        source.getSourceData()
+//                .get(PROPERTY_FILE)
+//                .add(PropertyFile.builder()
+//                        .fileName("application-dev.property")
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .data(codeBuilder.buildApplicationDevProperty())
+//                        .build()
+//                );
+//
+//        source.getSourceData()
+//                .get(PROPERTY_FILE)
+//                .add(PropertyFile.builder()
+//                        .fileName("message.property")
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .data(codeBuilder.buildMessageProperty())
+//                        .build()
+//                );
+//
+//        source.getSourceData()
+//                .get(PROPERTY_FILE)
+//                .add(PropertyFile.builder()
+//                        .fileName("db.property")
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .data(codeBuilder.buildDBProperty())
+//                        .build()
+//                );
+//
+//        return this;
+//    }
 
     public FileBuilder registerSource(Source source) {
         this.source = source;

@@ -19,14 +19,10 @@ public class PropertyValueEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        if (values.size() > 0 && values.size() < 2) {
-            return new QuoteWrapper<>(DelimiterType.NONE, values).toString();
-        } else {
-            List<String> quotedValues = values.stream()
-                    .map(element -> getTab(1, this) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
-                    .collect(Collectors.toList());
+        List<String> quotedValues = values.stream()
+                .map(element -> getTab(1, this) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
+                .collect(Collectors.toList());
 
-            return new BodyBracketWrapper<>(DelimiterType.INDENT, new IndentList<>(DelimiterType.COMMA, false, quotedValues)).toString();
-        }
+        return new BodyBracketWrapper<>(DelimiterType.INDENT, new IndentList<>(DelimiterType.COMMA, false, quotedValues)).toString();
     }
 }

@@ -3,6 +3,7 @@ package com.plohoy.generator;
 import com.plohoy.generator.config.AppConfig;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
+import com.plohoy.generator.model.EntryPointType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
@@ -55,7 +56,16 @@ public class GeneratorApplication {
                 .mainEntities(getTestMainEntities())
                 .secondaryEntities(getTestEntities())
                 .tools(getTestTools())
+                .entryPoints(getTestEntryPoint())
                 .build();
+    }
+
+    private static HashMap<EntryPointType, String> getTestEntryPoint() {
+        HashMap<EntryPointType, String> entryPoints = new HashMap<>();
+        entryPoints.put(EntryPointType.MAIN_ENTRY_POINT, "/person");
+        entryPoints.put(EntryPointType.CREATE_ENTRY_POINT, "");
+
+        return entryPoints;
     }
 
     private static List<RequestEntity> getTestMainEntities() {

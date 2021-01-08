@@ -16,6 +16,7 @@ import com.plohoy.generator.view.request.SourceRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class RequestMapper {
     private PathHelper pathHelper = new PathHelper();
@@ -84,7 +85,9 @@ public class RequestMapper {
     private HashMap<EntryPointType, String> initEntryPoints(HashMap<EntryPointType, String> requestEntryPoints) {
         HashMap<EntryPointType, String> entryPoints = new HashMap<>();
         for (EntryPointType entryPointType : EntryPointType.values()) {
-            entryPoints.put(entryPointType, requestEntryPoints.get(entryPointType));
+            if (Objects.nonNull(requestEntryPoints.get(entryPointType))) {
+                entryPoints.put(entryPointType, requestEntryPoints.get(entryPointType));
+            }
         }
 
         return entryPoints;

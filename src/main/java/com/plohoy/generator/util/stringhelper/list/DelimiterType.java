@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum DelimiterType {
     NONE(""),
+    SPACE(" "),
     INDENT("\n"),
     COMMA(","),
     SEMICOLON(";"),

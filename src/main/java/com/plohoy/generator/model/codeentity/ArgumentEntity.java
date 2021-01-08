@@ -13,7 +13,7 @@ public class ArgumentEntity extends CodeEntity {
     private EnumerationList<String> modifiers;
     private String type;
     private String name;
-    private IndentList<AnnotationEntity> annotations;
+    private EnumerationList<AnnotationEntity> annotations;
 
     @Override
     public String toString() {
@@ -23,7 +23,7 @@ public class ArgumentEntity extends CodeEntity {
                 + name;
     }
 
-    public void setAnnotations(IndentList<AnnotationEntity> annotations) {
+    public void setAnnotations(EnumerationList<AnnotationEntity> annotations) {
         this.annotations = annotations;
         this.annotations.stream().forEach(element -> element.setParentEntity(this));
     }

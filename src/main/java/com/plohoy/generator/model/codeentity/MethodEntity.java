@@ -1,11 +1,10 @@
 package com.plohoy.generator.model.codeentity;
 
+import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Objects;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
@@ -22,23 +21,20 @@ public class MethodEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return Objects.nonNull(annotations)
-                    ? getTab(1, this) + annotations
-                    : EMPTY_STRING
-                + (Objects.nonNull(modifiers)
-                    ? getTab(1, this) + modifiers
-                    : getTab(1, this) + EMPTY_STRING)
+        return StringUtil.checkForNull(annotations,
+                    getTab(1, this) + annotations)
+                + StringUtil.checkForNull(modifiers,
+                    getTab(1, this) + modifiers)
                 + returnType + SPACE_SYMBOL
                 + name
                 + OPEN_PARAM_BRACKET
                 + args
                 + CLOSE_PARAM_BRACKET
                 + exceptions
-                + (Objects.nonNull(body)
-                    ? (SPACE_SYMBOL + OPEN_BODY_BRACKET + getIndent()
-                        + getTab(2, this) + body + getIndent()
-                        + getTab(1, this) + CLOSE_BODY_BRACKET + getIndent())
-                    : CODE_DELIMITER
+                + StringUtil.checkForNull(body,
+                    (SPACE_SYMBOL + OPEN_BODY_BRACKET + getIndent()
+                            + getTab(2, this) + body + getIndent()
+                            + getTab(1, this) + CLOSE_BODY_BRACKET + getIndent())
         );
     }
 

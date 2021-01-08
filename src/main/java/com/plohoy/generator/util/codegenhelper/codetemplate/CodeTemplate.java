@@ -1,12 +1,13 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
+import com.plohoy.generator.model.EntryPointType;
+import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.*;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.plohoy.generator.util.stringhelper.list.DelimiterType.DOT;
@@ -34,6 +35,7 @@ public class CodeTemplate {
     public static final String IMPLEMENT_WORD = "implements";
     public static final String THROW_WORD = "throws";
     public static final String STATIC_WORD = "static";
+    public static final String FINAL_WORD = "final";
     public static final String PACKAGE_WORD = "package";
     public static final String ANNOTATION_MARK = "@";
 
@@ -91,7 +93,7 @@ public class CodeTemplate {
                                 .name("PropertySource")
                                 .properties(new EnumerationList<>(DelimiterType.COMMA, false,
                                         Arrays.asList(PropertyEntity.builder()
-                                            .value(PropertyValueEntity.builder()
+                                            .values(PropertyValueEntity.builder()
                                                         .values(new IndentList<>(DelimiterType.COMMA, false,
                                                                 Arrays.asList(
                                                                         CLASSPATH_NAME + MESSAGE_PROPERTIES_NAME,
@@ -193,7 +195,7 @@ public class CodeTemplate {
         return getTab(1);
     }
 
-    public EnumerationList<String> getPublicModifier() {
+    public static EnumerationList<String> getPublicModifier() {
         return new EnumerationList<>(DelimiterType.NONE, true,
                 Arrays.asList(PUBLIC_ACCESS_MODIFIER));
     }
@@ -215,7 +217,7 @@ public class CodeTemplate {
     }
 
     public IndentList<MethodEntity> generateRepoDeleteMethods(ClassEntity mainEntity) {
-        return new IndentList<>(DelimiterType.INDENT, true,
+        return new IndentList<>(DelimiterType.NONE, true,
                 Arrays.asList(
                         MethodEntity.builder()
                                 .returnType(String.format("List<%s>", mainEntity.getName()))
@@ -261,7 +263,98 @@ public class CodeTemplate {
                         AnnotationEntity.builder()
                                 .name("RequestMapping")
                                 .value(controllerPath)
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("RequiredArgsConstructor")
                                 .build()
                 ));
+    }
+
+    public IndentList<ImportEntity> generateSpringRestControllerImports(String corePackageName, String entityName) {
+        return new IndentList<>(DelimiterType.SEMICOLON, true,
+                Arrays.asList(
+                        ImportEntity.builder()
+                                .value(corePackageName + DOT.getDelimiter() + SERVICE_SUFFIX.toLowerCase() + DOT.getDelimiter()  + entityName + "Service")
+                                .build(),
+                        ImportEntity.builder()
+                                .value(corePackageName + DOT.getDelimiter() + DTO_SUFFIX.toLowerCase() + DOT.getDelimiter()  + entityName + "Dto")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.web.bind.annotation.*")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.http.ResponseEntity")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.beans.factory.annotation.Autowired")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.data.domain.Page")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.data.domain.Pageable")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.data.domain.Sort")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("org.springframework.data.web.PageableDefault")
+                                .build(),
+                        ImportEntity.builder()
+                                .value("java.util.UUID")
+                                .build()
+                )
+        );
+    }
+
+    public IndentList<MethodEntity> generateControllerMethods(Source source, ClassEntity mainEntity) {
+        List<MethodEntity> methods = new ArrayList<>();
+        for (Map.Entry<EntryPointType, String> entryPointPair : source.getEntryPoints().entrySet()) {
+            methods.add(generateMethodFromEntryType(entryPointPair, mainEntity));
+        }
+
+        return new IndentList<>(DelimiterType.INDENT, false, methods);
+    }
+
+    private MethodEntity generateMethodFromEntryType(Map.Entry<EntryPointType, String> entryPointPair, ClassEntity mainEntity) {
+        switch(entryPointPair.getKey()) {
+            case CREATE_ENTRY_POINT: return new CreateMethodEntity(mainEntity.getName());
+            default: return null;
+        }
+    }
+
+    public IndentList<FieldEntity> getEntityControllerField(ClassEntity mainEntity) {
+        return getEntityField(CONTROLLER_SUFFIX, mainEntity);
+    }
+
+    public IndentList<FieldEntity> getEntityServiceField(ClassEntity mainEntity) {
+        return getEntityField(SERVICE_SUFFIX, mainEntity);
+    }
+
+    public IndentList<FieldEntity> getEntityRepositoryField(ClassEntity mainEntity) {
+        return getEntityField(REPO_SUFFIX, mainEntity);
+    }
+
+    public IndentList<FieldEntity> getEntityField(ClassEntity mainEntity) {
+        return getEntityField(EMPTY_STRING, mainEntity);
+    }
+
+    public IndentList<FieldEntity> getEntityDTOField(ClassEntity mainEntity) {
+        return getEntityField(DTO_SUFFIX, mainEntity);
+    }
+
+    private IndentList<FieldEntity> getEntityField(String fieldSpecific, ClassEntity entity) {
+        return new IndentList<>(DelimiterType.SEMICOLON, true,
+                Arrays.asList(
+                        FieldEntity.builder()
+                                .modifiers(
+                                        new EnumerationList<>(DelimiterType.NONE, true,
+                                                Arrays.asList(PRIVATE_ACCESS_MODIFIER, FINAL_WORD))
+                                )
+                                .type(entity.getName() + fieldSpecific)
+                                .name(fieldSpecific.toLowerCase())
+                                .build()
+                )
+        );
     }
 }

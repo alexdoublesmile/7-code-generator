@@ -1,5 +1,9 @@
 package com.plohoy.generator.util.stringhelper;
 
+import java.util.Objects;
+
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY_STRING;
+
 public class StringUtil {
 
     public static String toCamelCase(String string) {
@@ -31,5 +35,13 @@ public class StringUtil {
                             && Character.isLowerCase(currentChar);
         }
         return result.toString();
+    }
+
+    public static String checkStringForNull(String value, String resultValue) {
+        return Objects.nonNull(value) && !value.isEmpty() ? resultValue : EMPTY_STRING;
+    }
+
+    public static String checkForNull(Object object, String resultString) {
+        return Objects.nonNull(object) ? resultString : EMPTY_STRING;
     }
 }
