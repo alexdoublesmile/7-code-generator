@@ -1,5 +1,7 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.codeentity.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;

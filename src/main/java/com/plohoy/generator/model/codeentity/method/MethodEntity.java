@@ -1,5 +1,7 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.codeentity.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -34,7 +36,7 @@ public class MethodEntity extends CodeEntity {
                 + StringUtil.checkForNull(body,
                     (SPACE_SYMBOL + OPEN_BODY_BRACKET + getIndent()
                             + getTab(2, this) + body + getIndent()
-                            + getTab(1, this) + CLOSE_BODY_BRACKET + getIndent())
+                            + getTab(1, this) + CLOSE_BODY_BRACKET)
         );
     }
 

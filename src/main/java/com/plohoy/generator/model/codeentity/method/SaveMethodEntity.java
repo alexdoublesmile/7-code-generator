@@ -1,5 +1,8 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.codeentity.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.ClassEntity;
+import com.plohoy.generator.model.codeentity.PropertyEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -9,12 +12,12 @@ import lombok.Data;
 import java.util.Arrays;
 
 @Data
-public class CreateMethodEntity extends MethodEntity {
-    public CreateMethodEntity(String returnType) {
+public class SaveMethodEntity extends MethodEntity {
+    public SaveMethodEntity(ClassEntity dtoClass, String entryPointPath) {
         super(
                 CodeTemplate.getPublicModifier(),
-                returnType,
-                "create",
+                dtoClass.getName(),
+                "save",
                 new EnumerationList<>(DelimiterType.NONE, false,
                         Arrays.asList(ArgumentEntity.builder()
                                 .annotations(new EnumerationList<>(DelimiterType.SPACE, true,
@@ -30,7 +33,7 @@ public class CreateMethodEntity extends MethodEntity {
                                                         .name("RequestBody")
                                                         .build()
                                         )))
-                                .type(returnType)
+                                .type(dtoClass.getName())
                                 .name("dto")
                                 .build())),
                 null,

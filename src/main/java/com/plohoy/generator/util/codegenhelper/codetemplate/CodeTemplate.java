@@ -3,6 +3,7 @@ package com.plohoy.generator.util.codegenhelper.codetemplate;
 import com.plohoy.generator.model.EntryPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.*;
+import com.plohoy.generator.model.codeentity.method.*;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -313,12 +314,17 @@ public class CodeTemplate {
             methods.add(generateMethodFromEntryType(entryPointPair, mainEntity));
         }
 
-        return new IndentList<>(DelimiterType.INDENT, false, methods);
+        return new IndentList<>(DelimiterType.INDENT, true, methods);
     }
 
     private MethodEntity generateMethodFromEntryType(Map.Entry<EntryPointType, String> entryPointPair, ClassEntity mainEntity) {
         switch(entryPointPair.getKey()) {
-            case CREATE_ENTRY_POINT: return new CreateMethodEntity(mainEntity.getName());
+            case CREATE_ENTRY_POINT: return new SaveMethodEntity(mainEntity, entryPointPair.getValue());
+            case FIND_ALL_ENTRY_POINT: return new FindAllMethodEntity(mainEntity, entryPointPair.getValue());
+            case GET_ONE_ENTRY_POINT: return new FindMethodEntity(mainEntity, entryPointPair.getValue());
+            case UPDATE_ENTRY_POINT: return new UpdateMethodEntity(mainEntity, entryPointPair.getValue());
+            case DELETE_HARDLY_ENTRY_POINT: return new DeleteHardMethodEntity(mainEntity, entryPointPair.getValue());
+            case DELETE_SOFTLY_ENTRY_POINT: return new DeleteSoftMethodEntity(mainEntity, entryPointPair.getValue());
             default: return null;
         }
     }

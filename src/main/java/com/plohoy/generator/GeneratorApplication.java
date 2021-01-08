@@ -64,6 +64,11 @@ public class GeneratorApplication {
         HashMap<EntryPointType, String> entryPoints = new HashMap<>();
         entryPoints.put(EntryPointType.MAIN_ENTRY_POINT, "/person");
         entryPoints.put(EntryPointType.CREATE_ENTRY_POINT, "");
+        entryPoints.put(EntryPointType.FIND_ALL_ENTRY_POINT, "");
+        entryPoints.put(EntryPointType.GET_ONE_ENTRY_POINT, "/{id}");
+        entryPoints.put(EntryPointType.UPDATE_ENTRY_POINT, "/{id}");
+        entryPoints.put(EntryPointType.DELETE_HARDLY_ENTRY_POINT, "/{id}/delete_hard");
+        entryPoints.put(EntryPointType.DELETE_SOFTLY_ENTRY_POINT, "/{id}/delete_soft");
 
         return entryPoints;
     }
