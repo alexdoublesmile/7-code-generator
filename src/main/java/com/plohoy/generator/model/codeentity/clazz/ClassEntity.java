@@ -1,5 +1,8 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.clazz;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.MethodEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -20,6 +23,7 @@ public class ClassEntity extends CodeEntity {
     private String name;
     private String extendsClass;
     private EnumerationList<ClassEntity> implInterfaces;
+    private String idType;
     private IndentList<FieldEntity> fields;
     private IndentList<BlockEntity> blocks;
     private IndentList<ConstructorEntity> constructors;
@@ -33,9 +37,9 @@ public class ClassEntity extends CodeEntity {
             + StringUtil.checkForNull(imports, imports + getIndent())
             + annotations
             + modifiers
-            + StringUtil.checkForNull(classType, classType.getTypeName() + SPACE_SYMBOL)
-            + name + SPACE_SYMBOL
-            + StringUtil.checkForNull(extendsClass, EXTEND_WORD + SPACE_SYMBOL + extendsClass + SPACE_SYMBOL)
+            + StringUtil.checkForNull(classType, classType.getTypeName() + SPACE)
+            + name + SPACE
+            + StringUtil.checkForNull(extendsClass, EXTENDS + SPACE + extendsClass + SPACE)
             + implInterfaces
             + OPEN_BODY_BRACKET + getIndent()
             + StringUtil.checkForNull(fields, fields + INDENT)
@@ -44,7 +48,7 @@ public class ClassEntity extends CodeEntity {
             + methods
             + innerClasses
             + CLOSE_BODY_BRACKET + getIndent()
-        ).replace(NULL_STRING, EMPTY_STRING);
+        ).replace(NULL, EMPTY);
     }
 
     public void setImports(IndentList<ImportEntity> imports) {

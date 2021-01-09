@@ -1,6 +1,6 @@
 package com.plohoy.generator.model.codeentity.method;
 
-import com.plohoy.generator.model.codeentity.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -25,16 +25,15 @@ public class MethodEntity extends CodeEntity {
     public String toString() {
         return StringUtil.checkForNull(annotations,
                     getTab(1, this) + annotations)
-                + StringUtil.checkForNull(modifiers,
-                    getTab(1, this) + modifiers)
-                + returnType + SPACE_SYMBOL
+                + getTab(1, this) + modifiers
+                + returnType + SPACE
                 + name
                 + OPEN_PARAM_BRACKET
                 + args
                 + CLOSE_PARAM_BRACKET
                 + exceptions
                 + StringUtil.checkForNull(body,
-                    (SPACE_SYMBOL + OPEN_BODY_BRACKET + getIndent()
+                    (SPACE + OPEN_BODY_BRACKET + getIndent()
                             + getTab(2, this) + body + getIndent()
                             + getTab(1, this) + CLOSE_BODY_BRACKET)
         );

@@ -1,4 +1,4 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.clazz;
 
 public enum ClassType {
     CLASS("class"),

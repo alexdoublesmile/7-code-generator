@@ -7,11 +7,13 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 public abstract class CustomList<T> extends ArrayList<T> {
 
     private DelimiterType delimiter;
+    private boolean listStyleAtTheEnd;
     private boolean delimiterAtTheEnd;
 
-    public CustomList(DelimiterType delimiter, boolean delimiterAtTheEnd, List<T> elements) {
+    public CustomList(DelimiterType delimiter, boolean listStyleAtTheEnd, boolean delimiterAtTheEnd, List<T> elements) {
         super(elements);
         this.delimiter = delimiter;
+        this.listStyleAtTheEnd = listStyleAtTheEnd;
         this.delimiterAtTheEnd = delimiterAtTheEnd;
     }
 
@@ -27,13 +29,14 @@ public abstract class CustomList<T> extends ArrayList<T> {
         for (;;) {
             T element = iterator.next();
 
-            String delimiterString = isFirstElement ? EMPTY_STRING : delimiter.getDelimiter() + getListStyle();
+            String delimiterString = isFirstElement ? EMPTY : delimiter.getDelimiter() + getListStyle();
 
             result.append(element == this ? "(this Collection)" : delimiterString + element);
             isFirstElement = false;
 
             if (!iterator.hasNext()) {
-                result.append(delimiterAtTheEnd ? delimiter.getDelimiter() + getListStyle() : EMPTY_STRING);
+                result.append(delimiterAtTheEnd ? delimiter.getDelimiter() : EMPTY);
+                result.append(listStyleAtTheEnd ? getListStyle() : EMPTY);
                 return result.toString();
             }
         }

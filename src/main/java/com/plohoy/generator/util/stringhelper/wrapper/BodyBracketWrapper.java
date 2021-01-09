@@ -17,6 +17,8 @@ public class BodyBracketWrapper<E> {
 
     @Override
     public String toString() {
-        return Objects.nonNull(element) ? OPEN_BODY_BRACKET + delimiter.getDelimiter() + element + delimiter.getDelimiter() +CLOSE_BODY_BRACKET : EMPTY_STRING;
+        return Objects.nonNull(element)
+                        ? OPEN_BODY_BRACKET + delimiter.getDelimiter() + element + delimiter.getDelimiter() + CLOSE_BODY_BRACKET
+                        : EMPTY;
     }
 }

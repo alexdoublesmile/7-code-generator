@@ -1,16 +1,11 @@
 package com.plohoy.generator.util.codegenhelper.filebuilder;
 
 import com.plohoy.generator.model.Source;
-import com.plohoy.generator.model.codeentity.ClassEntity;
+import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.file.*;
 import com.plohoy.generator.util.codegenhelper.codebuilder.CodeBuilder;
 import com.plohoy.generator.util.pathhelper.PathHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.plohoy.generator.model.file.FileType.*;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
@@ -36,18 +31,28 @@ public class FileBuilder {
 
     public FileBuilder addSimpleController() {
         for (ClassEntity mainEntity : source.getMainEntities()) {
-            String fileName = StringUtil.toCamelCase(mainEntity.getName()) + CONTROLLER_SUFFIX;
+            String fileName = StringUtil.getControllerFileName(mainEntity.getName());
 
             source.getSourceData()
                     .get(CONTROLLER)
                     .add(ControllerFile.builder()
                             .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + CONTROLLER_SUFFIX.toLowerCase() + SLASH_SYMBOL)
-                            .data(codeBuilder.buildControllerCode(source, fileName, mainEntity))
+                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + CONTROLLER_SUFFIX.toLowerCase() + SLASH)
+                            .data(codeBuilder.buildControllerCode(source, fileName, mainEntity.getName(), getSimilarDtoEntity(mainEntity)))
                             .build()
                     );
         }
         return this;
+    }
+
+    private ClassEntity getSimilarDtoEntity(ClassEntity mainEntity) {
+        ClassEntity mainDtoEntity = null;
+        for (ClassEntity dtoEntity : source.getMainDtoEntities()) {
+            if ((mainEntity.getName() + DTO_SUFFIX).equals(dtoEntity.getName())) {
+                mainDtoEntity = dtoEntity;
+            }
+        }
+        return mainDtoEntity;
     }
 
 //    public FileBuilder addSimpleService() {
@@ -58,7 +63,7 @@ public class FileBuilder {
 //                    .get(SERVICE)
 //                    .add(ServiceFile.builder()
 //                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH)
 //                            .data(codeBuilder.buildServiceCode(source, fileName, mainEntity))
 //                            .build()
 //                    );
@@ -74,7 +79,7 @@ public class FileBuilder {
                     .get(REPOSITORY)
                     .add(RepositoryFile.builder()
                             .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH)
                             .data(codeBuilder.buildRepositoryCode(source, fileName, mainEntity))
                             .build()
                     );
@@ -90,7 +95,7 @@ public class FileBuilder {
 //                    .get(MAPPER)
 //                    .add(MapperFile.builder()
 //                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH)
 //                            .data(codeBuilder.buildMapperCode(source, fileName, mainEntity))
 //                            .build()
 //                    );
@@ -111,7 +116,7 @@ public class FileBuilder {
 //                    .get(ENTITY)
 //                    .add(EntityFile.builder()
 //                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + ENTITY_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + ENTITY_SUFFIX.toLowerCase() + SLASH)
 //                            .data(codeBuilder.buildEntityCode(source, fileName, entity))
 //                            .build()
 //                    );
@@ -123,7 +128,7 @@ public class FileBuilder {
 //                        .get(DTO)
 //                        .add(DTOFile.builder()
 //                                .fileName(dtoFileName + DEFAULT_JAVA_EXTENSION)
-//                                .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                                .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH)
 //                                .data(codeBuilder.buildDtoCode(source, dtoFileName, entity))
 //                                .build()
 //                        );
@@ -137,7 +142,7 @@ public class FileBuilder {
 //                .get(EXCEPTION)
 //                .add(ExceptionFile.builder()
 //                        .fileName("" + DEFAULT_JAVA_EXTENSION)
-//                        .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH_SYMBOL)
+//                        .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
 //                        .data(codeBuilder.buildDefaultExceptionHandler(source))
 //                        .build()
 //                );
@@ -150,7 +155,7 @@ public class FileBuilder {
 //                .get(PROPERTY_FILE)
 //                .add(PropertyFile.builder()
 //                        .fileName("application.property")
-//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
 //                        .data(codeBuilder.buildApplicationProperty())
 //                        .build()
 //                );
@@ -159,7 +164,7 @@ public class FileBuilder {
 //                .get(PROPERTY_FILE)
 //                .add(PropertyFile.builder()
 //                        .fileName("application-dev.property")
-//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
 //                        .data(codeBuilder.buildApplicationDevProperty())
 //                        .build()
 //                );
@@ -168,7 +173,7 @@ public class FileBuilder {
 //                .get(PROPERTY_FILE)
 //                .add(PropertyFile.builder()
 //                        .fileName("message.property")
-//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
 //                        .data(codeBuilder.buildMessageProperty())
 //                        .build()
 //                );
@@ -177,7 +182,7 @@ public class FileBuilder {
 //                .get(PROPERTY_FILE)
 //                .add(PropertyFile.builder()
 //                        .fileName("db.property")
-//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH_SYMBOL)
+//                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
 //                        .data(codeBuilder.buildDBProperty())
 //                        .build()
 //                );

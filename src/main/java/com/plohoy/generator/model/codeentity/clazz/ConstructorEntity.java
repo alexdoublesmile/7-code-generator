@@ -1,5 +1,7 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.clazz;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.method.ArgumentEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;

@@ -1,9 +1,8 @@
 package com.plohoy.generator.model.codeentity.method;
 
-import com.plohoy.generator.model.codeentity.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
-import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,9 +18,9 @@ public class ArgumentEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return EMPTY_STRING + annotations
+        return EMPTY + annotations
                 + modifiers
-                + type + SPACE_SYMBOL
+                + type + SPACE
                 + name;
     }
 

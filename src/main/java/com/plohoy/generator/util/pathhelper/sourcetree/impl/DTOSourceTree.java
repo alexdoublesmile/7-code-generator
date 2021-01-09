@@ -5,15 +5,15 @@ import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH_SYMBOL;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH;
 
 public class DTOSourceTree extends AbstractSourceTree {
 
     @Override
     public List<String> getRootPathList(SourceRequest request) {
-        rootPathList.add(SLASH_SYMBOL);
-        rootPathList.add(SLASH_SYMBOL + String.format("%s-api", request.getArtifactName()));
-        rootPathList.add(SLASH_SYMBOL + String.format("%s-core", request.getArtifactName()));
+        rootPathList.add(SLASH);
+        rootPathList.add(SLASH + String.format("%s-api", request.getArtifactName()));
+        rootPathList.add(SLASH + String.format("%s-core", request.getArtifactName()));
 
         return rootPathList;
     }
@@ -23,7 +23,7 @@ public class DTOSourceTree extends AbstractSourceTree {
         packagePath = String.format("/%s-core", request.getArtifactName())
                 + "/src/main/java/"
                 + request.getGroupName().replace(".", "/")
-                + SLASH_SYMBOL + request.getArtifactName() + SLASH_SYMBOL;
+                + SLASH + request.getArtifactName() + SLASH;
 
         return packagePath;
     }
@@ -33,7 +33,7 @@ public class DTOSourceTree extends AbstractSourceTree {
         dtoPackagePath = String.format("/%s-dto", request.getArtifactName())
                 + "/src/main/java/"
                 + request.getGroupName().replace(".", "/")
-                + SLASH_SYMBOL + request.getArtifactName() + SLASH_SYMBOL;
+                + SLASH + request.getArtifactName() + SLASH;
 
         return null;
     }

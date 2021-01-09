@@ -1,13 +1,12 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.annotation;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.wrapper.RoundBracketWrapper;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Objects;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 

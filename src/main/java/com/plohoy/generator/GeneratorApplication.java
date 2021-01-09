@@ -3,7 +3,7 @@ package com.plohoy.generator;
 import com.plohoy.generator.config.AppConfig;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
-import com.plohoy.generator.model.EntryPointType;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
@@ -56,19 +56,19 @@ public class GeneratorApplication {
                 .mainEntities(getTestMainEntities())
                 .secondaryEntities(getTestEntities())
                 .tools(getTestTools())
-                .entryPoints(getTestEntryPoint())
+                .endPointsPaths(getTestEntryPoint())
                 .build();
     }
 
-    private static HashMap<EntryPointType, String> getTestEntryPoint() {
-        HashMap<EntryPointType, String> entryPoints = new HashMap<>();
-        entryPoints.put(EntryPointType.MAIN_ENTRY_POINT, "/person");
-        entryPoints.put(EntryPointType.CREATE_ENTRY_POINT, "");
-        entryPoints.put(EntryPointType.FIND_ALL_ENTRY_POINT, "");
-        entryPoints.put(EntryPointType.GET_ONE_ENTRY_POINT, "/{id}");
-        entryPoints.put(EntryPointType.UPDATE_ENTRY_POINT, "/{id}");
-        entryPoints.put(EntryPointType.DELETE_HARDLY_ENTRY_POINT, "/{id}/delete_hard");
-        entryPoints.put(EntryPointType.DELETE_SOFTLY_ENTRY_POINT, "/{id}/delete_soft");
+    private static HashMap<EndPointType, String> getTestEntryPoint() {
+        HashMap<EndPointType, String> entryPoints = new HashMap<>();
+        entryPoints.put(EndPointType.MAIN_END_POINT, "/person");
+        entryPoints.put(EndPointType.CREATE_END_POINT, "");
+        entryPoints.put(EndPointType.FIND_ALL_END_POINT, "");
+        entryPoints.put(EndPointType.FIND_END_POINT, "/{id}");
+        entryPoints.put(EndPointType.UPDATE_END_POINT, "/{id}");
+        entryPoints.put(EndPointType.DELETE_HARD_END_POINT, "/{id}/delete_hard");
+        entryPoints.put(EndPointType.DELETE_SOFT_END_POINT, "/{id}/delete_soft");
 
         return entryPoints;
     }

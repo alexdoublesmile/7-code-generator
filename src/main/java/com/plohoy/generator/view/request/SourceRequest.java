@@ -1,7 +1,7 @@
 package com.plohoy.generator.view.request;
 
 import com.plohoy.generator.model.ArchitectureType;
-import com.plohoy.generator.model.EntryPointType;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import lombok.Builder;
@@ -19,9 +19,11 @@ public class SourceRequest {
     private String jdkVersion;
     private ArchitectureType architecture;
     private boolean isMicroService;
-    private boolean isArchive;
     private List<RequestEntity> mainEntities;
     private List<RequestEntity> secondaryEntities;
+    private List<RequestEntity> mainDtoEntities;
+    private List<RequestEntity> secondaryDtoEntities;
     private HashMap<ToolType, AbstractTool> tools;
-    private HashMap<EntryPointType, String> entryPoints;
+    private HashMap<EndPointType, String> endPointsPaths;
+    private boolean isArchive;
 }

@@ -1,5 +1,7 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.field;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -24,10 +26,10 @@ public class FieldEntity extends CodeEntity {
                     getTab(1, this) + annotations)
                 + StringUtil.checkForNull(modifiers,
                     getTab(1, this) + modifiers)
-                + type + SPACE_SYMBOL
+                + type + SPACE
                 + name
                 + StringUtil.checkStringForNull(value,
-                    SPACE_SYMBOL + EQUALS + SPACE_SYMBOL + value)
+                    SPACE + EQUAL + SPACE + value)
                 + values;
     }
 

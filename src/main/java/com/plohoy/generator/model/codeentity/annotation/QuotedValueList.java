@@ -1,5 +1,6 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.annotation;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import com.plohoy.generator.util.stringhelper.wrapper.BodyBracketWrapper;
@@ -14,7 +15,7 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 @Builder
-public class PropertyValueEntity extends CodeEntity {
+public class QuotedValueList extends CodeEntity {
     private IndentList<String> values;
 
     @Override

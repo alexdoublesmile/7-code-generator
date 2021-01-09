@@ -1,45 +1,119 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
-import com.plohoy.generator.model.EntryPointType;
-import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.*;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
+import com.plohoy.generator.model.codeentity.annotation.QuotedValueList;
+import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
+import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
+import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.*;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static com.plohoy.generator.util.stringhelper.list.DelimiterType.DOT;
+import static com.plohoy.generator.model.EndPointType.MAIN_END_POINT;
 
 public class CodeTemplate {
     public static final String INDENT = "\n";
     public static final String TAB = "\t";
-    public static final String EMPTY_STRING = "";
-    public static final String NULL_STRING = "null";
-    public static final String SPACE_SYMBOL = " ";
-    public static final String SLASH_SYMBOL = "/";
+    public static final String EMPTY = "";
+    public static final String NULL = "null";
+    public static final String SPACE = " ";
+    public static final String SLASH = "/";
     public static final String QUOTE = "\"";
-    public static final String ENUMERATION_DELIMITER = ",";
-    public static final String CODE_DELIMITER = ";";
+    public static final String DOT = ".";
+    public static final String TRIPLE_DOT = "...";
+    public static final String COMMA = ",";
+    public static final String COLON = ":";
+    public static final String SEMICOLON = ";";
+    public static final String WILDCARD = "?";
+    public static final String BLANK = "_";
+    public static final String MINUS = "-";
+    public static final String PLUS = "+";
+    public static final String STAR = "*";
+    public static final String AND = "&";
+    public static final String DOUBLE_AND = "&&";
+    public static final String OR = "|";
+    public static final String DOUBLE_OR = "||";
+    public static final String INVERSE = "!";
+    public static final String PERCENT = "%";
+    public static final String EQUAL = "=";
     public static final String OPEN_BODY_BRACKET = "{";
     public static final String CLOSE_BODY_BRACKET = "}";
+    public static final String BODY_BRACKETS = "{}";
     public static final String OPEN_PARAM_BRACKET = "(";
     public static final String CLOSE_PARAM_BRACKET = ")";
-    public static final String EQUALS = "=";
-    public static final String PUBLIC_ACCESS_MODIFIER = "public";
-    public static final String PRIVATE_ACCESS_MODIFIER = "private";
-    public static final String DEFAULT_RETURN_TYPE = "void";
-    public static final String IMPORT_WORD = "import";
-    public static final String EXTEND_WORD = "extends";
-    public static final String IMPLEMENT_WORD = "implements";
-    public static final String THROW_WORD = "throws";
-    public static final String STATIC_WORD = "static";
-    public static final String FINAL_WORD = "final";
-    public static final String PACKAGE_WORD = "package";
-    public static final String ANNOTATION_MARK = "@";
+    public static final String PARAM_BRACKETS = "()";
+    public static final String OPEN_CORNER_BRACKET = "<";
+    public static final String CLOSE_CORNER_BRACKET = ">";
+    public static final String CORNER_BRACKETS = "<>";
+    public static final String OPEN_SQUARE_BRACKET = "[";
+    public static final String CLOSE_SQUARE_BRACKET = "]";
+    public static final String ARRAY = "[]";
 
+    public static final String PACKAGE = "package";
+    public static final String IMPORT = "import";
+    public static final String ANNOTATION_MARK = "@";
+    public static final String PUBLIC_MOD = "public";
+    public static final String PRIVATE_MOD = "private";
+    public static final String PROTECTED_MOD = "protected";
+    public static final String DEFAULT_MOD = "default";
+    public static final String STATIC_MOD = "static";
+    public static final String FINAL_MOD = "final";
+    public static final String ABSTRACT_MOD = "abstract";
+    public static final String SYNCHRONIZED_MOD = "synchronized";
+    public static final String VOLATILE_MOD = "volatile";
+    public static final String TRANSITION_MOD = "transition";
+    public static final String CLASS = "class";
+    public static final String INTERFACE = "interface";
+    public static final String VOID = "void";
+    public static final String EXTENDS = "extends";
+    public static final String SUPER = "super";
+    public static final String THIS = "this";
+    public static final String RETURN = "return";
+    public static final String IF = "if";
+    public static final String ELSE = "else";
+    public static final String TRY = "try";
+    public static final String CATCH = "catch";
+    public static final String FINALLY = "finally";
+    public static final String FOR = "for";
+    public static final String WHILE = "while";
+    public static final String DO = "do";
+    public static final String SWITCH = "switch";
+    public static final String CASE = "case";
+    public static final String INSTANCE_OF = "instanceOf";
+    public static final String IMPLEMENTS = "implements";
+    public static final String THROWS = "throws";
+    public static final String THROW = "throw";
+    public static final String EQUALS = "equals";
+    public static final String HASHCODE = "hashcode";
+    public static final String TO_STRING = "toString";
+
+    public static final String BOOLEAN = "boolean";
+    public static final String INT = "int";
+    public static final String LONG = "long";
+    public static final String SHORT = "short";
+    public static final String FLOAT = "float";
+    public static final String DOUBLE = "double";
+    public static final String CHAR = "char";
+    public static final String STRING = "String";
+    public static final String OBJECT = "Object";
+
+    public static final String LIST_TEMPLATE = "List<%s>";
+    public static final String ARRAY_LIST_TEMPLATE = "ArrayList<%s>";
+    public static final String LINKED_LIST_TEMPLATE = "LinkedList<%s>";
+    public static final String MAP_TEMPLATE = "Map<%s, %s>";
+    public static final String HASH_MAP_TEMPLATE = "HashMap<%s, %s>";
+    public static final String SET_TEMPLATE = "Set<%s>";
+    public static final String HASH_SET_TEMPLATE = "HashSet<%s>";
+    public static final String OPTIONAL_TEMPLATE = "Optional<%s>";
+
+    public static final String DELETED = "deleted";
+    public static final String ID = "id";
     public static final String MAIN_METHOD_NAME = "main";
     public static final String MAIN_METHOD_ARGS_TYPE = "String[]";
     public static final String MAIN_METHOD_ARGS_VALUE = "args";
@@ -54,8 +128,14 @@ public class CodeTemplate {
     public static final String DTO_SUFFIX = "Dto";
     public static final String DAO_SUFFIX = "Dao";
     public static final String CONFIG_SUFFIX = "Config";
-    public static final String ENTITY_SUFFIX = "RequestEntity";
-    public static final String EXCEPTION_SUFFIX= "Exception";
+    public static final String ENTITY_SUFFIX = "Entity";
+    public static final String EXCEPTION_SUFFIX = "Exception";
+    public static final String UTIL_SUFFIX = "Exception";
+    public static final String HELPER_SUFFIX = "Exception";
+    public static final String BUILDER_SUFFIX = "Exception";
+    public static final String TEMPLATE_SUFFIX = "Exception";
+    public static final String REQUEST_SUFFIX = "Exception";
+    public static final String RESPONSE_SUFFIX = "Exception";
 
     public static final String APPLICATION_PROPERTIES_NAME = "application.properties";
     public static final String APPLICATION_DEV_PROPERTIES_NAME = "application-dev.properties";
@@ -64,105 +144,107 @@ public class CodeTemplate {
     public static final String DB_PROPERTIES_NAME = "db.properties";
     public static final String URL_PROPERTIES_NAME = "url.properties";
 
-    public static final String CLASSPATH_NAME = "classpath:";
+    public static final String CLASSPATH = "classpath:";
+    public static final String JPA_REPO_TEMPLATE = "JpaRepository<%s, %s>";
+    public static final String SPRING_BOOT_LAUNCHER_TEMPLATE = "SpringApplication.run(%s.class, args);";
 
-    public IndentList<MethodEntity> generateMainMethod(String bodyCode) {
-        return new IndentList<>(DelimiterType.INDENT, false,
-                Arrays.asList(MethodEntity.builder()
-                                .modifiers(new EnumerationList<>(DelimiterType.NONE, true,
-                                        Arrays.asList(PUBLIC_ACCESS_MODIFIER, STATIC_WORD)
-                                ))
-                                .returnType(DEFAULT_RETURN_TYPE)
-                                .name(MAIN_METHOD_NAME)
-                                .args(new EnumerationList<>(DelimiterType.COMMA, false,
-                                        Arrays.asList(ArgumentEntity.builder()
-                                                        .type(MAIN_METHOD_ARGS_TYPE)
-                                                        .name(MAIN_METHOD_ARGS_VALUE)
-                                                        .build()
-                                        )
-                                ))
-                                .body(bodyCode)
-                                .build()
-                )
+    public static final String SPRING_BOOT_LAUNCHER_ANNOTATION = "SpringBootApplication";
+    public static final String SPRING_PROPERTY_ANNOTATION = "PropertySource";
+    public static final String SPRING_REST_ANNOTATION = "RestController";
+    public static final String SPRING_REQUEST_MAPPING_ANNOTATION = "RequestMapping";
+    public static final String LOMBOK_REQ_CONSTRUCTOR_ANNOTATION = "RequiredArgsConstructor";
+    public static final String LOMBOK_ALL_CONSTRUCTOR_ANNOTATION = "AllArgsConstructor";
+    public static final String LOMBOK_NO_CONSTRUCTOR_ANNOTATION = "NoArgsConstructor";
+
+    public static final String FIND_BY_ID_AND_DELETED_METHOD = "findByIdAndDeleted";
+    public static final String FIND_BY_DELETED_METHOD = "findByDeleted";
+
+    public static final String JAVA_UTIL_PACKAGE = "java.util";
+    public static final String SPRING_MAIN_PACKAGE = "org.springframework";
+
+
+    public IndentList<MethodEntity> getMainMethod(String bodyCode) {
+        return new IndentList<MethodEntity>(DelimiterType.INDENT, true,
+                MethodEntity.builder()
+                        .modifiers(new EnumerationList<>(PUBLIC_MOD, STATIC_MOD))
+                        .returnType(VOID)
+                        .name(MAIN_METHOD_NAME)
+                        .args(new EnumerationList<ArgumentEntity>(false,
+                                ArgumentEntity.builder()
+                                    .type(MAIN_METHOD_ARGS_TYPE)
+                                    .name(MAIN_METHOD_ARGS_VALUE)
+                                    .build()))
+                        .body(bodyCode)
+                        .build()
         );
     }
 
-    public IndentList<AnnotationEntity> generateSpringBootLauncherAnnotations() {
-        return new IndentList<>(DelimiterType.NONE, true,
-                Arrays.asList(
-                        AnnotationEntity.builder()
-                                .name("PropertySource")
-                                .properties(new EnumerationList<>(DelimiterType.COMMA, false,
-                                        Arrays.asList(PropertyEntity.builder()
-                                            .values(PropertyValueEntity.builder()
-                                                        .values(new IndentList<>(DelimiterType.COMMA, false,
-                                                                Arrays.asList(
-                                                                        CLASSPATH_NAME + MESSAGE_PROPERTIES_NAME,
-                                                                        CLASSPATH_NAME + DB_PROPERTIES_NAME
-                                                                )
-                                                        ))
-                                                        .build())
-                                            .build()))
-                                        )
-                                .build(),
-                        AnnotationEntity.builder()
-                                .name("SpringBootApplication")
-                                .build()
-                )
-        );
+    public IndentList<AnnotationEntity> getSpringBootLaunchAnnotations() {
+        return new IndentList<>(
+                AnnotationEntity.builder()
+                        .name(SPRING_PROPERTY_ANNOTATION)
+                        .properties(new EnumerationList<PropertyEntity>(false,
+                                PropertyEntity.builder()
+                                    .quotedValueList(QuotedValueList.builder()
+                                                .values(new IndentList<String>(DelimiterType.COMMA, false,
+                                                        CLASSPATH + MESSAGE_PROPERTIES_NAME,
+                                                        CLASSPATH + DB_PROPERTIES_NAME
+                                                ))
+                                                .build())
+                                    .build()))
+                        .build(),
+                AnnotationEntity.builder()
+                        .name(SPRING_BOOT_LAUNCHER_ANNOTATION)
+                        .build());
     }
 
-    public String generateSpringLauncherBody(String className) {
+    public String getSpringLaunchBody(String className) {
         return String.format(
-                "SpringApplication.run(%s.class, args);",
+                SPRING_BOOT_LAUNCHER_TEMPLATE,
                 className
         );
     }
 
-    public IndentList<ImportEntity> generateSpringBootLauncherImports() {
-        return new IndentList<>(DelimiterType.SEMICOLON, true,
-                Arrays.asList(
-                        ImportEntity.builder()
-                                .value("org.springframework.boot.SpringApplication")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.boot.autoconfigure.SpringBootApplication")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.context.annotation.PropertySource")
-                                .build()
-                )
+    public IndentList<ImportEntity> getSpringBootLaunchImports() {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".boot.SpringApplication")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".boot.autoconfigure.SpringBootApplication")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".context.annotation.PropertySource")
+                        .build()
         );
     }
 
-    public IndentList<ImportEntity> generateSpringDataJpaImports(String corePackageName, String entityName) {
-        return new IndentList<>(DelimiterType.SEMICOLON, true,
-                Arrays.asList(
-                        ImportEntity.builder()
-                                .value("org.springframework.data.jpa.repository.JpaRepository")
-                                .build(),
-                        ImportEntity.builder()
-                                .value(corePackageName + DOT.getDelimiter() + ENTITY_SUFFIX.toLowerCase() + DOT.getDelimiter()  + entityName)
-                                .build(),
-                        ImportEntity.builder()
-                                .value("java.util.List")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("java.util.Optional")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("java.util.UUID")
-                                .build()
-                )
+    public IndentList<ImportEntity> getSpringDataJpaImports(String corePackageName, String entityName) {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.jpa.repository.JpaRepository")
+                        .build(),
+                ImportEntity.builder()
+                        .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".List")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".Optional")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".UUID")
+                        .build()
         );
     }
 
     public String getPackageString(String corePackageName) {
-        return PACKAGE_WORD + SPACE_SYMBOL + corePackageName + CODE_DELIMITER + getIndent(2);
+        return PACKAGE + SPACE + corePackageName + SEMICOLON + getIndent(2);
     }
 
     public static String getIndent(int indentNumber) {
-        String result = EMPTY_STRING;
+        String result = EMPTY;
         for (int i = 0; i < indentNumber; i++) {
             result += INDENT;
         }
@@ -170,7 +252,7 @@ public class CodeTemplate {
     }
 
     public static String getTab(int tabNumber) {
-        String result = EMPTY_STRING;
+        String result = EMPTY;
         for (int i = 0; i < tabNumber; i++) {
             result += TAB;
         }
@@ -196,171 +278,146 @@ public class CodeTemplate {
         return getTab(1);
     }
 
-    public static EnumerationList<String> getPublicModifier() {
-        return new EnumerationList<>(DelimiterType.NONE, true,
-                Arrays.asList(PUBLIC_ACCESS_MODIFIER));
+    public static EnumerationList<String> getPublicMod() {
+        return new EnumerationList<>(PUBLIC_MOD);
     }
 
-    public EnumerationList<String> getPrivateModifier() {
-        return new EnumerationList<>(DelimiterType.NONE, true,
-                Arrays.asList(PRIVATE_ACCESS_MODIFIER));
+    public EnumerationList<String> getPrivateMod() {
+        return new EnumerationList<>(PRIVATE_MOD);
     }
 
-    public String getJpaRepositoryClassName(ClassEntity mainEntity) {
+    public String getJpaRepoClassName(ClassEntity mainEntity) {
         return String.format(
-                "JpaRepository<%s, %s>",
+                JPA_REPO_TEMPLATE,
                 mainEntity.getName(),
-                mainEntity.getFields()
-                        .stream()
-                        .filter(element -> "id".equals(element.getName()))
-                        .map(element -> element.getType())
-                        .collect(Collectors.toList()).get(0));
+                mainEntity.getIdType());
     }
 
-    public IndentList<MethodEntity> generateRepoDeleteMethods(ClassEntity mainEntity) {
-        return new IndentList<>(DelimiterType.NONE, true,
-                Arrays.asList(
-                        MethodEntity.builder()
-                                .returnType(String.format("List<%s>", mainEntity.getName()))
-                                .name("findByDeleted")
-                                .args(new EnumerationList<>(DelimiterType.COMMA, false,
-                                        Arrays.asList(ArgumentEntity.builder()
-                                                .type("boolean")
-                                                .name("deleted")
-                                                .build()
-                                        )
-                                ))
-                                .build(),
-                        MethodEntity.builder()
-                                .returnType(String.format("Optional<%s>", mainEntity.getName()))
-                                .name("findByIdAndDeleted")
-                                .args(new EnumerationList<>(DelimiterType.COMMA, false,
-                                        Arrays.asList(
-                                                ArgumentEntity.builder()
-                                                        .type(mainEntity.getFields()
-                                                                .stream()
-                                                                .filter(element -> "id".equals(element.getName()))
-                                                                .map(element -> element.getType())
-                                                                .collect(Collectors.toList()).get(0))
-                                                        .name("id")
-                                                        .build(),
-                                                ArgumentEntity.builder()
-                                                        .type("boolean")
-                                                        .name("deleted")
-                                                        .build()
-                                        )
-                                ))
-                                .build()
-                )
+    public IndentList<MethodEntity> getRepoDeleteMethods(ClassEntity mainEntity) {
+        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
+                MethodEntity.builder()
+                        .returnType(String.format(LIST_TEMPLATE, mainEntity.getName()))
+                        .name(FIND_BY_DELETED_METHOD)
+                        .args(new EnumerationList<ArgumentEntity>(false,
+                                ArgumentEntity.builder()
+                                        .type(BOOLEAN)
+                                        .name(DELETED)
+                                        .build()))
+                        .build(),
+                MethodEntity.builder()
+                        .returnType(String.format(OPTIONAL_TEMPLATE, mainEntity.getName()))
+                        .name(FIND_BY_ID_AND_DELETED_METHOD)
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .type(mainEntity.getIdType())
+                                        .name(ID)
+                                        .build(),
+                                ArgumentEntity.builder()
+                                        .type(BOOLEAN)
+                                        .name(DELETED)
+                                        .build()))
+                        .build()
         );
     }
 
-    public IndentList<AnnotationEntity> generateSpringRestControllerAnnotations(String controllerPath) {
-        return new IndentList<>(DelimiterType.NONE, true,
-                Arrays.asList(
-                        AnnotationEntity.builder()
-                                .name("RestController")
-                                .build(),
-                        AnnotationEntity.builder()
-                                .name("RequestMapping")
-                                .value(controllerPath)
-                                .build(),
-                        AnnotationEntity.builder()
-                                .name("RequiredArgsConstructor")
-                                .build()
-                ));
+    public IndentList<AnnotationEntity> getSpringRestAnnotations(String controllerPath) {
+        return new IndentList<>(
+                AnnotationEntity.builder()
+                        .name(SPRING_REST_ANNOTATION)
+                        .build(),
+                AnnotationEntity.builder()
+                        .name(SPRING_REQUEST_MAPPING_ANNOTATION)
+                        .value(controllerPath)
+                        .build(),
+                AnnotationEntity.builder()
+                        .name(LOMBOK_REQ_CONSTRUCTOR_ANNOTATION)
+                        .build());
     }
 
-    public IndentList<ImportEntity> generateSpringRestControllerImports(String corePackageName, String entityName) {
-        return new IndentList<>(DelimiterType.SEMICOLON, true,
-                Arrays.asList(
-                        ImportEntity.builder()
-                                .value(corePackageName + DOT.getDelimiter() + SERVICE_SUFFIX.toLowerCase() + DOT.getDelimiter()  + entityName + "Service")
-                                .build(),
-                        ImportEntity.builder()
-                                .value(corePackageName + DOT.getDelimiter() + DTO_SUFFIX.toLowerCase() + DOT.getDelimiter()  + entityName + "Dto")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.web.bind.annotation.*")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.http.ResponseEntity")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.beans.factory.annotation.Autowired")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.data.domain.Page")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.data.domain.Pageable")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.data.domain.Sort")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("org.springframework.data.web.PageableDefault")
-                                .build(),
-                        ImportEntity.builder()
-                                .value("java.util.UUID")
-                                .build()
-                )
-        );
+    public IndentList<ImportEntity> getSpringRestImports(String corePackageName, String entityName) {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(corePackageName + DOT + SERVICE_SUFFIX.toLowerCase() + DOT  + entityName + SERVICE_SUFFIX)
+                        .build(),
+                ImportEntity.builder()
+                        .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + entityName + DTO_SUFFIX)
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.*")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".http.ResponseEntity")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".beans.factory.annotation.Autowired")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.domain.Page")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.domain.Pageable")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.domain.Sort")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.web.PageableDefault")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".UUID")
+                        .build());
     }
 
-    public IndentList<MethodEntity> generateControllerMethods(Source source, ClassEntity mainEntity) {
+    public IndentList<MethodEntity> getSpringRestMethods(HashMap<EndPointType, String> endPoints, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
-        for (Map.Entry<EntryPointType, String> entryPointPair : source.getEntryPoints().entrySet()) {
-            methods.add(generateMethodFromEntryType(entryPointPair, mainEntity));
+        for (Map.Entry<EndPointType, String> endPointPair : endPoints.entrySet()) {
+
+            if (!MAIN_END_POINT.equals(endPointPair.getKey())) {
+                methods.add(getMethodByEndPointType(endPointPair, mainDtoEntity));
+            }
         }
 
         return new IndentList<>(DelimiterType.INDENT, true, methods);
     }
 
-    private MethodEntity generateMethodFromEntryType(Map.Entry<EntryPointType, String> entryPointPair, ClassEntity mainEntity) {
-        switch(entryPointPair.getKey()) {
-            case CREATE_ENTRY_POINT: return new SaveMethodEntity(mainEntity, entryPointPair.getValue());
-            case FIND_ALL_ENTRY_POINT: return new FindAllMethodEntity(mainEntity, entryPointPair.getValue());
-            case GET_ONE_ENTRY_POINT: return new FindMethodEntity(mainEntity, entryPointPair.getValue());
-            case UPDATE_ENTRY_POINT: return new UpdateMethodEntity(mainEntity, entryPointPair.getValue());
-            case DELETE_HARDLY_ENTRY_POINT: return new DeleteHardMethodEntity(mainEntity, entryPointPair.getValue());
-            case DELETE_SOFTLY_ENTRY_POINT: return new DeleteSoftMethodEntity(mainEntity, entryPointPair.getValue());
+    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, String> endPointPair, ClassEntity dtoEntity) {
+        switch(endPointPair.getKey()) {
+            case CREATE_END_POINT: return new SaveMethodEntity(dtoEntity, endPointPair.getValue());
+            case FIND_ALL_END_POINT: return new FindAllMethodEntity(dtoEntity, endPointPair.getValue());
+            case FIND_END_POINT: return new FindMethodEntity(dtoEntity, endPointPair.getValue());
+            case UPDATE_END_POINT: return new UpdateMethodEntity(dtoEntity, endPointPair.getValue());
+            case DELETE_HARD_END_POINT: return new DeleteHardMethodEntity(dtoEntity, endPointPair.getValue());
+            case DELETE_SOFT_END_POINT: return new DeleteSoftMethodEntity(dtoEntity, endPointPair.getValue());
             default: return null;
         }
     }
 
-    public IndentList<FieldEntity> getEntityControllerField(ClassEntity mainEntity) {
-        return getEntityField(CONTROLLER_SUFFIX, mainEntity);
+    public IndentList<FieldEntity> getEntityControllerField(String entityName) {
+        return getEntityField(CONTROLLER_SUFFIX, entityName);
     }
 
-    public IndentList<FieldEntity> getEntityServiceField(ClassEntity mainEntity) {
-        return getEntityField(SERVICE_SUFFIX, mainEntity);
+    public IndentList<FieldEntity> getEntityServiceField(String entityName) {
+        return getEntityField(SERVICE_SUFFIX, entityName);
     }
 
-    public IndentList<FieldEntity> getEntityRepositoryField(ClassEntity mainEntity) {
-        return getEntityField(REPO_SUFFIX, mainEntity);
+    public IndentList<FieldEntity> getEntityRepositoryField(String entityName) {
+        return getEntityField(REPO_SUFFIX, entityName);
     }
 
-    public IndentList<FieldEntity> getEntityField(ClassEntity mainEntity) {
-        return getEntityField(EMPTY_STRING, mainEntity);
+    public IndentList<FieldEntity> getEntityField(String entityName) {
+        return getEntityField(EMPTY, entityName);
     }
 
-    public IndentList<FieldEntity> getEntityDTOField(ClassEntity mainEntity) {
-        return getEntityField(DTO_SUFFIX, mainEntity);
+    public IndentList<FieldEntity> getEntityDTOField(String entityName) {
+        return getEntityField(DTO_SUFFIX, entityName);
     }
 
-    private IndentList<FieldEntity> getEntityField(String fieldSpecific, ClassEntity entity) {
-        return new IndentList<>(DelimiterType.SEMICOLON, true,
-                Arrays.asList(
-                        FieldEntity.builder()
-                                .modifiers(
-                                        new EnumerationList<>(DelimiterType.NONE, true,
-                                                Arrays.asList(PRIVATE_ACCESS_MODIFIER, FINAL_WORD))
-                                )
-                                .type(entity.getName() + fieldSpecific)
-                                .name(fieldSpecific.toLowerCase())
-                                .build()
-                )
-        );
+    private IndentList<FieldEntity> getEntityField(String fieldSpecific, String entityName) {
+        return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
+                FieldEntity.builder()
+                        .modifiers(new EnumerationList<>(PRIVATE_MOD, FINAL_MOD))
+                        .type(entityName + fieldSpecific)
+                        .name(fieldSpecific.toLowerCase())
+                        .build());
     }
 }

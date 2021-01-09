@@ -1,5 +1,6 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.clazz;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,6 +13,6 @@ public class ImportEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return getTab(0, this) + IMPORT_WORD + SPACE_SYMBOL + value;
+        return getTab(0, this) + IMPORT + SPACE + value;
     }
 }

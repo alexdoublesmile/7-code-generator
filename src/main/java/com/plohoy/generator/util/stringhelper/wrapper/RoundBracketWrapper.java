@@ -18,6 +18,8 @@ public class RoundBracketWrapper<E> {
     @Override
     public String toString() {
 
-        return Objects.nonNull(element) ? OPEN_PARAM_BRACKET + delimiter.getDelimiter() + element + delimiter.getDelimiter() + CLOSE_PARAM_BRACKET : EMPTY_STRING;
+        return Objects.nonNull(element)
+                ? OPEN_PARAM_BRACKET + delimiter.getDelimiter() + element + delimiter.getDelimiter() + CLOSE_PARAM_BRACKET
+                : EMPTY;
     }
 }

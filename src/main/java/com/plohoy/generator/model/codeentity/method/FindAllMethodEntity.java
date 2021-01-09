@@ -1,8 +1,8 @@
 package com.plohoy.generator.model.codeentity.method;
 
-import com.plohoy.generator.model.codeentity.AnnotationEntity;
-import com.plohoy.generator.model.codeentity.ClassEntity;
-import com.plohoy.generator.model.codeentity.PropertyEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
+import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 public class FindAllMethodEntity extends MethodEntity {
     public FindAllMethodEntity(ClassEntity dtoClass, String entryPointPath) {
         super(
-                CodeTemplate.getPublicModifier(),
+                CodeTemplate.getPublicMod(),
                 String.format("Page<%s>", dtoClass.getName()),
                 "findAll",
                 new EnumerationList<>(DelimiterType.COMMA, false,
@@ -29,11 +29,11 @@ public class FindAllMethodEntity extends MethodEntity {
                                                                     Arrays.asList(
                                                                             PropertyEntity.builder()
                                                                                     .name("required")
-                                                                                    .value("false")
+                                                                                    .quotedValue("false")
                                                                                     .build(),
                                                                             PropertyEntity.builder()
                                                                                     .name("defaultValue")
-                                                                                    .value("false")
+                                                                                    .quotedValue("false")
                                                                                     .build())))
                                                             .build())))
                                         .type("boolean")
@@ -48,11 +48,11 @@ public class FindAllMethodEntity extends MethodEntity {
                                                                     Arrays.asList(
                                                                             PropertyEntity.builder()
                                                                                     .name("sort")
-                                                                                    .value("id")
+                                                                                    .simpleValue("{ \"id\" }")
                                                                                     .build(),
                                                                             PropertyEntity.builder()
                                                                                     .name("direction")
-                                                                                    .value("Sort.Direction.DESC")
+                                                                                    .simpleValue("Sort.Direction.DESC")
                                                                                     .build())))
                                                             .build())))
                                         .type("Pageable")
@@ -64,7 +64,7 @@ public class FindAllMethodEntity extends MethodEntity {
                                 .name("GetMapping")
                                 .property(PropertyEntity.builder()
                                         .name("produces")
-                                        .value("application/json")
+                                        .quotedValue("application/json")
                                         .build())
                                 .build())
                 ),

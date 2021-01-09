@@ -4,7 +4,7 @@ import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 
 import java.util.Objects;
 
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY_STRING;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.QUOTE;
 
 public class QuoteWrapper<E> {
@@ -18,6 +18,8 @@ public class QuoteWrapper<E> {
 
     @Override
     public String toString() {
-        return Objects.nonNull(element) ? QUOTE + delimiter.getDelimiter() + element + delimiter.getDelimiter() + QUOTE : EMPTY_STRING;
+        return Objects.nonNull(element)
+                ? QUOTE + delimiter.getDelimiter() + element + delimiter.getDelimiter() + QUOTE
+                : EMPTY;
     }
 }

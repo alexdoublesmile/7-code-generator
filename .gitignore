@@ -7,7 +7,6 @@
 temp/
 
 # default output directories
-classes/
 deploy/
 
 # lock file, a part of Oracle Credential Store Framework

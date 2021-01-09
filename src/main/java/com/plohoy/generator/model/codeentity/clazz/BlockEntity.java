@@ -1,5 +1,6 @@
-package com.plohoy.generator.model.codeentity;
+package com.plohoy.generator.model.codeentity.clazz;
 
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import lombok.Builder;
 import lombok.Data;
