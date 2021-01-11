@@ -32,10 +32,8 @@ public class RequestMapper {
                 .relativeRootPaths(pathHelper.getRootPathList(request))
                 .corePackagePath(pathHelper.getPackagePath(request))
                 .dtoPackagePath(pathHelper.getDtoPackagePath(request))
-                .corePackageName(String.format(
-                        "%s.%s",
-                        request.getGroupName(),
-                        request.getArtifactName().replace("-", "")))
+                .corePackageName(request.getGroupName() + DOT +
+                        request.getArtifactName().replace(MINUS, EMPTY))
                 .groupName(request.getGroupName())
                 .artifactName(request.getArtifactName())
                 .jdkVersion(request.getJdkVersion())

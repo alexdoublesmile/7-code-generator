@@ -18,7 +18,7 @@ public class DeleteSoftMethodEntity extends MethodEntity {
                 CodeTemplate.getPublicMod(),
                 dto.getName(),
                 "deleteSoft",
-                new EnumerationList<ArgumentEntity>(false,
+                new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
                                 .annotations(new EnumerationList<AnnotationEntity>(true,
                                         AnnotationEntity.builder()
@@ -43,6 +43,32 @@ public class DeleteSoftMethodEntity extends MethodEntity {
                                                 .build()))
                                 .build()),
                 "return service.deleteSoft(id);"
+        );
+    }
+
+    public DeleteSoftMethodEntity(ClassEntity entity, ClassEntity dto) {
+        super(
+                CodeTemplate.getPublicMod(),
+                dto.getName(),
+                "deleteSoft",
+                new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                        ArgumentEntity.builder()
+                                .type(dto.getIdType())
+                                .name("id")
+                                .build()),
+                null,
+                new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()),
+                entity.getName() + " entityFromDB = repository.findById(id)\n" +
+                        "                .orElseThrow(() -> { throw new ResponseStatusException(\n" +
+                        "                        HttpStatus.NOT_FOUND,\n" +
+                        "                        \"The entity with ID: \" + id + \" wasn't found in DB\"); });\n" +
+                        "        entityFromDB.setDeleted(true);\n" +
+                        "\n" +
+                        "        return mapper.toDto(\n" +
+                        "                repository.save(entityFromDB));"
         );
     }
 

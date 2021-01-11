@@ -5,6 +5,7 @@ import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.DOT;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH;
 
 public class SimpleSourceTree extends AbstractSourceTree {
@@ -19,7 +20,7 @@ public class SimpleSourceTree extends AbstractSourceTree {
     public String  getPackagePath(SourceRequest request) {
         packagePath = SLASH
                 + "/src/main/java/"
-                + request.getGroupName().replace(".", "/")
+                + request.getGroupName().replace(DOT, SLASH)
                 + SLASH + request.getArtifactName();
 
         return packagePath;

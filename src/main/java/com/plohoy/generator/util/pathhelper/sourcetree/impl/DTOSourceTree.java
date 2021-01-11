@@ -5,7 +5,7 @@ import com.plohoy.generator.view.request.SourceRequest;
 
 import java.util.List;
 
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public class DTOSourceTree extends AbstractSourceTree {
 
@@ -22,19 +22,19 @@ public class DTOSourceTree extends AbstractSourceTree {
     public String getPackagePath(SourceRequest request) {
         packagePath = String.format("/%s-core", request.getArtifactName())
                 + "/src/main/java/"
-                + request.getGroupName().replace(".", "/")
-                + SLASH + request.getArtifactName() + SLASH;
+                + request.getGroupName().replace(DOT, SLASH)
+                + SLASH + request.getArtifactName().replace(MINUS, EMPTY) + SLASH;
 
         return packagePath;
     }
 
     @Override
     public String getDtoPackagePath(SourceRequest request) {
-        dtoPackagePath = String.format("/%s-dto", request.getArtifactName())
+        dtoPackagePath = String.format("/%s-api", request.getArtifactName())
                 + "/src/main/java/"
-                + request.getGroupName().replace(".", "/")
-                + SLASH + request.getArtifactName() + SLASH;
+                + request.getGroupName().replace(DOT, SLASH)
+                + SLASH + request.getArtifactName().replace(MINUS, EMPTY) + SLASH;
 
-        return null;
+        return dtoPackagePath;
     }
 }

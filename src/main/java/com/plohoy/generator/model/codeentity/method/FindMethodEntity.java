@@ -13,40 +13,54 @@ import java.util.Arrays;
 
 @Data
 public class FindMethodEntity extends MethodEntity {
-    public FindMethodEntity(ClassEntity dtoClass, String entryPointPath) {
+    public FindMethodEntity(ClassEntity dtoEntity, String entryPointPath) {
         super(
                 CodeTemplate.getPublicMod(),
-                dtoClass.getName(),
+                dtoEntity.getName(),
                 "find",
-                new EnumerationList<>(DelimiterType.NONE, false,
-                        Arrays.asList(ArgumentEntity.builder()
-                                .annotations(new EnumerationList<>(DelimiterType.SPACE, true,
-                                        Arrays.asList(
-                                                AnnotationEntity.builder()
-                                                        .name("PathVariable")
-                                                        .value("id")
-                                                        .build()
-                                        )))
-                                .type(dtoClass.getFields().get(0).getType())
-                                .name("id")
-                                .build())),
+                new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                    ArgumentEntity.builder()
+                            .annotations(new EnumerationList<>(
+                                    AnnotationEntity.builder()
+                                            .name("PathVariable")
+                                            .value("id")
+                                            .build()))
+                            .type(dtoEntity.getIdType())
+                            .name("id")
+                            .build()),
                 null,
-                new IndentList<>(DelimiterType.NONE, true,
-                        Arrays.asList(AnnotationEntity.builder()
-                                .name("GetMapping")
-                                .properties(new EnumerationList<>(DelimiterType.COMMA, false,
-                                        Arrays.asList(
-                                                PropertyEntity.builder()
-                                                        .name("quotedValue")
-                                                        .quotedValue(entryPointPath)
-                                                        .build(),
-                                                PropertyEntity.builder()
-                                                        .name("produces")
-                                                        .quotedValue("application/json")
-                                                        .build())))
-                                .build())
-                ),
+                new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                            .name("GetMapping")
+                            .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                    PropertyEntity.builder()
+                                            .name("quotedValue")
+                                            .quotedValue(entryPointPath)
+                                            .build(),
+                                    PropertyEntity.builder()
+                                            .name("produces")
+                                            .quotedValue("application/json")
+                                            .build()))
+                            .build()),
                 "return service.findById(id);"
+        );
+    }
+
+    public FindMethodEntity(ClassEntity entity, ClassEntity dtoEntity) {
+        super(
+                CodeTemplate.getPublicMod(),
+                dtoEntity.getName(),
+                "find",
+                new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                        ArgumentEntity.builder()
+                            .type(dtoEntity.getIdType())
+                            .name("id")
+                            .build()),
+                null,
+                null,
+                "return mapper.toDto(\n" +
+                        "                repository.findByIdAndDeleted(id, false)\n" +
+                        "                        .orElseThrow(() -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND); }));"
         );
     }
 

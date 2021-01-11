@@ -7,6 +7,7 @@ import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 

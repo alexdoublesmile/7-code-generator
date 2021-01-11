@@ -16,12 +16,12 @@ public class RestSimpleStrategy implements Strategy {
                 .registerSource(requestMapper.mapRequestToSource(request))
                 .addSpringBootLauncher()
                 .addSimpleController()
-//                .addSimpleService()
+                .addSimpleService()
                 .addSimpleRepository()
-//                .addMapper()
-//                .addDomain()
-//                .addException()
-//                .addProperties()
+                .addMapper()
+                .addDomain()
+                .addException()
+                .addProperties()
                 .generateSource();
     }
 }

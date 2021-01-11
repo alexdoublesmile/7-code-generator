@@ -14,10 +14,10 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 public class UpdateMethodEntity extends MethodEntity {
-    public UpdateMethodEntity(ClassEntity dtoClass, String entryPointPath) {
+    public UpdateMethodEntity(ClassEntity dtoEntity, String entryPointPath) {
         super(
                 CodeTemplate.getPublicMod(),
-                dtoClass.getName(),
+                dtoEntity.getName(),
                 "update",
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA,false,
                         ArgumentEntity.builder()
@@ -26,7 +26,7 @@ public class UpdateMethodEntity extends MethodEntity {
                                                     .name("PathVariable")
                                                     .value(ID)
                                                     .build()))
-                                .type(dtoClass.getIdType())
+                                .type(dtoEntity.getIdType())
                                 .name(ID)
                                 .build(),
                         ArgumentEntity.builder()
@@ -34,7 +34,7 @@ public class UpdateMethodEntity extends MethodEntity {
                                             AnnotationEntity.builder()
                                                     .name("RequestBody")
                                                     .build()))
-                                .type(dtoClass.getName())
+                                .type(dtoEntity.getName())
                                 .name(DTO_SUFFIX.toLowerCase())
                                 .build()),
                 null,
@@ -52,6 +52,34 @@ public class UpdateMethodEntity extends MethodEntity {
                                                     .build()))
                                 .build()),
                 "return service.update(id, dto);"
+        );
+    }
+
+    public UpdateMethodEntity(ClassEntity entity, ClassEntity dtoEntity) {
+        super(
+                CodeTemplate.getPublicMod(),
+                dtoEntity.getName(),
+                "update",
+                new EnumerationList<ArgumentEntity>(DelimiterType.COMMA,false,
+                        ArgumentEntity.builder()
+                                .type(dtoEntity.getIdType())
+                                .name(ID)
+                                .build(),
+                        ArgumentEntity.builder()
+                                .type(dtoEntity.getName())
+                                .name(DTO_SUFFIX.toLowerCase())
+                                .build()),
+                null,
+                null,
+                "if (dto.getId() != null\n" +
+                        "                && !dto.getId().equals(id)) {\n" +
+                        "            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, idsDoNotMatchMessage);\n" +
+                        "        }\n" +
+                        "        dto.setId(id);\n" +
+                        "\n" +
+                        "        return mapper.toDto(\n" +
+                        "                repository.save(\n" +
+                        "                        mapper.toEntity(dto)));"
         );
     }
 
