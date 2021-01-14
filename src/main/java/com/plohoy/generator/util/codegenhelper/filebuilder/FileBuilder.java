@@ -135,7 +135,7 @@ public class FileBuilder {
         source.getSourceData()
                 .get(EXCEPTION)
                 .add(ExceptionFile.builder()
-                        .fileName("" + DEFAULT_JAVA_EXTENSION)
+                        .fileName("GlobalExceptionHandler" + DEFAULT_JAVA_EXTENSION)
                         .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
                         .data(codeBuilder.buildDefaultExceptionHandler(source))
                         .build()
@@ -149,7 +149,7 @@ public class FileBuilder {
                 .get(PROPERTY_FILE)
                 .add(PropertyFile.builder()
                         .fileName("application.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
+                        .path(source.getPath() + source.getArtifactName() + source.getResourcePath() + SLASH)
                         .data(codeBuilder.buildApplicationProperty())
                         .build()
                 );
@@ -158,7 +158,7 @@ public class FileBuilder {
                 .get(PROPERTY_FILE)
                 .add(PropertyFile.builder()
                         .fileName("application-dev.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
+                        .path(source.getPath() + source.getArtifactName() + source.getResourcePath() + SLASH)
                         .data(codeBuilder.buildApplicationDevProperty())
                         .build()
                 );
@@ -167,7 +167,7 @@ public class FileBuilder {
                 .get(PROPERTY_FILE)
                 .add(PropertyFile.builder()
                         .fileName("message.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
+                        .path(source.getPath() + source.getArtifactName() + source.getResourcePath() + SLASH)
                         .data(codeBuilder.buildMessageProperty())
                         .build()
                 );
@@ -176,7 +176,7 @@ public class FileBuilder {
                 .get(PROPERTY_FILE)
                 .add(PropertyFile.builder()
                         .fileName("db.property")
-                        .path(source.getPath() + source.getArtifactName() + pathHelper.getResourcePath() + SLASH)
+                        .path(source.getPath() + source.getArtifactName() + source.getResourcePath() + SLASH)
                         .data(codeBuilder.buildDBProperty())
                         .build()
                 );

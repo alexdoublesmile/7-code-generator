@@ -8,4 +8,5 @@ public interface SourceTree {
     List<String> getRootPathList(SourceRequest request);
     String getPackagePath(SourceRequest request);
     String getDtoPackagePath(SourceRequest request);
+    String getResourcePath(SourceRequest request);
 }

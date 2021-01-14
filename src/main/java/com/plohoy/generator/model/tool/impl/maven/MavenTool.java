@@ -1,52 +1,24 @@
 package com.plohoy.generator.model.tool.impl.maven;
 
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.file.FileType;
+import com.plohoy.generator.model.file.SimpleSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.model.tool.impl.maven.entity.MavenEntity;
-
-import java.io.File;
-import java.util.HashMap;
 
 public class MavenTool extends AbstractTool {
-    private HashMap<String, MavenEntity> pathsOfPomData;
-
-    private String pomData;
-
-    public MavenTool(String version) {
-        super(version);
-    }
-
-    public MavenTool() {
-    }
+    private MavenUtil mavenUtil = new MavenUtil();
 
     @Override
     public Source generateCode(Source source) {
-//        for (String rootPath : source.getRelativeRootPaths()) {
-//
-//            pathsOfPomData.put(
-//                    rootPath + "/pom.xml",
-//                    buildMavenEntity(rootPath, source));
-//        }
-
-        return source;
-    }
-
-    private Source buildBasicPomFile(Source source, String rootPath) {
-//        File pomFile = new File(rootPath + "/pom.xml");
-//        StringBuilder pomData = new StringBuilder();
-//
-//        pomData.append(MavenUtil.getPomHeader());
-//        pomData.append(MavenUtil.getPomFooter());
-//
-//        outputHelper.writeDataToFile(pomData.toString(), pomFile);
-
-        return source;
-    }
-
-    private Source buildPomFile(Source source, String rootPath) {
-//        buildMainPomFile(rootDir.getPath() + "/");
-//        buildApiPomFile(apiModuleDir.getPath() + "/");
-//        buildCorePomFile(coreModuleDir.getPath() + "/");
+        for (String rootPath : source.getRelativeRootPaths()) {
+            source.getSourceData()
+                    .get(FileType.EXTERNAL_FILE)
+                    .add(SimpleSourceFile.builder()
+                            .path(rootPath)
+                            .fileName("pom.xml")
+                            .data(mavenUtil.getPomCode(source, rootPath))
+                            .build());
+        }
         return source;
     }
 }

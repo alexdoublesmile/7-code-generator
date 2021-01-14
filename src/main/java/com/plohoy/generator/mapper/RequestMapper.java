@@ -32,6 +32,7 @@ public class RequestMapper {
                 .relativeRootPaths(pathHelper.getRootPathList(request))
                 .corePackagePath(pathHelper.getPackagePath(request))
                 .dtoPackagePath(pathHelper.getDtoPackagePath(request))
+                .resourcePath(pathHelper.getResourcePath(request))
                 .corePackageName(request.getGroupName() + DOT +
                         request.getArtifactName().replace(MINUS, EMPTY))
                 .groupName(request.getGroupName())
@@ -41,7 +42,8 @@ public class RequestMapper {
                 .secondaryEntities(mapRequestEntitiesToSource(request.getSecondaryEntities(), EMPTY))
                 .mainDtoEntities(mapRequestEntitiesToSource(request.getMainEntities(), DTO_SUFFIX))
                 .secondaryDtoEntities(mapRequestEntitiesToSource(request.getSecondaryEntities(), DTO_SUFFIX))
-                .isArchive(request.isArchive())
+                .dtoModuleExists(request.isDtoModuleExists())
+                .archive(request.isArchive())
                 .sourceData(initSourceData())
                 .endPoints(initEndPoints(request.getEndPointsPaths()))
                 .build();

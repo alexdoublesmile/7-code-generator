@@ -9,4 +9,5 @@ public abstract class AbstractSourceTree implements SourceTree {
     protected List<String> rootPathList = new ArrayList<>();
     protected String packagePath;
     protected String dtoPackagePath;
+    protected String resourcePath;
 }

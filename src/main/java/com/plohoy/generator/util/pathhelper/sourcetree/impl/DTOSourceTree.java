@@ -37,4 +37,12 @@ public class DTOSourceTree extends AbstractSourceTree {
 
         return dtoPackagePath;
     }
+
+    @Override
+    public String getResourcePath(SourceRequest request) {
+        resourcePath = String.format("/%s-core", request.getArtifactName())
+                + "/src/main/resources/";
+
+        return resourcePath;
+    }
 }

@@ -19,13 +19,15 @@ public class Source {
     private List<String> relativeRootPaths;
     private String corePackagePath;
     private String dtoPackagePath;
+    private String resourcePath;
     private String corePackageName;
     private List<ClassEntity> mainEntities;
     private List<ClassEntity> secondaryEntities;
     private List<ClassEntity> mainDtoEntities;
     private List<ClassEntity> secondaryDtoEntities;
     private String jdkVersion;
-    private boolean isArchive;
+    private boolean dtoModuleExists;
+    private boolean archive;
     private HashMap<FileType, List<AbstractSourceFile>> sourceData;
     private HashMap<EndPointType, String> endPoints;
 }

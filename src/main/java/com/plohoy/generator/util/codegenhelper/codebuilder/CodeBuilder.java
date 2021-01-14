@@ -122,25 +122,26 @@ public class CodeBuilder {
                 .annotations(codeTemplate.getExceptionHandlerAnnotations())
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.CLASS)
-                .name("ExceptionResolver")
+                .name("GlobalExceptionHandler")
+                .extendsClass("ResponseEntityExceptionHandler")
                 .methods(codeTemplate.getExceptionMethods())
                 .build()
                 .toString();
     }
 
     public String buildApplicationProperty() {
-        return new IndentList<String>(codeTemplate.getAppProperties());
+        return codeTemplate.getAppProperties().toString();
     }
 
     public String buildApplicationDevProperty() {
-        return new IndentList<String>(codeTemplate.getAppDevProperties());
+        return codeTemplate.getAppDevProperties().toString();
     }
 
     public String buildMessageProperty() {
-        return new IndentList<String>(codeTemplate.getMessageProperties());
+        return codeTemplate.getMessageProperties().toString();
     }
 
     public String buildDBProperty() {
-        return new IndentList<String>(codeTemplate.getDBProperties());
+        return codeTemplate.getDBProperties().toString();
     }
 }

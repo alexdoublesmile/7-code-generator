@@ -30,4 +30,12 @@ public class SimpleSourceTree extends AbstractSourceTree {
     public String getDtoPackagePath(SourceRequest request) {
         return getPackagePath(request);
     }
+
+    @Override
+    public String getResourcePath(SourceRequest request) {
+        resourcePath = request.getArtifactName()
+                + "/src/main/resources/";
+
+        return resourcePath;
+    }
 }

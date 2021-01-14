@@ -24,6 +24,7 @@ public class CodeTemplate {
     public static final String NULL = "null";
     public static final String SPACE = " ";
     public static final String SLASH = "/";
+    public static final String BACKSLASH = "\\";
     public static final String QUOTE = "\"";
     public static final String DOT = ".";
     public static final String TRIPLE_DOT = "...";
@@ -703,6 +704,103 @@ public class CodeTemplate {
 
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 dtoFields
+        );
+    }
+
+    public IndentList<ImportEntity> getExceptionHandlerImports() {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".http.HttpHeaders")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".http.HttpStatus")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".http.ResponseEntity")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ControllerAdvice")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ExceptionHandler")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".web.context.request.WebRequest")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + "javax.validation.EntityNotFoundException")
+                        .build()
+        );
+    }
+
+    public IndentList<AnnotationEntity> getExceptionHandlerAnnotations() {
+        return new IndentList<>(
+                AnnotationEntity.builder()
+                        .name("ControllerAdvice")
+                        .build());
+    }
+
+    public IndentList<MethodEntity> getExceptionMethods() {
+        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
+                MethodEntity.builder()
+                        .annotations(new IndentList<AnnotationEntity>(
+                                AnnotationEntity.builder()
+                                        .name("ExceptionHandler")
+                                        .property(PropertyEntity.builder().simpleValue("EntityNotFoundException.class").build())
+                                        .build()))
+                        .modifiers(new EnumerationList<String>(PROTECTED_MOD))
+                        .returnType("ResponseEntity<Object>")
+                        .name("toDto")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .type("EntityNotFoundException")
+                                        .name("ex")
+                                        .build(),
+                                ArgumentEntity.builder()
+                                        .type("WebRequest")
+                                        .name("request")
+                                        .build()))
+                        .body("return handleExceptionInternal(\n" +
+                                "                ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);")
+                        .build());
+    }
+
+    public IndentList<PropertyEntity> getAppProperties() {
+        return new IndentList(
+                "server.port=8080",
+                "spring.jpa.generate-ddl=false",
+                "spring.jpa.hibernate.ddl-auto=none",
+                "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yml"
+        );
+    }
+
+    public IndentList<PropertyEntity> getAppDevProperties() {
+        return new IndentList(
+                "server.port=8088",
+                "spring.main.banner-mode=off",
+                "spring.jpa.show-sql=true",
+                "spring.jpa.generate-ddl=true",
+                "spring.jpa.hibernate.ddl-auto=create-drop",
+                "spring.liquibase.enabled=false"
+        );
+    }
+
+    public IndentList<PropertyEntity> getMessageProperties() {
+        return new IndentList(
+                "ids.do.not.match.message=ID from Entity & ID from path don't match",
+                "entity.not.found.message=Entity with this ID was not found"
+        );
+    }
+
+    public IndentList<PropertyEntity> getDBProperties() {
+        return new IndentList(
+                "spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}?sslmode=${DB_SSL_MODE:disable}&prepareThreshold=${DB_PREPARE_THRESHOLD:5}",
+                "spring.datasource.username=${DB_USERNAME:postgres}",
+                "spring.datasource.password=${DB_PASSWORD:mysecretpassword}",
+                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect"
         );
     }
 }
