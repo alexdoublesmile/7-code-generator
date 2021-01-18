@@ -168,8 +168,8 @@ public class CodeTemplate {
 
 
 
-    public String getPackageString(String corePackageName) {
-        return PACKAGE + SPACE + corePackageName + SEMICOLON + getIndent(2);
+    public String getPackageString(String packageName) {
+        return PACKAGE + SPACE + packageName + SEMICOLON + getIndent(2);
     }
 
     public FieldEntity getEntityControllerField(String entityName) {
@@ -220,16 +220,16 @@ public class CodeTemplate {
         return result;
     }
 
-    public static String getTab(int currentTab, CodeEntity codeEntity) {
-        CodeEntity currentEntity = codeEntity.getParentEntity();
-
-        while (Objects.nonNull(currentEntity)) {
-            currentTab += currentEntity.getNestLvl();
-            currentEntity = currentEntity.getParentEntity();
-        }
-
-        return getTab(currentTab);
-    }
+//    public static String getTab(int currentTab, CodeEntity codeEntity) {
+//        CodeEntity currentEntity = codeEntity.getParentEntity();
+//
+//        while (Objects.nonNull(currentEntity)) {
+//            currentTab++;
+//            currentEntity = currentEntity.getParentEntity();
+//        }
+//
+//        return getTab(currentTab - 1);
+//    }
 
     public static String getIndent() {
         return getIndent(1);
@@ -611,13 +611,13 @@ public class CodeTemplate {
                         .value(LOMBOK_MAIN_PACKAGE + ".Data")
                         .build(),
                 ImportEntity.builder()
-                        .value("import javax.persistence.*")
+                        .value("javax.persistence.*")
                         .build(),
                 ImportEntity.builder()
-                        .value("import java.time.LocalDate")
+                        .value("java.time.LocalDate")
                         .build(),
                 ImportEntity.builder()
-                        .value("import java.time.LocalDateTime")
+                        .value("java.time.LocalDateTime")
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".List")
@@ -640,10 +640,10 @@ public class CodeTemplate {
                         .value(LOMBOK_MAIN_PACKAGE + ".Data")
                         .build(),
                 ImportEntity.builder()
-                        .value("import java.time.LocalDate")
+                        .value("java.time.LocalDate")
                         .build(),
                 ImportEntity.builder()
-                        .value("import java.time.LocalDateTime")
+                        .value("java.time.LocalDateTime")
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".List")

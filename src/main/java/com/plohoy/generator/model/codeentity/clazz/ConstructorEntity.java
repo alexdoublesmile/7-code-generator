@@ -22,16 +22,16 @@ public class ConstructorEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return getTab(1, this) + annotations.toString()
-                + getTab(1, this) + modifiers
+        return getTab(getNestLvl() + 1) + annotations.toString()
+                + getTab(getNestLvl() + 1) + modifiers
                 + name
                 + OPEN_PARAM_BRACKET
                 + args
                 + CLOSE_PARAM_BRACKET + getIndent()
                 + exceptions + getIndent()
                 + OPEN_BODY_BRACKET + getIndent()
-                + getTab(2, this) + body + getIndent()
-                + getTab(1, this) + CLOSE_BODY_BRACKET + getIndent();
+                + getTab(getNestLvl() + 2) + body + getIndent()
+                + getTab(getNestLvl() + 1) + CLOSE_BODY_BRACKET + getIndent();
     }
 
     public void setArgs(EnumerationList<ArgumentEntity> args) {

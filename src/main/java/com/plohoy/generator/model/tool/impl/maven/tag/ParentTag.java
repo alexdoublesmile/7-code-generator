@@ -1,32 +1,30 @@
-package com.plohoy.generator.model.tool.impl.maven.entity.impl;
+package com.plohoy.generator.model.tool.impl.maven.tag;
 
-import com.plohoy.generator.model.tool.impl.maven.entity.TagEntity;
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
-@Builder
 public class ParentTag extends TagEntity {
-
-    public ParentTag(String name, String body, boolean singleTag, IndentList<TagEntity> innerTags) {
-        super(name, body, singleTag, innerTags);
+    public ParentTag(String name, List<String> attrs, String body, boolean singleTag, IndentList<CodeEntity> innerTags) {
+        super(name, attrs, body, singleTag, innerTags);
     }
 
-    public ParentTag(IndentList<TagEntity> innerTags) {
-        this("parent", null, false, innerTags);
+    public ParentTag(IndentList<CodeEntity> innerTags) {
+        this("parent", null, null, false, innerTags);
     }
 
-    public ParentTag(TagEntity ... innerTags) {
+    public ParentTag(CodeEntity ... innerTags) {
         this(new IndentList(innerTags));
     }
 
-    public ParentTag(String groupId, String artifactId, String version, TagEntity ... innerTags) {
+    public ParentTag(String groupId, String artifactId, String version, CodeEntity... innerTags) {
         this(
                 new GroupIdTag(groupId),
                 new ArtifactIdTag(artifactId),

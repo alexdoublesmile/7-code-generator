@@ -3,6 +3,8 @@ package com.plohoy.generator.model;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.file.AbstractSourceFile;
+import com.plohoy.generator.model.tool.AbstractTool;
+import com.plohoy.generator.model.tool.ToolType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -29,5 +31,6 @@ public class Source {
     private boolean dtoModuleExists;
     private boolean archive;
     private HashMap<FileType, List<AbstractSourceFile>> sourceData;
+    private HashMap<ToolType, AbstractTool> tools;
     private HashMap<EndPointType, String> endPoints;
 }

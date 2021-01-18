@@ -20,7 +20,7 @@ public class FileBuilder {
     private Source source;
 
     public FileBuilder addSpringBootLauncher() {
-        String fileName = StringUtil.toCamelCase(source.getArtifactName()) + LAUNCHER_SUFFIX;
+        String fileName = StringUtil.getLauncherFileName(source.getArtifactName());
 
         source.getSourceData()
                 .get(LAUNCHER)
@@ -67,7 +67,7 @@ public class FileBuilder {
 
     public FileBuilder addSimpleRepository() {
         for (ClassEntity entity : source.getMainEntities()) {
-            String fileName = StringUtil.toCamelCase(entity.getName()) + REPO_SUFFIX;
+            String fileName = StringUtil.getRepoFileName(entity.getName());
 
             source.getSourceData()
                     .get(REPOSITORY)
@@ -83,7 +83,7 @@ public class FileBuilder {
 
     public FileBuilder addMapper() {
         for (ClassEntity entity : source.getMainEntities()) {
-            String fileName = StringUtil.toCamelCase(entity.getName()) + MAPPER_SUFFIX;
+            String fileName = StringUtil.getMapperFileName(entity.getName());
 
             source.getSourceData()
                     .get(MAPPER)

@@ -1,6 +1,5 @@
 package com.plohoy.generator;
 
-import com.plohoy.generator.config.AppConfig;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.EndPointType;
@@ -13,6 +12,7 @@ import com.plohoy.generator.model.tool.impl.jackson.JacksonTool;
 import com.plohoy.generator.model.tool.impl.liquibase.LiquibaseTool;
 import com.plohoy.generator.model.tool.impl.lombok.LombokTool;
 import com.plohoy.generator.model.tool.impl.mapstruct.MapstructTool;
+import com.plohoy.generator.model.tool.impl.maven.MavenTool;
 import com.plohoy.generator.model.tool.impl.postgres.PostgresTool;
 import com.plohoy.generator.model.tool.impl.readme.ReadMeTool;
 import com.plohoy.generator.model.tool.impl.spring.SpringBootTool;
@@ -34,7 +34,7 @@ public class GeneratorApplication {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext ctx =
                 new AnnotationConfigApplicationContext();
-        ctx.register(AppConfig.class);
+//        ctx.register(AppConfig.class);
         ctx.scan("com.plohoy.generator");
         ctx.refresh();
 
@@ -51,7 +51,7 @@ public class GeneratorApplication {
                 .artifactName("person-service")
                 .jdkVersion("11")
                 .architecture(ArchitectureType.REST_SIMPLE)
-                .dtoModuleExists(true)
+                .dtoModuleExists(false)
                 .archive(false)
                 .mainEntities(getTestMainEntities())
                 .secondaryEntities(getTestEntities())
@@ -172,6 +172,7 @@ public class GeneratorApplication {
 
     private static HashMap<ToolType, AbstractTool> getTestTools() {
         HashMap<ToolType, AbstractTool> tools = new HashMap<>();
+        AbstractTool mavenTool = new MavenTool("4.0.0");
         AbstractTool springTool = new SpringTool("5.2.9.RELEASE");
         AbstractTool springBootTool = new SpringBootTool("2.3.4.RELEASE");
         AbstractTool lombokTool = new LombokTool("1.18.12");
@@ -187,6 +188,7 @@ public class GeneratorApplication {
         AbstractTool dockerTool = new DockerTool();
         AbstractTool readMeTool = new ReadMeTool();
 
+        tools.put(ToolType.MAVEN, mavenTool);
         tools.put(ToolType.SPRING, springTool);
         tools.put(ToolType.SPRING_BOOT, springBootTool);
         tools.put(ToolType.LOMBOK, lombokTool);

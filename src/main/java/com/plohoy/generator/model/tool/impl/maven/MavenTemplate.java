@@ -5,8 +5,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class MavenTemplate {
 
-    private final String POM_HEADER =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    private final String POM_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
     private final String POM_FOOTER =
             "</project>";
@@ -72,6 +71,11 @@ public class MavenTemplate {
                     "\t\t\t\t\t<source>${java.version}</source>\n" +
                     "\t\t\t\t\t<target>${java.version}</target>\n" +
                     "\t\t\t\t</configuration>\n";
+    private static final String PROJECT_ATTRS =
+            "xmlns=\"http://maven.apache.org/POM/4.0.0\" " +
+                    "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+                    "xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 " +
+                    "http://maven.apache.org/xsd/maven-4.0.0.xsd\"";
 
     public static String getPomHeader() {
         return POM_HEADER;
@@ -107,5 +111,9 @@ public class MavenTemplate {
 
     public static String getPluginInfo() {
         return PLUGIN_INFO;
+    }
+
+    public static String getProjectAttrs() {
+        return PROJECT_ATTRS;
     }
 }

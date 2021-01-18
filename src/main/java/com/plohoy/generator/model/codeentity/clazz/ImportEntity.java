@@ -13,6 +13,6 @@ public class ImportEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return getTab(0, this) + IMPORT + SPACE + value;
+        return getTab(getNestLvl()) + IMPORT + SPACE + value;
     }
 }

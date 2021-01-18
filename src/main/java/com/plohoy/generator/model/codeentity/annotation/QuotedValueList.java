@@ -21,7 +21,7 @@ public class QuotedValueList extends CodeEntity {
     @Override
     public String toString() {
         List<String> quotedValues = values.stream()
-                .map(element -> getTab(1, this) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
+                .map(element -> getTab(getNestLvl() + 1) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
                 .collect(Collectors.toList());
 
         return new BodyBracketWrapper<>(DelimiterType.INDENT, new IndentList<>(DelimiterType.COMMA, false, quotedValues)).toString();

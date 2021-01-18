@@ -20,7 +20,7 @@ public class AnnotationEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return getTab(0, this) + ANNOTATION_MARK
+        return getTab(getNestLvl()) + ANNOTATION_MARK
                 + name
                 + StringUtil.checkStringForNull(value,
                     OPEN_PARAM_BRACKET + QUOTE + value + QUOTE + CLOSE_PARAM_BRACKET)

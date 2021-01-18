@@ -1,27 +1,27 @@
-package com.plohoy.generator.model.tool.impl.maven.entity.impl;
+package com.plohoy.generator.model.tool.impl.maven.tag;
 
-import com.plohoy.generator.model.tool.impl.maven.entity.TagEntity;
+import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
-import lombok.Builder;
 import lombok.Data;
-@Builder
+
+import java.util.List;
+
 @Data
 public class ModulesTag extends TagEntity {
-
-    public ModulesTag(String name, String body, boolean singleTag, IndentList<TagEntity> innerTags) {
-        super(name, body, singleTag, innerTags);
+    public ModulesTag(String name, List<String> attrs, String body, boolean singleTag, IndentList<CodeEntity> innerTags) {
+        super(name, attrs, body, singleTag, innerTags);
     }
 
-    public ModulesTag(String body, IndentList<TagEntity> innerTags) {
-        this("modules", body, false, innerTags);
+    public ModulesTag(String body, IndentList<CodeEntity> innerTags) {
+        this("modules", null, body, false, innerTags);
     }
 
-    public ModulesTag(IndentList<TagEntity> innerTags) {
-        this("modules", null, false, innerTags);
+    public ModulesTag(IndentList<CodeEntity> innerTags) {
+        this(null, innerTags);
     }
 
-    public ModulesTag(TagEntity ... modules) {
-        this("modules", null, false, new IndentList(modules));
+    public ModulesTag(CodeEntity ... modules) {
+        this(new IndentList(modules));
     }
 
     public ModulesTag(String coreModuleName, String apiModuleName) {

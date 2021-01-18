@@ -48,8 +48,6 @@ public class StringUtil {
         return Objects.nonNull(object) ? resultString : EMPTY;
     }
 
-
-
     public String getControllerFileName(String rootName) {
         return StringUtil.toCamelCase(rootName + CONTROLLER_SUFFIX);
     }

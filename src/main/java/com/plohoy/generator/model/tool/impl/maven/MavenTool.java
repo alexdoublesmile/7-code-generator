@@ -6,6 +6,13 @@ import com.plohoy.generator.model.file.SimpleSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
 
 public class MavenTool extends AbstractTool {
+    public MavenTool(String version) {
+        super(version);
+    }
+
+    public MavenTool() {
+    }
+
     private MavenUtil mavenUtil = new MavenUtil();
 
     @Override
@@ -14,7 +21,7 @@ public class MavenTool extends AbstractTool {
             source.getSourceData()
                     .get(FileType.EXTERNAL_FILE)
                     .add(SimpleSourceFile.builder()
-                            .path(rootPath)
+                            .path(source.getPath() + source.getArtifactName() + rootPath)
                             .fileName("pom.xml")
                             .data(mavenUtil.getPomCode(source, rootPath))
                             .build());

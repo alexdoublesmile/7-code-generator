@@ -15,9 +15,9 @@ public class BlockEntity extends CodeEntity {
 
     @Override
     public String toString() {
-        return getTab(1, this) + modifiers.toString()
+        return getTab(getNestLvl() + 1) + modifiers.toString()
                 + OPEN_BODY_BRACKET + getIndent()
-                + getTab(2, this) + body + getIndent()
-                + getTab(1, this) + CLOSE_BODY_BRACKET + getIndent();
+                + getTab(getNestLvl() + 2) + body + getIndent()
+                + getTab(getNestLvl() + 1) + CLOSE_BODY_BRACKET + getIndent();
     }
 }

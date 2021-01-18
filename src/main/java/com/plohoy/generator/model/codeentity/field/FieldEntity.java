@@ -23,9 +23,9 @@ public class FieldEntity extends CodeEntity {
     @Override
     public String toString() {
         return StringUtil.checkForNull(annotations,
-                    getTab(1, this) + annotations)
+                    getTab(getNestLvl() + 1) + annotations)
                 + StringUtil.checkForNull(modifiers,
-                    getTab(1, this) + modifiers)
+                    getTab(getNestLvl() + 1) + modifiers)
                 + type + SPACE
                 + name
                 + StringUtil.checkStringForNull(value,

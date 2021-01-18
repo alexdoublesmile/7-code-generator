@@ -25,8 +25,8 @@ public class MethodEntity extends CodeEntity {
     @Override
     public String toString() {
         return StringUtil.checkForNull(annotations,
-                    getTab(1, this) + annotations)
-                + getTab(1, this) + modifiers
+                    getTab(getNestLvl() + 1) + annotations)
+                + getTab(getNestLvl() + 1) + modifiers
                 + returnType + SPACE
                 + name
                 + OPEN_PARAM_BRACKET
@@ -35,8 +35,8 @@ public class MethodEntity extends CodeEntity {
                 + exceptions
                 + StringUtil.checkForNull(body,
                     (SPACE + OPEN_BODY_BRACKET + getIndent()
-                            + getTab(2, this) + body + getIndent()
-                            + getTab(1, this) + CLOSE_BODY_BRACKET)
+                            + getTab(getNestLvl() + 2) + body + getIndent()
+                            + getTab(getNestLvl() + 1) + CLOSE_BODY_BRACKET)
         );
     }
 

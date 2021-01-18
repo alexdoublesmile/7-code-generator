@@ -45,6 +45,7 @@ public class RequestMapper {
                 .dtoModuleExists(request.isDtoModuleExists())
                 .archive(request.isArchive())
                 .sourceData(initSourceData())
+                .tools(request.getTools())
                 .endPoints(initEndPoints(request.getEndPointsPaths()))
                 .build();
     }

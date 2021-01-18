@@ -33,7 +33,7 @@ public class ClassEntity extends CodeEntity {
     @Override
     public String toString() {
         return (
-            getTab(0, this) + packageString
+            getTab(getNestLvl()) + packageString
             + StringUtil.checkForNull(imports, imports + getIndent())
             + annotations
             + modifiers
@@ -85,7 +85,6 @@ public class ClassEntity extends CodeEntity {
         this.innerClasses = innerClasses;
         this.innerClasses.stream().forEach(element -> {
             element.setParentEntity(this);
-            element.setNestLvl(1);
         });
     }
 }

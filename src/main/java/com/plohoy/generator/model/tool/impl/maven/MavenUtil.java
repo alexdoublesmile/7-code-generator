@@ -14,7 +14,7 @@ public class MavenUtil {
     public String getPomCode(Source source, String rootPath) {
         return pomBuilderHandler.getPomBuilders()
                 .get(source.isDtoModuleExists())
-                .getPomCode(rootPath);
+                .getPomCode(source, rootPath);
     }
 
 
