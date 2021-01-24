@@ -1,6 +1,7 @@
 package com.plohoy.generator.model.codeentity.field;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.annotation.QuotedValueList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,14 @@ public class FieldValueEntity extends CodeEntity {
     private IndentList<String> values;
 
     @Override
+    public FieldValueEntity setParentEntity(CodeEntity parentEntity) {
+        this.parentEntity = parentEntity;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return EQUAL + values;
     }
 }
+

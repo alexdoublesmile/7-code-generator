@@ -2,19 +2,19 @@ package com.plohoy.generator.util.codegenhelper.codebuilder;
 
 import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.Source;
+import com.plohoy.generator.model.codeentity.AppPropertiesEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassType;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
-import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
+import static com.plohoy.generator.model.EndPointType.MAIN_END_POINT;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @SuppressWarnings("Duplicates")
 public class CodeBuilder {
     CodeTemplate codeTemplate = new CodeTemplate();
 
-    public String buildSpringBootLaunchCode(Source source, String fileName) {
+    public ClassEntity buildSpringBootLaunchCode(Source source, String fileName) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(source.getCorePackageName()))
                 .imports(codeTemplate.getSpringBootLaunchImports())
@@ -24,26 +24,28 @@ public class CodeBuilder {
                 .name(fileName)
                 .methods(codeTemplate.getMainMethod(
                         codeTemplate.getSpringLaunchBody(fileName)))
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildControllerCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+    public ClassEntity buildControllerCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + CONTROLLER_SUFFIX.toLowerCase()))
                 .imports(codeTemplate.getSpringRestImports(source.getCorePackageName(), mainEntity.getName()))
-                .annotations(codeTemplate.getSpringRestAnnotations(source.getEndPoints().get(EndPointType.MAIN_END_POINT)))
+                .annotations(codeTemplate.getSpringRestAnnotations(
+                        mainEntity.getEndPoints()
+                                .get(MAIN_END_POINT)
+                                .getPath()))
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.CLASS)
                 .name(fileName)
+                .schemaDescription(mainEntity.getSchemaDescription())
                 .fields(codeTemplate.getSpringRestFields(mainEntity))
-                .methods(codeTemplate.getSpringRestMethods(source.getEndPoints(), mainDtoEntity))
-                .build()
-                .toString();
+                .methods(codeTemplate.getSpringRestMethods(mainEntity.getEndPoints(), mainDtoEntity))
+                .build();
     }
 
-    public String buildServiceCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+    public ClassEntity buildServiceCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + SERVICE_SUFFIX.toLowerCase()))
@@ -53,12 +55,11 @@ public class CodeBuilder {
                 .classType(ClassType.CLASS)
                 .name(fileName)
                 .fields(codeTemplate.getSpringServiceFields(mainEntity))
-                .methods(codeTemplate.getSpringServiceMethods(source.getEndPoints(), mainEntity, mainDtoEntity))
-                .build()
-                .toString();
+                .methods(codeTemplate.getSpringServiceMethods(mainEntity.getEndPoints(), mainEntity, mainDtoEntity))
+                .build();
     }
 
-    public String buildRepositoryCode(Source source, String fileName, ClassEntity mainEntity) {
+    public ClassEntity buildRepositoryCode(Source source, String fileName, ClassEntity mainEntity) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + REPO_SUFFIX.toLowerCase()))
@@ -68,11 +69,10 @@ public class CodeBuilder {
                 .name(fileName)
                 .extendsClass(codeTemplate.getSpringDataJpaRepoClassName(mainEntity))
                 .methods(codeTemplate.getSpringDataJpaDeleteMethods(mainEntity))
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildMapperCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+    public ClassEntity buildMapperCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + MAPPER_SUFFIX.toLowerCase()))
@@ -82,12 +82,12 @@ public class CodeBuilder {
                 .classType(ClassType.INTERFACE)
                 .name(fileName)
                 .methods(codeTemplate.getMapstructMethods(mainEntity))
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildEntityCode(Source source, String fileName, ClassEntity entity) {
+    public ClassEntity buildEntityCode(Source source, String fileName, ClassEntity entity) {
         return ClassEntity.builder()
+                .idType(entity.getIdType())
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + ENTITY_SUFFIX.toLowerCase()))
                 .imports(codeTemplate.getEntityImports(source.getCorePackageName(), entity.getName()))
@@ -96,12 +96,12 @@ public class CodeBuilder {
                 .classType(ClassType.CLASS)
                 .name(fileName)
                 .fields(codeTemplate.getEntityFields(entity))
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildDtoCode(Source source, String dtoFileName, ClassEntity dtoEntity) {
+    public ClassEntity buildDtoCode(Source source, String dtoFileName, ClassEntity dtoEntity) {
         return ClassEntity.builder()
+                .idType(dtoEntity.getIdType())
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + DTO_SUFFIX.toLowerCase()))
                 .imports(codeTemplate.getDTOImports(source.getCorePackageName(), dtoEntity.getName()))
@@ -109,12 +109,12 @@ public class CodeBuilder {
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.CLASS)
                 .name(dtoFileName)
+                .schemaDescription(dtoEntity.getSchemaDescription())
                 .fields(codeTemplate.getDTOFields(dtoEntity))
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildDefaultExceptionHandler(Source source) {
+    public ClassEntity buildDefaultExceptionHandler(Source source) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + EXCEPTION_SUFFIX.toLowerCase()))
@@ -125,23 +125,30 @@ public class CodeBuilder {
                 .name("GlobalExceptionHandler")
                 .extendsClass("ResponseEntityExceptionHandler")
                 .methods(codeTemplate.getExceptionMethods())
-                .build()
-                .toString();
+                .build();
     }
 
-    public String buildApplicationProperty() {
-        return codeTemplate.getAppProperties().toString();
+    public AppPropertiesEntity buildApplicationProperty() {
+        return AppPropertiesEntity.builder()
+                .propertiesMap(codeTemplate.getAppProperties())
+                .build();
     }
 
-    public String buildApplicationDevProperty() {
-        return codeTemplate.getAppDevProperties().toString();
+    public AppPropertiesEntity buildApplicationDevProperty() {
+        return AppPropertiesEntity.builder()
+                .propertiesMap(codeTemplate.getAppDevProperties())
+                .build();
     }
 
-    public String buildMessageProperty() {
-        return codeTemplate.getMessageProperties().toString();
+    public AppPropertiesEntity buildMessageProperty() {
+        return AppPropertiesEntity.builder()
+                .propertiesMap(codeTemplate.getMessageProperties())
+                .build();
     }
 
-    public String buildDBProperty() {
-        return codeTemplate.getDBProperties().toString();
+    public AppPropertiesEntity buildDBProperty() {
+        return AppPropertiesEntity.builder()
+                .propertiesMap(codeTemplate.getDBProperties())
+                .build();
     }
 }

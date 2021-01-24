@@ -1,6 +1,5 @@
 package com.plohoy.generator.mapper;
 
-import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
@@ -28,6 +27,7 @@ public class RequestMapper {
     public Source mapRequestToSource(SourceRequest request) {
         return Source.builder()
                 .name(request.getArtifactName())
+                .description(request.getDescription())
                 .path(request.getSourcePath())
                 .relativeRootPaths(pathHelper.getRootPathList(request))
                 .corePackagePath(pathHelper.getPackagePath(request))
@@ -46,7 +46,6 @@ public class RequestMapper {
                 .archive(request.isArchive())
                 .sourceData(initSourceData())
                 .tools(request.getTools())
-                .endPoints(initEndPoints(request.getEndPointsPaths()))
                 .build();
     }
 
@@ -56,8 +55,10 @@ public class RequestMapper {
         for (RequestEntity requestEntity : requestEntities) {
             ClassEntity entity = ClassEntity.builder()
                     .name(requestEntity.getName() + suffix)
-                    .idType(getIdFromRequestEntity(requestEntity))
+                    .idType(getIdTypeFromRequestEntity(requestEntity))
                     .fields(mapRequestFieldsToSource(requestEntity.getFields()))
+                    .endPoints(requestEntity.getEndPoints())
+                    .schemaDescription(requestEntity.getDescription())
                     .build();
 
             entities.add(entity);
@@ -66,7 +67,7 @@ public class RequestMapper {
         return entities;
     }
 
-    private String getIdFromRequestEntity(RequestEntity requestEntity) {
+    private String getIdTypeFromRequestEntity(RequestEntity requestEntity) {
         List<RequestEntityField> idFields = requestEntity.getFields()
                 .stream()
                 .filter(field -> ID.equals(field.getName()))
@@ -85,6 +86,7 @@ public class RequestMapper {
             FieldEntity field = FieldEntity.builder()
                     .type(requestField.getType())
                     .name(requestField.getName())
+                    .schemaDescription(requestField.getDescription())
                     .build();
 
             fields.add(field);
@@ -100,13 +102,5 @@ public class RequestMapper {
         }
 
         return sourceData;
-    }
-
-    private HashMap<EndPointType, String> initEndPoints(HashMap<EndPointType, String> requestEndPoints) {
-        HashMap<EndPointType, String> endPoints = new HashMap<>();
-        for (Map.Entry<EndPointType, String> requestEndPointDefinition : requestEndPoints.entrySet()) {
-            endPoints.put(requestEndPointDefinition.getKey(), requestEndPointDefinition.getValue());
-        }
-        return endPoints;
     }
 }

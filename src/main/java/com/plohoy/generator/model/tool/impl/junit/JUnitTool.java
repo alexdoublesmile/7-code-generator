@@ -1,22 +1,24 @@
-package com.plohoy.generator.model.tool.impl.postgres;
+package com.plohoy.generator.model.tool.impl.junit;
 
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.tool.AbstractTool;
+import lombok.Getter;
 
 import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.CORE;
 
-public class PostgresTool extends AbstractTool {
+@Getter
+public class JUnitTool extends AbstractTool {
 
-    private static final String DEFAULT_GROUP_ID = "org.postgresql";
-    private static final String DEFAULT_ARTIFACT_ID = "postgresql";
-    private static final String SCOPE = "runtime";
+    private static final String DEFAULT_GROUP_ID = "junit";
+    private static final String DEFAULT_ARTIFACT_ID = "junit";
+    private static final String SCOPE = "test";
 
-    public PostgresTool(String version) {
+    public JUnitTool(String version) {
         super(version, DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, SCOPE,
                 true, CORE);
     }
 
-    public PostgresTool() {
+    public JUnitTool() {
     }
 
     public Source generateCode(Source source) {

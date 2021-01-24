@@ -14,10 +14,16 @@ public class BlockEntity extends CodeEntity {
     private String body;
 
     @Override
+    public BlockEntity setParentEntity(CodeEntity parentEntity) {
+        this.parentEntity = parentEntity;
+        return this;
+    }
+
+    @Override
     public String toString() {
-        return getTab(getNestLvl() + 1) + modifiers.toString()
+        return getTab(getNestLvl()) + modifiers.toString()
                 + OPEN_BODY_BRACKET + getIndent()
-                + getTab(getNestLvl() + 2) + body + getIndent()
-                + getTab(getNestLvl() + 1) + CLOSE_BODY_BRACKET + getIndent();
+                + getTab(getNestLvl() + 1) + body + getIndent()
+                + getTab(getNestLvl()) + CLOSE_BODY_BRACKET + getIndent();
     }
 }

@@ -14,13 +14,13 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 @Builder
-public class AnnotationEntity extends CodeEntity {
+public class ArgumentAnnotationEntity extends CodeEntity {
     private String name;
     private String value;
     private PropertyEntity property;
     private EnumerationList<PropertyEntity> properties;
 
-    public AnnotationEntity(
+    public ArgumentAnnotationEntity(
             String name,
             String value,
             PropertyEntity property,
@@ -46,14 +46,14 @@ public class AnnotationEntity extends CodeEntity {
     }
 
     @Override
-    public AnnotationEntity setParentEntity(CodeEntity parentEntity) {
+    public ArgumentAnnotationEntity setParentEntity(CodeEntity parentEntity) {
         this.parentEntity = parentEntity;
         return this;
     }
 
     @Override
     public String toString() {
-        return getTab(getParentNestLvl()) + ANNOTATION_MARK + name
+        return ANNOTATION_MARK + name
                 + StringUtil.checkStringForNull(value,
                 OPEN_PARAM_BRACKET + QUOTE + value + QUOTE + CLOSE_PARAM_BRACKET)
                 + new RoundBracketWrapper(DelimiterType.NONE, property)

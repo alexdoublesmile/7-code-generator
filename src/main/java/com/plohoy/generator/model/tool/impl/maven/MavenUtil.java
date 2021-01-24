@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class MavenUtil {
     private PomBuilderHandler pomBuilderHandler = new PomBuilderHandler();
 
-    public String getPomCode(Source source, String rootPath) {
+    public MavenEntity getPomCode(Source source, String rootPath) {
         return pomBuilderHandler.getPomBuilders()
                 .get(source.isDtoModuleExists())
                 .getPomCode(source, rootPath);

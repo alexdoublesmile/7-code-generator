@@ -8,4 +8,5 @@ import lombok.Data;
 public class RequestEntityField {
     private String type;
     private String name;
+    private String description;
 }

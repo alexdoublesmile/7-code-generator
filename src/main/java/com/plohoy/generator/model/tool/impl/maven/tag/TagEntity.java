@@ -11,7 +11,7 @@ import java.util.Objects;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @Data
-public class TagEntity extends CodeEntity {
+public class TagEntity extends CodeEntity<TagEntity> {
     private String name;
     private List<String> attrs;
     private String body;
@@ -39,11 +39,15 @@ public class TagEntity extends CodeEntity {
     }
 
     public void setInnerTags(IndentList<CodeEntity> innerTags) {
+        while (innerTags.remove(null));
+
         this.innerTags = innerTags;
-        this.innerTags.stream().forEach(innerTag -> {
-            if (Objects.nonNull(innerTag)) {
-                innerTag.setParentEntity(this);
-            }
-        });
+        this.innerTags.stream().forEach(innerTag -> innerTag.setParentEntity(this));
+    }
+
+    @Override
+    public TagEntity setParentEntity(CodeEntity parentEntity) {
+        this.parentEntity = parentEntity;
+        return this;
     }
 }

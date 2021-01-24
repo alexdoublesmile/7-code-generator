@@ -1,10 +1,13 @@
 package com.plohoy.generator.model.tool.impl.maven.tag;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Data;
 
 import java.util.List;
+
+import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.PROJECT_ATTRS;
 
 @Data
 public class ProjectTag  extends TagEntity {
@@ -20,16 +23,16 @@ public class ProjectTag  extends TagEntity {
         this(null, null, false, innerTags);
     }
 
-    public ProjectTag(CodeEntity ... innerTags) {
-        this(new IndentList(innerTags));
-    }
-
     public ProjectTag(List<String> attrs, IndentList<CodeEntity> innerTags) {
         this(attrs, null, false, innerTags);
     }
 
     public ProjectTag(List<String> attrs, CodeEntity ... innerTags) {
         this(attrs, new IndentList(innerTags));
+    }
+
+    public ProjectTag(CodeEntity ... innerTags) {
+        this(new EnumerationList<String>(false, PROJECT_ATTRS), new IndentList(innerTags));
     }
 
     @Override

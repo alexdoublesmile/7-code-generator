@@ -4,6 +4,7 @@ import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.file.SimpleSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
+import com.plohoy.generator.model.tool.impl.maven.tag.TagEntity;
 
 public class MavenTool extends AbstractTool {
     public MavenTool(String version) {

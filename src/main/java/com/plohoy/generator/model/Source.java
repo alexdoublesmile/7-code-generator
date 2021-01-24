@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class Source {
     private String name;
+    private String description;
     private String path;
     private String groupName;
     private String artifactName;
@@ -32,5 +33,4 @@ public class Source {
     private boolean archive;
     private HashMap<FileType, List<AbstractSourceFile>> sourceData;
     private HashMap<ToolType, AbstractTool> tools;
-    private HashMap<EndPointType, String> endPoints;
 }

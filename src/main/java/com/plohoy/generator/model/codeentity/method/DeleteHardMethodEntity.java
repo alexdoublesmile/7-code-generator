@@ -1,6 +1,9 @@
 package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.EndPoint;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
@@ -11,15 +14,15 @@ import lombok.Data;
 
 @Data
 public class DeleteHardMethodEntity extends MethodEntity {
-    public DeleteHardMethodEntity(ClassEntity dtoEntity, String entryPointPath) {
+    public DeleteHardMethodEntity(ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 "ResponseEntity<String>",
                 "deleteHard",
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
-                                .annotations(new EnumerationList<>(
-                                        AnnotationEntity.builder()
+                                .annotations(new EnumerationList<ArgumentAnnotationEntity>(
+                                        ArgumentAnnotationEntity.builder()
                                                 .name("PathVariable")
                                                 .property(PropertyEntity.builder()
                                                         .quotedValue("id")
@@ -34,19 +37,20 @@ public class DeleteHardMethodEntity extends MethodEntity {
                                 .name("DeleteMapping")
                                 .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                         PropertyEntity.builder()
-                                                .name("quotedValue")
-                                                .quotedValue(entryPointPath)
+                                                .name("value")
+                                                .quotedValue(endPoint.getPath())
                                                 .build(),
                                         PropertyEntity.builder()
                                                 .name("produces")
                                                 .quotedValue("text/plain")
                                                 .build()))
                                 .build()),
-                "return service.deleteHard(id);"
+                "return service.deleteHard(id);",
+                endPoint
         );
     }
 
-    public DeleteHardMethodEntity(ClassEntity entity, ClassEntity dtoEntity) {
+    public DeleteHardMethodEntity(ClassEntity entity, ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 "ResponseEntity<String>",
@@ -74,7 +78,8 @@ public class DeleteHardMethodEntity extends MethodEntity {
                         "        return new ResponseEntity<>(\n" +
                         "                \"The entity with ID: \" + id + \" was successfully deleted from DB\",\n" +
                         "                HttpStatus.OK\n" +
-                        "        );"
+                        "        );",
+                endPoint
         );
     }
 

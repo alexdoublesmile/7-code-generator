@@ -1,6 +1,9 @@
 package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.EndPoint;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
@@ -13,7 +16,7 @@ import java.util.Arrays;
 
 @Data
 public class FindMethodEntity extends MethodEntity {
-    public FindMethodEntity(ClassEntity dtoEntity, String entryPointPath) {
+    public FindMethodEntity(ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 dtoEntity.getName(),
@@ -21,7 +24,7 @@ public class FindMethodEntity extends MethodEntity {
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                     ArgumentEntity.builder()
                             .annotations(new EnumerationList<>(
-                                    AnnotationEntity.builder()
+                                    ArgumentAnnotationEntity.builder()
                                             .name("PathVariable")
                                             .value("id")
                                             .build()))
@@ -34,19 +37,20 @@ public class FindMethodEntity extends MethodEntity {
                             .name("GetMapping")
                             .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                     PropertyEntity.builder()
-                                            .name("quotedValue")
-                                            .quotedValue(entryPointPath)
+                                            .name("value")
+                                            .quotedValue(endPoint.getPath())
                                             .build(),
                                     PropertyEntity.builder()
                                             .name("produces")
                                             .quotedValue("application/json")
                                             .build()))
                             .build()),
-                "return service.findById(id);"
+                "return service.find(id);",
+                endPoint
         );
     }
 
-    public FindMethodEntity(ClassEntity entity, ClassEntity dtoEntity) {
+    public FindMethodEntity(ClassEntity entity, ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 dtoEntity.getName(),
@@ -60,7 +64,8 @@ public class FindMethodEntity extends MethodEntity {
                 null,
                 "return mapper.toDto(\n" +
                         "                repository.findByIdAndDeleted(id, false)\n" +
-                        "                        .orElseThrow(() -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND); }));"
+                        "                        .orElseThrow(() -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND); }));",
+                endPoint
         );
     }
 

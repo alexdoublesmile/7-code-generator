@@ -12,17 +12,17 @@ public class DTOSourceTree extends AbstractSourceTree {
     @Override
     public List<String> getRootPathList(SourceRequest request) {
         rootPathList.add(SLASH);
-        rootPathList.add(SLASH + String.format("%s-api", request.getArtifactName()));
-        rootPathList.add(SLASH + String.format("%s-core", request.getArtifactName()));
+        rootPathList.add(SLASH + String.format("%s-api", request.getArtifactName()) + SLASH);
+        rootPathList.add(SLASH + String.format("%s-core", request.getArtifactName()) + SLASH);
 
         return rootPathList;
     }
 
     @Override
     public String getPackagePath(SourceRequest request) {
-        packagePath = String.format("/%s-core", request.getArtifactName())
-                + "/src/main/java/"
-                + request.getGroupName().replace(DOT, SLASH)
+        packagePath = SLASH + String.format("%s-core", request.getArtifactName())
+                + SLASH + "src/main/java"
+                + SLASH + request.getGroupName().replace(DOT, SLASH)
                 + SLASH + request.getArtifactName().replace(MINUS, EMPTY) + SLASH;
 
         return packagePath;

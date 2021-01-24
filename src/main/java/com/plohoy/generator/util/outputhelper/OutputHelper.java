@@ -20,7 +20,11 @@ public class OutputHelper {
             File file = new File(abstractSourceFile.getPath() + abstractSourceFile.getFileName());
 
             try (OutputStream outputStream = new FileOutputStream(file)) {
-                outputStream.write(abstractSourceFile.getData().getBytes());
+                outputStream.write(abstractSourceFile
+                        .getData()
+                        .toString()
+                        .getBytes()
+                );
 
             } catch (IOException e) {
                 return new ResponseEntity<>(

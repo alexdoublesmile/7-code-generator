@@ -1,6 +1,9 @@
 package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.EndPoint;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
@@ -13,7 +16,7 @@ import java.util.Arrays;
 
 @Data
 public class FindAllMethodEntity extends MethodEntity {
-    public FindAllMethodEntity(ClassEntity dtoEntity, String entryPointPath) {
+    public FindAllMethodEntity(ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 String.format("Page<%s>", dtoEntity.getName()),
@@ -21,7 +24,7 @@ public class FindAllMethodEntity extends MethodEntity {
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
                                 .annotations(new EnumerationList<>(
-                                        AnnotationEntity.builder()
+                                        ArgumentAnnotationEntity.builder()
                                                 .name("PageableDefault")
                                                 .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                                         PropertyEntity.builder()
@@ -38,12 +41,12 @@ public class FindAllMethodEntity extends MethodEntity {
                                 .build(),
                         ArgumentEntity.builder()
                                 .annotations(new EnumerationList<>(
-                                        AnnotationEntity.builder()
+                                        ArgumentAnnotationEntity.builder()
                                                 .name("RequestParam")
                                                 .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                                         PropertyEntity.builder()
                                                                 .name("required")
-                                                                .quotedValue("false")
+                                                                .simpleValue("false")
                                                                 .build(),
                                                         PropertyEntity.builder()
                                                                 .name("defaultValue")
@@ -62,11 +65,12 @@ public class FindAllMethodEntity extends MethodEntity {
                                         .quotedValue("application/json")
                                         .build())
                                 .build()),
-                "return service.findAll(pageable, deleted);"
+                "return service.findAll(pageable, deleted);",
+                endPoint
         );
     }
 
-    public FindAllMethodEntity(ClassEntity entity, ClassEntity dtoEntity) {
+    public FindAllMethodEntity(ClassEntity entity, ClassEntity dtoEntity, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 String.format("Page<%s>", dtoEntity.getName()),
@@ -81,15 +85,7 @@ public class FindAllMethodEntity extends MethodEntity {
                                 .name("deleted")
                                 .build()),
                 null,
-                new IndentList<>(DelimiterType.NONE, true,
-                        Arrays.asList(AnnotationEntity.builder()
-                                .name("GetMapping")
-                                .property(PropertyEntity.builder()
-                                        .name("produces")
-                                        .quotedValue("application/json")
-                                        .build())
-                                .build())
-                ),
+                null,
                 "List<" + dtoEntity.getName() + "> dtoList;\n" +
                         "\n" +
                         "        if (deleted) {\n" +
@@ -105,7 +101,8 @@ public class FindAllMethodEntity extends MethodEntity {
                         "        return new PageImpl<>(\n" +
                         "                dtoList.subList(start, end),\n" +
                         "                pageable,\n" +
-                        "                dtoList.size());"
+                        "                dtoList.size());",
+                endPoint
         );
     }
 

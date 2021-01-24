@@ -1,6 +1,9 @@
 package com.plohoy.generator.model.codeentity.method;
 
+import com.plohoy.generator.model.EndPoint;
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
@@ -13,15 +16,15 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 public class DeleteSoftMethodEntity extends MethodEntity {
-    public DeleteSoftMethodEntity(ClassEntity dto, String entryPointPath) {
+    public DeleteSoftMethodEntity(ClassEntity dto, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 dto.getName(),
                 "deleteSoft",
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
-                                .annotations(new EnumerationList<AnnotationEntity>(true,
-                                        AnnotationEntity.builder()
+                                .annotations(new EnumerationList<ArgumentAnnotationEntity>(true,
+                                        ArgumentAnnotationEntity.builder()
                                                 .name("PathVariable")
                                                 .property(PropertyEntity.builder().quotedValue(ID).build())
                                                 .build()))
@@ -34,19 +37,20 @@ public class DeleteSoftMethodEntity extends MethodEntity {
                                 .name("DeleteMapping")
                                 .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                         PropertyEntity.builder()
-                                                .name("quotedValue")
-                                                .quotedValue(entryPointPath)
+                                                .name("value")
+                                                .quotedValue(endPoint.getPath())
                                                 .build(),
                                         PropertyEntity.builder()
                                                 .name("produces")
                                                 .quotedValue("application/json")
                                                 .build()))
                                 .build()),
-                "return service.deleteSoft(id);"
+                "return service.deleteSoft(id);",
+                endPoint
         );
     }
 
-    public DeleteSoftMethodEntity(ClassEntity entity, ClassEntity dto) {
+    public DeleteSoftMethodEntity(ClassEntity entity, ClassEntity dto, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
                 dto.getName(),
@@ -68,7 +72,8 @@ public class DeleteSoftMethodEntity extends MethodEntity {
                         "        entityFromDB.setDeleted(true);\n" +
                         "\n" +
                         "        return mapper.toDto(\n" +
-                        "                repository.save(entityFromDB));"
+                        "                repository.save(entityFromDB));",
+                endPoint
         );
     }
 

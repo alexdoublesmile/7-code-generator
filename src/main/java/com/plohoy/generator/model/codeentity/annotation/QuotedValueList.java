@@ -19,6 +19,12 @@ public class QuotedValueList extends CodeEntity {
     private IndentList<String> values;
 
     @Override
+    public QuotedValueList setParentEntity(CodeEntity parentEntity) {
+        this.parentEntity = parentEntity;
+        return this;
+    }
+
+    @Override
     public String toString() {
         List<String> quotedValues = values.stream()
                 .map(element -> getTab(getNestLvl() + 1) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())

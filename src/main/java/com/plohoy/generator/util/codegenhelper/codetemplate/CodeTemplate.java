@@ -1,7 +1,7 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
+import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.EndPointType;
-import com.plohoy.generator.model.codeentity.*;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.annotation.QuotedValueList;
@@ -12,6 +12,7 @@ import com.plohoy.generator.model.codeentity.method.*;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -56,6 +57,7 @@ public class CodeTemplate {
     public static final String CLOSE_SQUARE_BRACKET = "]";
     public static final String ARRAY = "[]";
 
+    public static final String JAVA = "java";
     public static final String PACKAGE = "package";
     public static final String IMPORT = "import";
     public static final String ANNOTATION_MARK = "@";
@@ -160,8 +162,10 @@ public class CodeTemplate {
     public static final String FIND_BY_ID_AND_DELETED_METHOD = "findByIdAndDeleted";
     public static final String FIND_BY_DELETED_METHOD = "findByDeleted";
 
+    public static final String DEFAULT_VERSION = "0.0.1";
     public static final String JAVA_UTIL_PACKAGE = "java.util";
     public static final String SPRING_MAIN_PACKAGE = "org.springframework";
+    public static final String SPRING_BOOT_MAIN_PACKAGE = "org.springframework.boot";
     public static final String MAPSTRUCT_MAIN_PACKAGE = "org.mapstruct";
     public static final String LOMBOK_MAIN_PACKAGE = "lombok";
 
@@ -220,17 +224,6 @@ public class CodeTemplate {
         return result;
     }
 
-//    public static String getTab(int currentTab, CodeEntity codeEntity) {
-//        CodeEntity currentEntity = codeEntity.getParentEntity();
-//
-//        while (Objects.nonNull(currentEntity)) {
-//            currentTab++;
-//            currentEntity = currentEntity.getParentEntity();
-//        }
-//
-//        return getTab(currentTab - 1);
-//    }
-
     public static String getIndent() {
         return getIndent(1);
     }
@@ -247,7 +240,7 @@ public class CodeTemplate {
         return new EnumerationList<>(PRIVATE_MOD);
     }
 
-    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, String> endPointPair, ClassEntity dtoEntity) {
+    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, EndPoint> endPointPair, ClassEntity dtoEntity) {
         switch(endPointPair.getKey()) {
             case CREATE_END_POINT:
                 return new SaveMethodEntity(dtoEntity, endPointPair.getValue());
@@ -266,20 +259,20 @@ public class CodeTemplate {
         }
     }
 
-    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, String> endPointPair, ClassEntity entity, ClassEntity dtoEntity) {
+    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, EndPoint> endPointPair, ClassEntity entity, ClassEntity dtoEntity) {
         switch(endPointPair.getKey()) {
             case CREATE_END_POINT:
-                return new SaveMethodEntity(entity, dtoEntity);
+                return new SaveMethodEntity(entity, dtoEntity, endPointPair.getValue());
             case FIND_ALL_END_POINT:
-                return new FindAllMethodEntity(entity, dtoEntity);
+                return new FindAllMethodEntity(entity, dtoEntity, endPointPair.getValue());
             case FIND_END_POINT:
-                return new FindMethodEntity(entity, dtoEntity);
+                return new FindMethodEntity(entity, dtoEntity, endPointPair.getValue());
             case UPDATE_END_POINT:
-                return new UpdateMethodEntity(entity, dtoEntity);
+                return new UpdateMethodEntity(entity, dtoEntity, endPointPair.getValue());
             case DELETE_HARD_END_POINT:
-                return new DeleteHardMethodEntity(entity, dtoEntity);
+                return new DeleteHardMethodEntity(entity, dtoEntity, endPointPair.getValue());
             case DELETE_SOFT_END_POINT:
-                return new DeleteSoftMethodEntity(entity, dtoEntity);
+                return new DeleteSoftMethodEntity(entity, dtoEntity, endPointPair.getValue());
             default:
                 return null;
         }
@@ -356,9 +349,6 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".http.ResponseEntity")
                         .build(),
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".beans.factory.annotation.Autowired")
-                        .build(),
-                ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".data.domain.Page")
                         .build(),
                 ImportEntity.builder()
@@ -369,6 +359,9 @@ public class CodeTemplate {
                         .build(),
                 ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".data.web.PageableDefault")
+                        .build(),
+                ImportEntity.builder()
+                        .value(LOMBOK_MAIN_PACKAGE + ".RequiredArgsConstructor")
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".UUID")
@@ -395,9 +388,9 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<MethodEntity> getSpringRestMethods(HashMap<EndPointType, String> endPoints, ClassEntity mainDtoEntity) {
+    public IndentList<MethodEntity> getSpringRestMethods(HashMap<EndPointType, EndPoint> endPoints, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
-        for (Map.Entry<EndPointType, String> endPointPair : endPoints.entrySet()) {
+        for (Map.Entry<EndPointType, EndPoint> endPointPair : endPoints.entrySet()) {
 
             if (!MAIN_END_POINT.equals(endPointPair.getKey())) {
                 methods.add(getMethodByEndPointType(endPointPair, mainDtoEntity));
@@ -428,9 +421,6 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".http.ResponseEntity")
                         .build(),
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".beans.factory.annotation.Autowired")
-                        .build(),
-                ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".beans.factory.annotation.Value")
                         .build(),
                 ImportEntity.builder()
@@ -455,7 +445,13 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".data.domain.PageImpl")
                         .build(),
                 ImportEntity.builder()
+                        .value(LOMBOK_MAIN_PACKAGE + ".RequiredArgsConstructor")
+                        .build(),
+                ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".List")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".Objects")
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".UUID")
@@ -466,19 +462,33 @@ public class CodeTemplate {
         return new IndentList<>(
                 AnnotationEntity.builder()
                         .name(SERVICE_SUFFIX)
+                        .build(),
+                AnnotationEntity.builder()
+                        .name(LOMBOK_REQ_CONSTRUCTOR_ANNOTATION)
                         .build());
     }
 
     public IndentList<FieldEntity> getSpringServiceFields(ClassEntity mainEntity) {
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 getEntityRepositoryField(mainEntity.getName()),
-                getEntityMapperField(mainEntity.getName())
+                getEntityMapperField(mainEntity.getName()),
+                FieldEntity.builder()
+                        .annotations(new IndentList<AnnotationEntity>(
+                                AnnotationEntity.builder()
+                                        .name("Value")
+                                        .value("${ids.do.not.match.message}")
+                                        .build()
+                        ))
+                        .modifiers(getPrivateMod())
+                        .type(STRING)
+                        .name("idsDoNotMatchMessage")
+                        .build()
         );
     }
 
-    public IndentList<MethodEntity> getSpringServiceMethods(HashMap<EndPointType, String> endPoints, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+    public IndentList<MethodEntity> getSpringServiceMethods(HashMap<EndPointType, EndPoint> endPoints, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
-        for (Map.Entry<EndPointType, String> endPointPair : endPoints.entrySet()) {
+        for (Map.Entry<EndPointType, EndPoint> endPointPair : endPoints.entrySet()) {
 
             if (!MAIN_END_POINT.equals(endPointPair.getKey())) {
                 methods.add(getMethodByEndPointType(endPointPair, mainEntity, mainDtoEntity));
@@ -548,9 +558,6 @@ public class CodeTemplate {
                         .value(MAPSTRUCT_MAIN_PACKAGE + ".Mapper")
                         .build(),
                 ImportEntity.builder()
-                        .value(MAPSTRUCT_MAIN_PACKAGE + ".Mapping")
-                        .build(),
-                ImportEntity.builder()
                         .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
                         .build(),
                 ImportEntity.builder()
@@ -599,7 +606,7 @@ public class CodeTemplate {
                         .args(new EnumerationList<ArgumentEntity>(false,
                                 ArgumentEntity.builder()
                                         .type(String.format(LIST_TEMPLATE, mainEntity.getName()))
-                                        .name(ENTITY_SUFFIX.toLowerCase() + "list")
+                                        .name(ENTITY_SUFFIX.toLowerCase() + "List")
                                         .build()))
                         .build()
         );
@@ -664,9 +671,6 @@ public class CodeTemplate {
         return new IndentList<>(
                 AnnotationEntity.builder()
                         .name("Data")
-                        .build(),
-                AnnotationEntity.builder()
-                        .name("Entity")
                         .build());
     }
 
@@ -686,6 +690,11 @@ public class CodeTemplate {
                     .name(requestField.getName())
                     .build());
         }
+        fields.add(FieldEntity.builder()
+                .modifiers(getPrivateMod())
+                .type(StringUtils.capitalize(BOOLEAN))
+                .name("deleted")
+                .build());
 
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 fields
@@ -699,8 +708,15 @@ public class CodeTemplate {
                     .modifiers(getPrivateMod())
                     .type(requestField.getType())
                     .name(requestField.getName())
+                    .schemaDescription(requestField.getSchemaDescription())
                     .build());
         }
+        dtoFields.add(FieldEntity.builder()
+                .modifiers(getPrivateMod())
+                .type(StringUtils.capitalize(BOOLEAN))
+                .name("deleted")
+                .value("Boolean.FALSE")
+                .build());
 
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 dtoFields
@@ -731,7 +747,7 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler")
                         .build(),
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + "javax.validation.EntityNotFoundException")
+                        .value("javax.persistence.EntityNotFoundException")
                         .build()
         );
     }
@@ -744,7 +760,7 @@ public class CodeTemplate {
     }
 
     public IndentList<MethodEntity> getExceptionMethods() {
-        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
+        return new IndentList<MethodEntity>(DelimiterType.INDENT, true,
                 MethodEntity.builder()
                         .annotations(new IndentList<AnnotationEntity>(
                                 AnnotationEntity.builder()
@@ -753,7 +769,7 @@ public class CodeTemplate {
                                         .build()))
                         .modifiers(new EnumerationList<String>(PROTECTED_MOD))
                         .returnType("ResponseEntity<Object>")
-                        .name("toDto")
+                        .name("handleEntityNotFoundException")
                         .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                                 ArgumentEntity.builder()
                                         .type("EntityNotFoundException")
@@ -768,39 +784,39 @@ public class CodeTemplate {
                         .build());
     }
 
-    public IndentList<PropertyEntity> getAppProperties() {
-        return new IndentList(
-                "server.port=8080",
-                "spring.jpa.generate-ddl=false",
-                "spring.jpa.hibernate.ddl-auto=none",
-                "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yml"
-        );
+    public HashMap<String, String> getAppProperties() {
+        HashMap<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("server.port", "8080");
+        propertiesMap.put("spring.jpa.generate-ddl", "false");
+        propertiesMap.put("spring.jpa.hibernate.ddl-auto", "none");
+        propertiesMap.put("spring.liquibase.change-log", "classpath:db/changelog/db.changelog-master.yml");
+        return propertiesMap;
     }
 
-    public IndentList<PropertyEntity> getAppDevProperties() {
-        return new IndentList(
-                "server.port=8088",
-                "spring.main.banner-mode=off",
-                "spring.jpa.show-sql=true",
-                "spring.jpa.generate-ddl=true",
-                "spring.jpa.hibernate.ddl-auto=create-drop",
-                "spring.liquibase.enabled=false"
-        );
+    public HashMap<String, String> getAppDevProperties() {
+        HashMap<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("server.port", "8088");
+        propertiesMap.put("spring.main.banner-mode", "off");
+        propertiesMap.put("spring.jpa.show-sql", "true");
+        propertiesMap.put("spring.jpa.generate-ddl", "true");
+        propertiesMap.put("spring.jpa.hibernate.ddl-auto", "create-drop");
+        propertiesMap.put("spring.liquibase.enabled", "false");
+        return propertiesMap;
     }
 
-    public IndentList<PropertyEntity> getMessageProperties() {
-        return new IndentList(
-                "ids.do.not.match.message=ID from Entity & ID from path don't match",
-                "entity.not.found.message=Entity with this ID was not found"
-        );
+    public HashMap<String, String> getMessageProperties() {
+        HashMap<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("ids.do.not.match.message", "ID from Entity & ID from path don't match");
+        propertiesMap.put("entity.not.found.message", "Entity with this ID was not found");
+        return propertiesMap;
     }
 
-    public IndentList<PropertyEntity> getDBProperties() {
-        return new IndentList(
-                "spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}?sslmode=${DB_SSL_MODE:disable}&prepareThreshold=${DB_PREPARE_THRESHOLD:5}",
-                "spring.datasource.username=${DB_USERNAME:postgres}",
-                "spring.datasource.password=${DB_PASSWORD:mysecretpassword}",
-                "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect"
-        );
+    public HashMap<String, String> getDBProperties() {
+        HashMap<String, String> propertiesMap = new HashMap<>();
+        propertiesMap.put("spring.datasource.url", "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}?sslmode=${DB_SSL_MODE:disable}&prepareThreshold=${DB_PREPARE_THRESHOLD:5}");
+        propertiesMap.put("spring.datasource.username", "${DB_USERNAME:postgres}");
+        propertiesMap.put("spring.datasource.password", "${DB_PASSWORD:mysecretpassword}");
+        propertiesMap.put("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQL9Dialect");
+        return propertiesMap;
     }
 }

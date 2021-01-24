@@ -8,11 +8,17 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 @Builder
-public class ImportEntity extends CodeEntity {
+public class ImportEntity extends CodeEntity<ImportEntity> {
     private String value;
 
     @Override
+    public ImportEntity setParentEntity(CodeEntity parentEntity) {
+        this.parentEntity = parentEntity;
+        return this;
+    }
+
+    @Override
     public String toString() {
-        return getTab(getNestLvl()) + IMPORT + SPACE + value;
+        return getTab(getParentNestLvl()) + IMPORT + SPACE + value;
     }
 }

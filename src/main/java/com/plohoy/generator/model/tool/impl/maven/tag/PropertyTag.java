@@ -1,10 +1,13 @@
 package com.plohoy.generator.model.tool.impl.maven.tag;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.tool.impl.maven.MavenTemplate;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Data;
 
 import java.util.List;
+
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.DEFAULT_VERSION;
 
 @Data
 public class PropertyTag extends TagEntity {
@@ -13,11 +16,11 @@ public class PropertyTag extends TagEntity {
     }
 
     public PropertyTag(String toolName, String toolVersion) {
-        this(String.format("%s.version", toolName), null, toolVersion, false, null);
+        this(MavenTemplate.getVersionName(toolName), null, toolVersion, false, null);
     }
 
     public PropertyTag(String name) {
-        this(name, "0.0.1");
+        this(name, DEFAULT_VERSION);
     }
 
     @Override

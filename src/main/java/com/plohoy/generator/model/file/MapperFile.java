@@ -1,7 +1,10 @@
 package com.plohoy.generator.model.file;
 
-public class MapperFile extends AbstractSourceFile {
-    MapperFile(String path, String fileName, String data) {
+import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
+
+public class MapperFile extends AbstractSourceFile<ClassEntity> {
+    MapperFile(String path, String fileName, ClassEntity data) {
         super(path, fileName, data);
     }
 }

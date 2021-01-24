@@ -1,11 +1,11 @@
 package com.plohoy.generator.model.codeentity;
 
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Objects;
 
-@Data
-public abstract class CodeEntity {
+@Getter
+public abstract class CodeEntity<T> {
     protected CodeEntity parentEntity;
 
     protected int getNestLvl() {
@@ -19,4 +19,10 @@ public abstract class CodeEntity {
 
         return nestLvl;
     }
+
+    protected int getParentNestLvl() {
+        return getNestLvl() - 1;
+    }
+
+    public abstract T setParentEntity(CodeEntity parentEntity);
 }

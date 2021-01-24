@@ -1,8 +1,11 @@
 package com.plohoy.generator.view.request;
 
+import com.plohoy.generator.model.EndPoint;
+import com.plohoy.generator.model.EndPointType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -10,5 +13,6 @@ import java.util.List;
 public class RequestEntity {
     private String name;
     private List<RequestEntityField> fields;
-
+    private String description;
+    private HashMap<EndPointType, EndPoint> endPoints;
 }
