@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @Builder
 public class SourceRequest {
+    private String author;
     private String sourcePath;
     private String groupName;
     private String artifactName;

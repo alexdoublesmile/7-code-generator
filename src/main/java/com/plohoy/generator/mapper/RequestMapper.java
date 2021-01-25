@@ -26,6 +26,7 @@ public class RequestMapper {
 
     public Source mapRequestToSource(SourceRequest request) {
         return Source.builder()
+                .author(request.getAuthor())
                 .name(request.getArtifactName())
                 .description(request.getDescription())
                 .path(request.getSourcePath())

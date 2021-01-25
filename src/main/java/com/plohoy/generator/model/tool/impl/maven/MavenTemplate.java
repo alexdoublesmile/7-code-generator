@@ -164,12 +164,17 @@ public class MavenTemplate {
 
         for (Map.Entry<ToolType, AbstractTool> toolDefinition : tools.entrySet()) {
             AbstractTool tool = toolDefinition.getValue();
+            String version = tool.getVersion();
+            VersionTag versionTag = null;
+            if (Objects.nonNull(version)) {
+                versionTag = new VersionTag(MavenTemplate.getVersionReference(toolDefinition.getKey().name()));
+            }
 
             if (tool.isDependency() && !tool.getToolType().equals(excludeDependencies)) {
                 dependencyList.add(new DependencyTag(
                         new GroupIdTag(tool.getDefaultGroupId()),
                         new ArtifactIdTag(tool.getDefaultArtifactId()),
-                        new VersionTag(MavenTemplate.getVersionReference(toolDefinition.getKey().name()))
+                        versionTag
                 ));
             }
         }

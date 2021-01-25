@@ -40,6 +40,29 @@ public class StringUtil {
         return result.toString();
     }
 
+    public String toSnakeCase(String string) {
+        return toSnakeCase(string, true);
+    }
+
+    public String toSnakeCase(String string, boolean lower) {
+        string = toCamelCase(string, true);
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < string.length(); i++) {
+            char currentChar = string.charAt(i);
+
+            if (Character.isUpperCase(currentChar)) {
+                result.append("_");
+                result.append(currentChar);
+            } else {
+                result.append(currentChar);
+            }
+        }
+
+        return lower ? result.toString().toLowerCase() : result.toString();
+    }
+
     public String checkStringForNull(String value, String resultValue) {
         return Objects.nonNull(value) && !value.isEmpty() ? resultValue : EMPTY;
     }

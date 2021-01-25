@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class Source {
+    private String author;
     private String name;
     private String description;
     private String path;

@@ -52,6 +52,7 @@ public class GeneratorApplication {
 
     private static SourceRequest getTestRequest() {
         return SourceRequest.builder()
+                .author("Alex Plohoy")
                 .sourcePath("../uploads/generated/")
                 .groupName("com.plohoy")
                 .artifactName("person-service")
@@ -269,7 +270,7 @@ public class GeneratorApplication {
         AbstractTool springDocTool = new SpringDocTool("1.3.9");
         AbstractTool javaDocTool = new JavaDocTool();
         AbstractTool postgresTool = new PostgresTool("42.2.18");
-        AbstractTool liquibaseTool = new LiquibaseTool();
+        AbstractTool liquibaseTool = new LiquibaseTool(null);
         AbstractTool gitTool = new GitTool();
         AbstractTool dockerTool = new DockerTool();
         AbstractTool readMeTool = new ReadMeTool();
@@ -286,7 +287,7 @@ public class GeneratorApplication {
         tools.put(ToolType.SPRING_DOC, springDocTool);
         tools.put(ToolType.JAVA_DOC, javaDocTool);
         tools.put(ToolType.POSTGRES, postgresTool);
-//        tools.put(ToolType.LIQUIBASE, liquibaseTool);
+        tools.put(ToolType.LIQUIBASE, liquibaseTool);
         tools.put(ToolType.GIT, gitTool);
         tools.put(ToolType.DOCKER, dockerTool);
         tools.put(ToolType.READ_ME, readMeTool);
