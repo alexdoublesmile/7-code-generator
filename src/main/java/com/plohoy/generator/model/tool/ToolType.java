@@ -20,5 +20,6 @@ public enum ToolType {
     GIT_LAB,
     DOCKER,
     KUBERNETES,
-    HIBERNATE, READ_ME
+    HIBERNATE,
+    READ_ME
 }

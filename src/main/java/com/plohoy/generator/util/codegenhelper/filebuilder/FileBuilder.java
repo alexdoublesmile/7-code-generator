@@ -6,11 +6,8 @@ import com.plohoy.generator.model.file.*;
 import com.plohoy.generator.util.codegenhelper.codebuilder.CodeBuilder;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.plohoy.generator.model.file.FileType.*;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
@@ -33,8 +30,8 @@ public class FileBuilder {
         return this;
     }
 
-    public FileBuilder addSimpleController() {
-        for (ClassEntity entity : source.getMainEntities()) {
+    public FileBuilder addSimpleController(List<ClassEntity> mainEntities) {
+        for (ClassEntity entity : mainEntities) {
             String fileName = StringUtil.getControllerFileName(entity.getName());
 
             source.getSourceData()
@@ -42,15 +39,15 @@ public class FileBuilder {
                     .add(ControllerFile.builder()
                             .fileName(fileName + DEFAULT_JAVA_EXTENSION)
                             .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + CONTROLLER_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildControllerCode(source, fileName, entity, mapEntityToDto(entity)))
+                            .data(codeBuilder.buildControllerCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
                             .build()
                     );
         }
         return this;
     }
 
-    public FileBuilder addSimpleService() {
-        for (ClassEntity entity : source.getMainEntities()) {
+    public FileBuilder addSimpleService(List<ClassEntity> mainEntities) {
+        for (ClassEntity entity : mainEntities) {
             String fileName = StringUtil.getServiceFileName(entity.getName());
 
             source.getSourceData()
@@ -58,15 +55,15 @@ public class FileBuilder {
                     .add(ServiceFile.builder()
                             .fileName(fileName + DEFAULT_JAVA_EXTENSION)
                             .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildServiceCode(source, fileName, entity, mapEntityToDto(entity)))
+                            .data(codeBuilder.buildServiceCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
                             .build()
                     );
         }
         return this;
     }
 
-    public FileBuilder addSimpleRepository() {
-        for (ClassEntity entity : source.getMainEntities()) {
+    public FileBuilder addSimpleRepository(List<ClassEntity> mainEntities) {
+        for (ClassEntity entity : mainEntities) {
             String fileName = StringUtil.getRepoFileName(entity.getName());
 
             source.getSourceData()
@@ -81,8 +78,8 @@ public class FileBuilder {
         return this;
     }
 
-    public FileBuilder addMapper() {
-        for (ClassEntity entity : source.getMainEntities()) {
+    public FileBuilder addMapper(List<ClassEntity> mainEntities) {
+        for (ClassEntity entity : mainEntities) {
             String fileName = StringUtil.getMapperFileName(entity.getName());
 
             source.getSourceData()
@@ -90,7 +87,7 @@ public class FileBuilder {
                     .add(MapperFile.builder()
                             .fileName(fileName + DEFAULT_JAVA_EXTENSION)
                             .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildMapperCode(source, fileName, entity, mapEntityToDto(entity)))
+                            .data(codeBuilder.buildMapperCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
                             .build()
                     );
         }
@@ -98,12 +95,7 @@ public class FileBuilder {
     }
 
     public FileBuilder addDomain() {
-        List<ClassEntity> allEntities = Stream.of(
-                    source.getMainEntities(), source.getSecondaryEntities())
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-
-        for (ClassEntity entity : allEntities) {
+        for (ClassEntity entity : source.getEntities()) {
             String fileName = StringUtil.toCamelCase(entity.getName());
 
             source.getSourceData()
@@ -123,7 +115,7 @@ public class FileBuilder {
                         .add(DTOFile.builder()
                                 .fileName(dtoFileName + DEFAULT_JAVA_EXTENSION)
                                 .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH)
-                                .data(codeBuilder.buildDtoCode(source, dtoFileName, mapEntityToDto(entity)))
+                                .data(codeBuilder.buildDtoCode(source, dtoFileName, findDtoByEntityName(entity.getName())))
                                 .build()
                         );
             }
@@ -193,15 +185,11 @@ public class FileBuilder {
         return source;
     }
 
-    private ClassEntity mapEntityToDto(ClassEntity mainEntity) {
+    private ClassEntity findDtoByEntityName(String mainEntityName) {
         ClassEntity mainDtoEntity = null;
-        List<ClassEntity> allDtoEntities = Stream.of(
-                source.getMainDtoEntities(), source.getSecondaryDtoEntities())
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
 
-        for (ClassEntity dtoEntity : allDtoEntities) {
-            if ((mainEntity.getName() + DTO_SUFFIX).equals(dtoEntity.getName())) {
+        for (ClassEntity dtoEntity : source.getDtoEntities()) {
+            if ((mainEntityName + DTO_SUFFIX).equals(dtoEntity.getName())) {
                 mainDtoEntity = dtoEntity;
             }
         }

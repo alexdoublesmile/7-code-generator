@@ -71,6 +71,10 @@ public class StringUtil {
         return Objects.nonNull(object) ? resultString : EMPTY;
     }
 
+    public String checkForNull(Object object) {
+        return checkForNull(object, object.toString());
+    }
+
     public String getControllerFileName(String rootName) {
         return StringUtil.toCamelCase(rootName + CONTROLLER_SUFFIX);
     }

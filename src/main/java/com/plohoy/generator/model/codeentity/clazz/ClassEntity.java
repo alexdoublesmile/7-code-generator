@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
@@ -35,7 +36,8 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
     private IndentList<MethodEntity> methods;
     private IndentList<ClassEntity> innerClasses;
     private String schemaDescription;
-    private HashMap<EndPointType, EndPoint> endPoints;
+    private List<EndPoint> endPoints;
+    private boolean restEntity;
 
     public ClassEntity(
             String packageString,
@@ -53,7 +55,8 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
             IndentList<MethodEntity> methods,
             IndentList<ClassEntity> innerClasses,
             String schemaDescription,
-            HashMap<EndPointType, EndPoint> endPoints
+            List<EndPoint> endPoints,
+            boolean restEntity
     ) {
         this.packageString = packageString;
         this.modifiers = modifiers;
@@ -64,6 +67,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
         this.idType = idType;
         this.schemaDescription = schemaDescription;
         this.endPoints = endPoints;
+        this.restEntity = restEntity;
 
         if (Objects.nonNull(imports)) setImports(imports);
         if (Objects.nonNull(annotations)) setAnnotations(annotations);

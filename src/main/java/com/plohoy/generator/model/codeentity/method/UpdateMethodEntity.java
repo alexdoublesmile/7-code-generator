@@ -74,11 +74,16 @@ public class UpdateMethodEntity extends MethodEntity {
                                 .name(DTO_SUFFIX.toLowerCase())
                                 .build()),
                 null,
-                null,
+                new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()
+                ),
                 "if (Objects.nonNull(dto.getId())\n" +
                         "                && !dto.getId().equals(id)) {\n" +
                         "            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, idsDoNotMatchMessage);\n" +
                         "        }\n" +
+                        "        repository.getOne(id);\n" +
                         "        dto.setId(id);\n" +
                         "\n" +
                         "        return mapper.toDto(\n" +

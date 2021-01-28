@@ -55,7 +55,7 @@ public class SimplePomBuilder implements PomBuilder {
                                 new GroupIdTag(source.getGroupName()),
                                 new ArtifactIdTag(source.getArtifactName()),
                                 new VersionTag(DEFAULT_VERSION),
-                                new NameTag(source.getName()),
+                                new NameTag(source.getArtifactName()),
                                 properties,
                                 dependencies,
                                 getPlugins(

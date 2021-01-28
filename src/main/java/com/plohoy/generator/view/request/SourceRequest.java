@@ -18,10 +18,7 @@ public class SourceRequest {
     private String groupName;
     private String artifactName;
     private String description;
-    private List<RequestEntity> mainEntities;
-    private List<RequestEntity> secondaryEntities;
-    private List<RequestEntity> mainDtoEntities;
-    private List<RequestEntity> secondaryDtoEntities;
+    private List<RequestEntity> entities;
     private HashMap<ToolType, AbstractTool> tools;
     private String jdkVersion;
     private ArchitectureType architecture;

@@ -5,6 +5,7 @@ import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
+import com.plohoy.generator.view.request.RequestEntityRelation;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,6 +23,7 @@ public class FieldEntity extends CodeEntity {
     private FieldValueEntity values;
     private IndentList<AnnotationEntity> annotations;
     private String schemaDescription;
+    private FieldRelation relation;
 
     public FieldEntity(
             EnumerationList<String> modifiers,
@@ -30,13 +32,15 @@ public class FieldEntity extends CodeEntity {
             String value,
             FieldValueEntity values,
             IndentList<AnnotationEntity> annotations,
-            String schemaDescription
+            String schemaDescription,
+            FieldRelation relation
     ) {
         this.modifiers = modifiers;
         this.type = type;
         this.name = name;
         this.value = value;
         this.schemaDescription = schemaDescription;
+        this.relation = relation;
 
         if (Objects.nonNull(values)) setValues(values);
         if (Objects.nonNull(annotations)) setAnnotations(annotations);

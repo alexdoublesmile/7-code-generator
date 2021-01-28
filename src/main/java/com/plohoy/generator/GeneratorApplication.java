@@ -5,6 +5,7 @@ import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.ResponseCode;
+import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
@@ -23,8 +24,10 @@ import com.plohoy.generator.model.tool.impl.spring.SpringTool;
 import com.plohoy.generator.model.tool.impl.swagger.SpringDocTool;
 import com.plohoy.generator.model.tool.impl.swagger.SwaggerTool;
 import com.plohoy.generator.model.tool.impl.validation.JakartaValidationTool;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.view.request.RequestEntity;
 import com.plohoy.generator.view.request.RequestEntityField;
+import com.plohoy.generator.view.request.RequestEntityRelation;
 import com.plohoy.generator.view.request.SourceRequest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -34,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.plohoy.generator.model.EndPointType.*;
+import static com.plohoy.generator.model.codeentity.field.RelationType.ONE_TO_ONE;
 
 public class GeneratorApplication {
 
@@ -61,116 +65,41 @@ public class GeneratorApplication {
                 .architecture(ArchitectureType.REST_SIMPLE)
                 .dtoModuleExists(true)
                 .archive(false)
-                .mainEntities(getTestMainEntities())
-                .secondaryEntities(getTestEntities())
+                .entities(getTestEntities())
                 .tools(getTestTools())
                 .build();
     }
 
-    private static List<RequestEntity> getTestMainEntities() {
-        List<RequestEntity> mainEntities = new ArrayList<>();
+    private static List<RequestEntity> getTestEntities() {
+        List<RequestEntity> entities = new ArrayList<>();
+
         RequestEntity personRequestEntity = RequestEntity.builder()
                 .name("Person")
                 .fields(getTestPersonFields())
                 .description("Персона")
                 .endPoints(getTestEndPoints())
+                .restEntity(true)
                 .build();
 
-        mainEntities.add(personRequestEntity);
+        RequestEntity passportRequestEntity = RequestEntity.builder()
+                .name("Passport")
+                .fields(getTestPassportFields())
+                .build();
 
-        return mainEntities;
-    }
-
-    private static HashMap<EndPointType, EndPoint> getTestEndPoints() {
-
-        HashMap<EndPointType, EndPoint> endPoints = new HashMap<>();
-        endPoints.put(
-                EndPointType.MAIN_END_POINT,
-                EndPoint.builder()
-                        .type(MAIN_END_POINT)
-                        .path("/person")
-                        .description("Персона")
-                        .build());
-        endPoints.put(
-                CREATE_END_POINT,
-                EndPoint.builder()
-                        .type(CREATE_END_POINT)
-                        .path("")
-                        .description("Создание записи о новой персоне")
-                        .responseCodes(
-                                Arrays.asList(
-                                        ResponseCode.builder()
-                                                .code("200")
-                                                .description("Персона успешно создана")
-                                                .build(),
-                                        ResponseCode.builder()
-                                                .code("500")
-                                                .description("Ошибка сервера")
-                                                .build()
-                                )
-                        )
-                        .build());
-        endPoints.put(
-                FIND_ALL_END_POINT,
-                EndPoint.builder()
-                        .type(FIND_ALL_END_POINT)
-                        .path("")
-                        .build());
-        endPoints.put(
-                EndPointType.FIND_END_POINT,
-                EndPoint.builder()
-                        .type(FIND_END_POINT)
-                        .path("/{id}")
-                        .description("Получение из БД записи \\\"Персона\\\" по идентификатору")
-                        .responseCodes(
-                                Arrays.asList(
-                                        ResponseCode.builder()
-                                                .code("200")
-                                                .build(),
-                                        ResponseCode.builder()
-                                                .code("404")
-                                                .build(),
-                                        ResponseCode.builder()
-                                                .code("500")
-                                                .build()
-                                )
-                        )
-                        .build());
-        endPoints.put(
-                EndPointType.UPDATE_END_POINT,
-                EndPoint.builder()
-                        .type(UPDATE_END_POINT)
-                        .path("/{id}")
-                        .description("Редактирование записи \\\"Персона\\\" в БД по идентификатору")
-                        .build());
-        endPoints.put(
-                EndPointType.DELETE_HARD_END_POINT,
-                EndPoint.builder()
-                        .type(DELETE_HARD_END_POINT)
-                        .path("/{id}/delete_hard")
-                        .description("Полное удаление записи из БД по идентификатору")
-                        .build());
-        endPoints.put(
-                EndPointType.DELETE_SOFT_END_POINT,
-                EndPoint.builder()
-                        .type(DELETE_SOFT_END_POINT)
-                        .path("/{id}/delete_soft")
-                        .description("Програмное удаление записи из БД по идентификатору (установка флага deleted)")
-                        .build());
-
-        return endPoints;
-
-    }
-
-    private static List<RequestEntity> getTestEntities() {
-        List<RequestEntity> entities = new ArrayList<>();
+        RequestEntity carRequestEntity = RequestEntity.builder()
+                .name("Car")
+                .fields(getTestCarFields())
+                .build();
 
         RequestEntity addressRequestEntity = RequestEntity.builder()
                 .name("Address")
                 .fields(getTestAddressFields())
                 .build();
 
-        entities.add(addressRequestEntity);
+        entities.add(personRequestEntity);
+        entities.add(passportRequestEntity);
+//        entities.add(carRequestEntity);
+//        entities.add(addressRequestEntity);
 
         return entities;
     }
@@ -207,13 +136,109 @@ public class GeneratorApplication {
                 .description("Возраст персоны")
                 .build();
 
+        RequestEntityField passportField = RequestEntityField.builder()
+                .type("Passport")
+                .name("passport")
+                .description("Паспорт персоны")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_ONE)
+                        .relationOwner(true)
+                        .build())
+                .build();
+
+        RequestEntityField carsField = RequestEntityField.builder()
+                .type("List<Car>")
+                .name("cars")
+                .description("Автомобили персоны")
+                .build();
+
+        RequestEntityField addressesField = RequestEntityField.builder()
+                .type("List<Address>")
+                .name("address")
+                .description("Адреса персоны")
+                .build();
+
         fields.add(idField);
         fields.add(firstNameField);
         fields.add(lastNameField);
         fields.add(patronymicField);
         fields.add(ageField);
+        fields.add(passportField);
+//        fields.add(carsField);
+//        fields.add(addressesField);
 
         return fields;
+    }
+
+    private static List<RequestEntityField> getTestPassportFields() {
+        List<RequestEntityField> passportFields = new ArrayList<>();
+        RequestEntityField idField = RequestEntityField.builder()
+                .type("UUID")
+                .name("id")
+                .description("Идентификатор паспорта в БД")
+                .build();
+
+        RequestEntityField numberField = RequestEntityField.builder()
+                .type("String")
+                .name("number")
+                .description("Номер паспорта")
+                .build();
+
+        RequestEntityField personField = RequestEntityField.builder()
+                .type("Person")
+                .name("person")
+                .description("Владелец паспорта")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_ONE)
+                        .build())
+                .build();
+
+        passportFields.add(idField);
+        passportFields.add(numberField);
+        passportFields.add(personField);
+
+        return passportFields;
+    }
+
+    private static List<RequestEntityField> getTestCarFields() {
+        List<RequestEntityField> carFields = new ArrayList<>();
+        RequestEntityField idField = RequestEntityField.builder()
+                .type("UUID")
+                .name("id")
+                .description("Идентификатор авто в БД")
+                .build();
+
+        RequestEntityField typeField = RequestEntityField.builder()
+                .type("String")
+                .name("type")
+                .description("Марка")
+                .build();
+
+        RequestEntityField colorField = RequestEntityField.builder()
+                .type("String")
+                .name("color")
+                .description("Цвет")
+                .build();
+
+        RequestEntityField regNumberField = RequestEntityField.builder()
+                .type("String")
+                .name("registrationNumber")
+                .description("Регистрационный номер")
+                .build();
+
+        RequestEntityField personField = RequestEntityField.builder()
+                .type("Person")
+                .name("person")
+                .description("Владелец авто")
+                .build();
+
+        carFields.add(idField);
+        carFields.add(typeField);
+        carFields.add(colorField);
+        carFields.add(regNumberField);
+        carFields.add(personField);
+
+        return carFields;
     }
 
     private static List<RequestEntityField> getTestAddressFields() {
@@ -248,11 +273,18 @@ public class GeneratorApplication {
                 .description("Дом")
                 .build();
 
+        RequestEntityField personsField = RequestEntityField.builder()
+                .type("List<Person>")
+                .name("persons")
+                .description("Проживающие персоны")
+                .build();
+
         addressFields.add(idField);
         addressFields.add(countryField);
         addressFields.add(cityField);
         addressFields.add(streetField);
         addressFields.add(houseField);
+        addressFields.add(personsField);
 
         return addressFields;
     }
@@ -294,5 +326,79 @@ public class GeneratorApplication {
         tools.put(ToolType.HIBERNATE, hibernateTool);
 
         return tools;
+    }
+
+    private static List<EndPoint> getTestEndPoints() {
+
+        List<EndPoint> endPoints = new ArrayList<>();
+        endPoints.add(
+                EndPoint.builder()
+                        .type(MAIN_END_POINT)
+                        .path("/person")
+                        .description("Персона")
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(CREATE_END_POINT)
+                        .path("")
+                        .description("Создание записи о новой персоне")
+                        .responseCodes(
+                                Arrays.asList(
+                                        ResponseCode.builder()
+                                                .code("200")
+                                                .description("Персона успешно создана")
+                                                .build(),
+                                        ResponseCode.builder()
+                                                .code("500")
+                                                .description("Ошибка сервера")
+                                                .build()
+                                )
+                        )
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(FIND_ALL_END_POINT)
+                        .path("")
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(FIND_END_POINT)
+                        .path("/{id}")
+                        .description("Получение из БД записи \\\"Персона\\\" по идентификатору")
+                        .responseCodes(
+                                Arrays.asList(
+                                        ResponseCode.builder()
+                                                .code("200")
+                                                .build(),
+                                        ResponseCode.builder()
+                                                .code("404")
+                                                .build(),
+                                        ResponseCode.builder()
+                                                .code("500")
+                                                .build()
+                                )
+                        )
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(UPDATE_END_POINT)
+                        .path("/{id}")
+                        .description("Редактирование записи \\\"Персона\\\" в БД по идентификатору")
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(DELETE_HARD_END_POINT)
+                        .path("/{id}/delete_hard")
+                        .description("Полное удаление записи из БД по идентификатору")
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(DELETE_SOFT_END_POINT)
+                        .path("/{id}/delete_soft")
+                        .description("Програмное удаление записи из БД по идентификатору (установка флага deleted)")
+                        .build());
+
+        return endPoints;
+
     }
 }

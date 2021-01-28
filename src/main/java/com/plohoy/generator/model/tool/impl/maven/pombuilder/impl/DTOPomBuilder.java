@@ -11,6 +11,7 @@ import com.plohoy.generator.model.tool.impl.maven.tag.*;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import static com.plohoy.generator.model.tool.ToolType.MAVEN;
 import static com.plohoy.generator.model.tool.ToolType.SPRING_BOOT;
@@ -35,6 +36,11 @@ public class DTOPomBuilder implements PomBuilder {
     private MavenEntity parentPomCode(Source source) {
         HashMap<ToolType, AbstractTool> tools = source.getTools();
 
+        DescriptionTag descriptionTag = null;
+        if (Objects.nonNull(source.getDescription())) {
+            descriptionTag = new DescriptionTag(source.getDescription());
+        }
+
         PropertiesTag properties = new PropertiesTag();
         IndentList<CodeEntity> propertyList = MavenTemplate.getPropertiesFromTools(tools);
         propertyList.add(new PropertyTag(JAVA, source.getJdkVersion()));
@@ -50,9 +56,10 @@ public class DTOPomBuilder implements PomBuilder {
                                 new GroupIdTag(source.getGroupName()),
                                 new ArtifactIdTag(source.getArtifactName()),
                                 new VersionTag(DEFAULT_VERSION),
-                                new NameTag(source.getName()),
+                                new NameTag(source.getArtifactName()),
+                                descriptionTag,
                                 new PackagingTag(POM),
-                                new ModulesTag(source.getName()),
+                                new ModulesTag(source.getArtifactName()),
                                 properties,
                                 MavenTemplate.getSpringBootDependencies(
                                         getVersionReference(SPRING_BOOT.name().toLowerCase())),

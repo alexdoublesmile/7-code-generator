@@ -1,11 +1,14 @@
 package com.plohoy.generator.util.codegenhelper.codebuilder;
 
+import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.AppPropertiesEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassType;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
+
+import java.util.Optional;
 
 import static com.plohoy.generator.model.EndPointType.MAIN_END_POINT;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
@@ -28,14 +31,18 @@ public class CodeBuilder {
     }
 
     public ClassEntity buildControllerCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+        EndPoint mainEndPoint = mainEntity.getEndPoints()
+                .stream()
+                .filter(endPoint ->
+                        MAIN_END_POINT.equals(endPoint.getType()))
+                .findFirst()
+                .get();
+
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + CONTROLLER_SUFFIX.toLowerCase()))
                 .imports(codeTemplate.getSpringRestImports(source.getCorePackageName(), mainEntity.getName()))
-                .annotations(codeTemplate.getSpringRestAnnotations(
-                        mainEntity.getEndPoints()
-                                .get(MAIN_END_POINT)
-                                .getPath()))
+                .annotations(codeTemplate.getSpringRestAnnotations(mainEndPoint.getPath()))
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.CLASS)
                 .name(fileName)

@@ -7,6 +7,9 @@ import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
 
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.EMPTY;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.NULL;
+
 @Data
 @Builder
 public class ChangeLogSqlEntity extends CodeEntity<ChangeLogSqlEntity> {
@@ -16,7 +19,7 @@ public class ChangeLogSqlEntity extends CodeEntity<ChangeLogSqlEntity> {
 
     @Override
     public String toString() {
-        return tables.toString() + constraints;
+        return (tables.toString() + constraints).replace(NULL, EMPTY);
     }
 
     @Override

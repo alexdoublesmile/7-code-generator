@@ -240,39 +240,39 @@ public class CodeTemplate {
         return new EnumerationList<>(PRIVATE_MOD);
     }
 
-    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, EndPoint> endPointPair, ClassEntity dtoEntity) {
-        switch(endPointPair.getKey()) {
+    private MethodEntity getMethodByEndPointType(EndPoint endPoint, ClassEntity dtoEntity) {
+        switch(endPoint.getType()) {
             case CREATE_END_POINT:
-                return new SaveMethodEntity(dtoEntity, endPointPair.getValue());
+                return new SaveMethodEntity(dtoEntity, endPoint);
             case FIND_ALL_END_POINT:
-                return new FindAllMethodEntity(dtoEntity, endPointPair.getValue());
+                return new FindAllMethodEntity(dtoEntity, endPoint);
             case FIND_END_POINT:
-                return new FindMethodEntity(dtoEntity, endPointPair.getValue());
+                return new FindMethodEntity(dtoEntity, endPoint);
             case UPDATE_END_POINT:
-                return new UpdateMethodEntity(dtoEntity, endPointPair.getValue());
+                return new UpdateMethodEntity(dtoEntity, endPoint);
             case DELETE_HARD_END_POINT:
-                return new DeleteHardMethodEntity(dtoEntity, endPointPair.getValue());
+                return new DeleteHardMethodEntity(dtoEntity, endPoint);
             case DELETE_SOFT_END_POINT:
-                return new DeleteSoftMethodEntity(dtoEntity, endPointPair.getValue());
+                return new DeleteSoftMethodEntity(dtoEntity, endPoint);
             default:
                 return null;
         }
     }
 
-    private MethodEntity getMethodByEndPointType(Map.Entry<EndPointType, EndPoint> endPointPair, ClassEntity entity, ClassEntity dtoEntity) {
-        switch(endPointPair.getKey()) {
+    private MethodEntity getMethodByEndPointType(EndPoint endPoint, ClassEntity entity, ClassEntity dtoEntity) {
+        switch(endPoint.getType()) {
             case CREATE_END_POINT:
-                return new SaveMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new SaveMethodEntity(entity, dtoEntity, endPoint);
             case FIND_ALL_END_POINT:
-                return new FindAllMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new FindAllMethodEntity(entity, dtoEntity, endPoint);
             case FIND_END_POINT:
-                return new FindMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new FindMethodEntity(entity, dtoEntity, endPoint);
             case UPDATE_END_POINT:
-                return new UpdateMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new UpdateMethodEntity(entity, dtoEntity, endPoint);
             case DELETE_HARD_END_POINT:
-                return new DeleteHardMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new DeleteHardMethodEntity(entity, dtoEntity, endPoint);
             case DELETE_SOFT_END_POINT:
-                return new DeleteSoftMethodEntity(entity, dtoEntity, endPointPair.getValue());
+                return new DeleteSoftMethodEntity(entity, dtoEntity, endPoint);
             default:
                 return null;
         }
@@ -388,12 +388,12 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<MethodEntity> getSpringRestMethods(HashMap<EndPointType, EndPoint> endPoints, ClassEntity mainDtoEntity) {
+    public IndentList<MethodEntity> getSpringRestMethods(List<EndPoint> endPoints, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
-        for (Map.Entry<EndPointType, EndPoint> endPointPair : endPoints.entrySet()) {
+        for (EndPoint endPoint : endPoints) {
 
-            if (!MAIN_END_POINT.equals(endPointPair.getKey())) {
-                methods.add(getMethodByEndPointType(endPointPair, mainDtoEntity));
+            if (!MAIN_END_POINT.equals(endPoint.getType())) {
+                methods.add(getMethodByEndPointType(endPoint, mainDtoEntity));
             }
         }
 
@@ -486,12 +486,12 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<MethodEntity> getSpringServiceMethods(HashMap<EndPointType, EndPoint> endPoints, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+    public IndentList<MethodEntity> getSpringServiceMethods(List<EndPoint> endPoints, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
-        for (Map.Entry<EndPointType, EndPoint> endPointPair : endPoints.entrySet()) {
+        for (EndPoint endPoint : endPoints) {
 
-            if (!MAIN_END_POINT.equals(endPointPair.getKey())) {
-                methods.add(getMethodByEndPointType(endPointPair, mainEntity, mainDtoEntity));
+            if (!MAIN_END_POINT.equals(endPoint.getType())) {
+                methods.add(getMethodByEndPointType(endPoint, mainEntity, mainDtoEntity));
             }
         }
 

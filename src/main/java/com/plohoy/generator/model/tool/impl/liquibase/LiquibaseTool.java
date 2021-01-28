@@ -75,6 +75,8 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private CodeEntity getSQLCode(Source source) {
+//        addMigrationDescription(field, currentSourceField.getRelation(), source);
+
         return LiquibaseSqlEntity.builder()
                 .header(ChangeLogHeaderEntity.builder().value(DEFAULT_HEADER_VALUE).build())
                 .settings(ChangeLogSettingsEntity.builder()
@@ -95,12 +97,8 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private IndentList<DBTableEntity> getSqlCreateTable(Source source) {
-        List<ClassEntity> entities = Stream
-                .of(source.getMainEntities(), source.getSecondaryEntities())
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
 
-        for (ClassEntity entity : entities) {
+        for (ClassEntity entity : source.getEntities()) {
             this.tables.add(
                     DBTableEntity.builder()
                             .tableName(StringUtil.toSnakeCase(entity.getName()))
@@ -191,7 +189,7 @@ public class LiquibaseTool extends AbstractTool {
                         .build()
         );
 
-        return new IndentList<ConstraintEntity>(DelimiterType.SEMICOLON, true, constraintList);
+        return null;
     }
 
     private List<String> getRollbackValues() {

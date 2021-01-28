@@ -13,6 +13,8 @@ import java.util.List;
 public class RequestEntity {
     private String name;
     private List<RequestEntityField> fields;
+    private List<RequestEntityField> dtoFields;
     private String description;
-    private HashMap<EndPointType, EndPoint> endPoints;
+    private List<EndPoint> endPoints;
+    private boolean restEntity;
 }

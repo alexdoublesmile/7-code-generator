@@ -164,17 +164,26 @@ public class MavenTemplate {
 
         for (Map.Entry<ToolType, AbstractTool> toolDefinition : tools.entrySet()) {
             AbstractTool tool = toolDefinition.getValue();
+
             String version = tool.getVersion();
+            String scope = tool.getScope();
+
             VersionTag versionTag = null;
+            ScopeTag scopeTag = null;
             if (Objects.nonNull(version)) {
                 versionTag = new VersionTag(MavenTemplate.getVersionReference(toolDefinition.getKey().name()));
             }
+            if (Objects.nonNull(scope) && !scope.isEmpty()) {
+                scopeTag = new ScopeTag(scope);
+            }
+
 
             if (tool.isDependency() && !tool.getToolType().equals(excludeDependencies)) {
                 dependencyList.add(new DependencyTag(
                         new GroupIdTag(tool.getDefaultGroupId()),
                         new ArtifactIdTag(tool.getDefaultArtifactId()),
-                        versionTag
+                        versionTag,
+                        scopeTag
                 ));
             }
         }

@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 public class Source {
     private String author;
-    private String name;
     private String description;
     private String path;
     private String groupName;
@@ -25,10 +24,8 @@ public class Source {
     private String dtoPackagePath;
     private String resourcePath;
     private String corePackageName;
-    private List<ClassEntity> mainEntities;
-    private List<ClassEntity> secondaryEntities;
-    private List<ClassEntity> mainDtoEntities;
-    private List<ClassEntity> secondaryDtoEntities;
+    private List<ClassEntity> entities;
+    private List<ClassEntity> dtoEntities;
     private String jdkVersion;
     private boolean dtoModuleExists;
     private boolean archive;

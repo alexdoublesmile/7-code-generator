@@ -1,6 +1,7 @@
 package com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class DBFieldEntity extends CodeEntity<DBFieldEntity> {
 
     @Override
     public String toString() {
-        return getTab(getNestLvl()) + fieldName + SPACE + fieldType + SPACE + fieldProperties;
+        return getTab(getNestLvl()) + fieldName + SPACE + fieldType
+                + StringUtil.checkForNull(fieldProperties, SPACE + fieldProperties);
     }
 }

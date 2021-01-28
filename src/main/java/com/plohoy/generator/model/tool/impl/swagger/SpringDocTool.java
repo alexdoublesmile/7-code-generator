@@ -62,7 +62,7 @@ public class SpringDocTool extends AbstractTool {
         return String.format( "return new OpenAPI()\n" +
                 "                .components(new Components())\n" +
                 "                .info(new Info()\n" +
-                "                        .title(\"%s\")", StringUtils.capitalize(source.getName().replace(MINUS, SPACE))) +
+                "                        .title(\"%s\")", StringUtils.capitalize(source.getArtifactName().replace(MINUS, SPACE))) +
                 (Objects.nonNull(source.getDescription())
                 ? String.format("\n                        .description(\"%s\"));", source.getDescription())
                 : ");");

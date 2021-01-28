@@ -13,7 +13,7 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 @Data
 @Builder
 public class ChangeLogFooterEntity extends CodeEntity<ChangeLogFooterEntity> {
-    private final String ROLLBACK_WORD = "rollback";
+    private final String ROLLBACK_WORD = "rollback drop table";
     private IndentList<String> rollbackValues;
 
     public ChangeLogFooterEntity(IndentList<String> rollbackValues) {
