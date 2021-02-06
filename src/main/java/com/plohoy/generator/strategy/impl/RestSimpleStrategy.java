@@ -1,5 +1,6 @@
 package com.plohoy.generator.strategy.impl;
 
+import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.util.codegenhelper.filebuilder.FileBuilder;
@@ -8,6 +9,7 @@ import com.plohoy.generator.view.request.SourceRequest;
 import com.plohoy.generator.strategy.Strategy;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RestSimpleStrategy implements Strategy {
@@ -20,7 +22,7 @@ public class RestSimpleStrategy implements Strategy {
 
         List<ClassEntity> mainEntities = source.getEntities()
                 .stream()
-                .filter(ClassEntity::isRestEntity)
+                .filter(entity -> Objects.nonNull(entity.getEndPoints()))
                 .collect(Collectors.toList());
 
         return fileBuilder

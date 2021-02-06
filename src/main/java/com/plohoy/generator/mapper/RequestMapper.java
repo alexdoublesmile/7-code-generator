@@ -80,6 +80,8 @@ public class RequestMapper {
                     .name(requestEntity.getName())
                     .idType(getIdTypeFromRequestEntity(requestEntity))
                     .fields(mapRequestFieldsToSource(requestEntity, false))
+                    .endPoints(requestEntity.getEndPoints())
+                    .schemaDescription(requestEntity.getDescription())
                     .build();
 
             entities.add(entity);
@@ -98,7 +100,7 @@ public class RequestMapper {
                     .idType(getIdTypeFromRequestEntity(requestEntity))
                     .fields(mapRequestFieldsToSource(requestEntity, true))
                     .endPoints(requestEntity.getEndPoints())
-                    .restEntity(requestEntity.isRestEntity())
+//                    .restEntity(Objects.nonNull(requestEntity.getEndPoints()))
                     .schemaDescription(requestEntity.getDescription())
                     .build();
 
@@ -128,6 +130,7 @@ public class RequestMapper {
                     .name(requestField.getName())
                     .schemaDescription(requestField.getDescription())
                     .relation(mapRequestRelationToFieldRelation(requestField.getRelation()))
+                    .array(requestField.isArray())
                     .build();
 
             fields.add(field);

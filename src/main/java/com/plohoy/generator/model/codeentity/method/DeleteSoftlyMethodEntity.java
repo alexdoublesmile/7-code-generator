@@ -12,23 +12,24 @@ import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Data;
 
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.BOOLEAN;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.ID;
+
 @Data
-public class DeleteHardMethodEntity extends MethodEntity {
-    public DeleteHardMethodEntity(ClassEntity dtoEntity, EndPoint endPoint) {
+public class DeleteSoftlyMethodEntity extends MethodEntity {
+    public DeleteSoftlyMethodEntity(ClassEntity dto, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
-                "ResponseEntity<String>",
-                "deleteHard",
+                dto.getName(),
+                "deleteSoftly",
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
-                                .annotations(new EnumerationList<ArgumentAnnotationEntity>(
+                                .annotations(new EnumerationList<ArgumentAnnotationEntity>(true,
                                         ArgumentAnnotationEntity.builder()
                                                 .name("PathVariable")
-                                                .property(PropertyEntity.builder()
-                                                        .quotedValue("id")
-                                                        .build())
+                                                .property(PropertyEntity.builder().quotedValue(ID).build())
                                                 .build()))
-                                .type(dtoEntity.getIdType())
+                                .type(dto.getIdType())
                                 .name("id")
                                 .build()),
                 null,
@@ -42,43 +43,41 @@ public class DeleteHardMethodEntity extends MethodEntity {
                                                 .build(),
                                         PropertyEntity.builder()
                                                 .name("produces")
-                                                .quotedValue("text/plain")
+                                                .quotedValue("application/json")
                                                 .build()))
                                 .build()),
-                "return service.deleteHard(id);",
+                "return service.changeDeletedState(id, true);",
                 endPoint
         );
     }
 
-    public DeleteHardMethodEntity(ClassEntity entity, ClassEntity dtoEntity, EndPoint endPoint) {
+    public DeleteSoftlyMethodEntity(ClassEntity entity, ClassEntity dto, EndPoint endPoint) {
         super(
                 CodeTemplate.getPublicMod(),
-                "ResponseEntity<String>",
-                "deleteHard",
+                dto.getName(),
+                "changeDeletedState",
                 new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
                         ArgumentEntity.builder()
-                                .type(dtoEntity.getIdType())
+                                .type(dto.getIdType())
                                 .name("id")
+                                .build(),
+                        ArgumentEntity.builder()
+                                .type(BOOLEAN)
+                                .name("deletedState")
                                 .build()),
                 null,
-                null,
-                "try {\n" +
-                        "            repository.deleteById(id);\n" +
-                        "        } catch (EmptyResultDataAccessException e) {\n" +
-                        "            return new ResponseEntity<>(\n" +
-                        "                    \"The entity with ID: \" + id + \" wasn't found in DB\",\n" +
-                        "                    HttpStatus.NOT_FOUND\n" +
-                        "            );\n" +
-                        "        } catch (Exception e) {\n" +
-                        "            return new ResponseEntity<>(\n" +
-                        "                    \"Something went wrong!\",\n" +
-                        "                    HttpStatus.INTERNAL_SERVER_ERROR\n" +
-                        "            );\n" +
-                        "        }\n" +
-                        "        return new ResponseEntity<>(\n" +
-                        "                \"The entity with ID: \" + id + \" was successfully deleted from DB\",\n" +
-                        "                HttpStatus.OK\n" +
-                        "        );",
+                new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()),
+                entity.getName() + " entityFromDB = repository.findById(id)\n" +
+                        "                .orElseThrow(() -> { throw new ResponseStatusException(\n" +
+                        "                        HttpStatus.NOT_FOUND,\n" +
+                        "                        \"The entity with ID: \" + id + \" wasn't found in DB\"); });\n" +
+                        "        entityFromDB.setDeleted(deletedState);\n" +
+                        "\n" +
+                        "        return mapper.toDto(\n" +
+                        "                repository.save(entityFromDB));",
                 endPoint
         );
     }

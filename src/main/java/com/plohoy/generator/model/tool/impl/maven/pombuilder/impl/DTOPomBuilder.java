@@ -86,7 +86,6 @@ public class DTOPomBuilder implements PomBuilder {
                                 getParent(source),
                                 new GroupIdTag(source.getGroupName()),
                                 new ArtifactIdTag(source.getArtifactName() + MINUS + API),
-                                new PackagingTag(JAR),
                                 dependencies,
                                 MavenTemplate.getPlugins(
                                         getDefaultCompilerPlugin(getVersionReference(JAVA)))

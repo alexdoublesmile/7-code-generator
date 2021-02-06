@@ -3,9 +3,7 @@ package com.plohoy.generator;
 import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.EndPoint;
-import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.ResponseCode;
-import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
@@ -24,7 +22,6 @@ import com.plohoy.generator.model.tool.impl.spring.SpringTool;
 import com.plohoy.generator.model.tool.impl.swagger.SpringDocTool;
 import com.plohoy.generator.model.tool.impl.swagger.SwaggerTool;
 import com.plohoy.generator.model.tool.impl.validation.JakartaValidationTool;
-import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.view.request.RequestEntity;
 import com.plohoy.generator.view.request.RequestEntityField;
 import com.plohoy.generator.view.request.RequestEntityRelation;
@@ -37,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.plohoy.generator.model.EndPointType.*;
-import static com.plohoy.generator.model.codeentity.field.RelationType.ONE_TO_ONE;
+import static com.plohoy.generator.model.codeentity.field.RelationType.*;
 
 public class GeneratorApplication {
 
@@ -48,10 +45,14 @@ public class GeneratorApplication {
         ctx.scan("com.plohoy.generator");
         ctx.refresh();
 
-        SourceController controller = (SourceController) ctx.getBean("controller");
+        test(ctx);
+    }
 
-        System.out.println(controller
-                .buildSource(getTestRequest()).getStatusCode());
+    private static void test(AnnotationConfigApplicationContext ctx) {
+        System.out.println(
+                ctx.getBean(SourceController.class)
+                        .buildSource(getTestRequest())
+        );
     }
 
     private static SourceRequest getTestRequest() {
@@ -78,17 +79,17 @@ public class GeneratorApplication {
                 .fields(getTestPersonFields())
                 .description("Персона")
                 .endPoints(getTestEndPoints())
-                .restEntity(true)
+                .build();
+
+        RequestEntity detailsRequestEntity = RequestEntity.builder()
+                .name("PersonDetails")
+                .fields(getTestDetailsFields())
+                .description("Детали персоны")
                 .build();
 
         RequestEntity passportRequestEntity = RequestEntity.builder()
                 .name("Passport")
                 .fields(getTestPassportFields())
-                .build();
-
-        RequestEntity carRequestEntity = RequestEntity.builder()
-                .name("Car")
-                .fields(getTestCarFields())
                 .build();
 
         RequestEntity addressRequestEntity = RequestEntity.builder()
@@ -97,8 +98,8 @@ public class GeneratorApplication {
                 .build();
 
         entities.add(personRequestEntity);
+        entities.add(detailsRequestEntity);
         entities.add(passportRequestEntity);
-//        entities.add(carRequestEntity);
 //        entities.add(addressRequestEntity);
 
         return entities;
@@ -130,88 +131,119 @@ public class GeneratorApplication {
                 .description("Отчество персоны")
                 .build();
 
-        RequestEntityField ageField = RequestEntityField.builder()
-                .type("String")
-                .name("age")
-                .description("Возраст персоны")
-                .build();
-
-        RequestEntityField passportField = RequestEntityField.builder()
-                .type("Passport")
-                .name("passport")
-                .description("Паспорт персоны")
+        RequestEntityField detailsField = RequestEntityField.builder()
+                .type("PersonDetails")
+                .name("details")
+                .description("Детали персоны")
                 .relation(RequestEntityRelation.builder()
                         .relationType(ONE_TO_ONE)
                         .relationOwner(true)
                         .build())
                 .build();
 
-        RequestEntityField carsField = RequestEntityField.builder()
-                .type("List<Car>")
-                .name("cars")
-                .description("Автомобили персоны")
+        RequestEntityField passportsField = RequestEntityField.builder()
+                .type("Passport")
+                .name("passports")
+                .description("Паспорта персоны")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_MANY)
+                        .relationOwner(true)
+                        .build())
+                .array(true)
                 .build();
 
         RequestEntityField addressesField = RequestEntityField.builder()
-                .type("List<Address>")
+                .type("Address")
                 .name("address")
                 .description("Адреса персоны")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_MANY)
+                        .relationOwner(true)
+                        .build())
+                .array(true)
                 .build();
 
         fields.add(idField);
         fields.add(firstNameField);
         fields.add(lastNameField);
         fields.add(patronymicField);
-        fields.add(ageField);
-        fields.add(passportField);
-//        fields.add(carsField);
+        fields.add(detailsField);
+        fields.add(passportsField);
 //        fields.add(addressesField);
 
         return fields;
     }
 
-    private static List<RequestEntityField> getTestPassportFields() {
+    private static List<RequestEntityField> getTestDetailsFields() {
         List<RequestEntityField> passportFields = new ArrayList<>();
         RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
-                .description("Идентификатор паспорта в БД")
+                .description("Идентификатор записей о деталях персоны в БД")
                 .build();
 
-        RequestEntityField numberField = RequestEntityField.builder()
+        RequestEntityField sexField = RequestEntityField.builder()
                 .type("String")
-                .name("number")
-                .description("Номер паспорта")
+                .name("sex")
+                .description("Пол")
+                .build();
+
+        RequestEntityField weightField = RequestEntityField.builder()
+                .type("String")
+                .name("weight")
+                .description("Вес")
+                .build();
+
+        RequestEntityField heightField = RequestEntityField.builder()
+                .type("String")
+                .name("height")
+                .description("Рост")
+                .build();
+
+        RequestEntityField ageField = RequestEntityField.builder()
+                .type("String")
+                .name("age")
+                .description("Возраст")
+                .build();
+
+        RequestEntityField strengthField = RequestEntityField.builder()
+                .type("String")
+                .name("strength")
+                .description("Уровень силы")
                 .build();
 
         RequestEntityField personField = RequestEntityField.builder()
                 .type("Person")
                 .name("person")
-                .description("Владелец паспорта")
+                .description("Сущность")
                 .relation(RequestEntityRelation.builder()
                         .relationType(ONE_TO_ONE)
                         .build())
                 .build();
 
         passportFields.add(idField);
-        passportFields.add(numberField);
+        passportFields.add(sexField);
+        passportFields.add(weightField);
+        passportFields.add(heightField);
+        passportFields.add(ageField);
+        passportFields.add(strengthField);
         passportFields.add(personField);
 
         return passportFields;
     }
 
-    private static List<RequestEntityField> getTestCarFields() {
+    private static List<RequestEntityField> getTestPassportFields() {
         List<RequestEntityField> carFields = new ArrayList<>();
         RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
-                .description("Идентификатор авто в БД")
+                .description("Идентификатор паспорта в БД")
                 .build();
 
         RequestEntityField typeField = RequestEntityField.builder()
                 .type("String")
                 .name("type")
-                .description("Марка")
+                .description("Тип")
                 .build();
 
         RequestEntityField colorField = RequestEntityField.builder()
@@ -229,7 +261,10 @@ public class GeneratorApplication {
         RequestEntityField personField = RequestEntityField.builder()
                 .type("Person")
                 .name("person")
-                .description("Владелец авто")
+                .description("Владелец паспорта")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_ONE)
+                        .build())
                 .build();
 
         carFields.add(idField);
@@ -333,7 +368,7 @@ public class GeneratorApplication {
         List<EndPoint> endPoints = new ArrayList<>();
         endPoints.add(
                 EndPoint.builder()
-                        .type(MAIN_END_POINT)
+                        .type(CONTROLLER_END_POINT)
                         .path("/person")
                         .description("Персона")
                         .build());
@@ -387,15 +422,21 @@ public class GeneratorApplication {
                         .build());
         endPoints.add(
                 EndPoint.builder()
-                        .type(DELETE_HARD_END_POINT)
+                        .type(DELETE_HARDLY_END_POINT)
                         .path("/{id}/delete_hard")
                         .description("Полное удаление записи из БД по идентификатору")
                         .build());
         endPoints.add(
                 EndPoint.builder()
-                        .type(DELETE_SOFT_END_POINT)
+                        .type(DELETE_SOFTLY_END_POINT)
                         .path("/{id}/delete_soft")
                         .description("Програмное удаление записи из БД по идентификатору (установка флага deleted)")
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(RESTORE_END_POINT)
+                        .path("/{id}/restore")
+                        .description("Восстановление записи в БД по идентификатору")
                         .build());
 
         return endPoints;

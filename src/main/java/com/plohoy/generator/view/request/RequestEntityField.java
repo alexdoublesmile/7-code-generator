@@ -10,5 +10,6 @@ public class RequestEntityField {
     private String name;
     private String description;
     private RequestEntityRelation relation;
+    private boolean array;
     private boolean entity;
 }

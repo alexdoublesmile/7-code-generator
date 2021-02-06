@@ -24,6 +24,7 @@ public class FieldEntity extends CodeEntity {
     private IndentList<AnnotationEntity> annotations;
     private String schemaDescription;
     private FieldRelation relation;
+    private boolean array;
 
     public FieldEntity(
             EnumerationList<String> modifiers,
@@ -33,7 +34,8 @@ public class FieldEntity extends CodeEntity {
             FieldValueEntity values,
             IndentList<AnnotationEntity> annotations,
             String schemaDescription,
-            FieldRelation relation
+            FieldRelation relation,
+            boolean array
     ) {
         this.modifiers = modifiers;
         this.type = type;
@@ -41,9 +43,11 @@ public class FieldEntity extends CodeEntity {
         this.value = value;
         this.schemaDescription = schemaDescription;
         this.relation = relation;
+        this.array = array;
 
         if (Objects.nonNull(values)) setValues(values);
         if (Objects.nonNull(annotations)) setAnnotations(annotations);
+        if (array) this.value = "new ArrayList<>()";
     }
 
     public void setValues(FieldValueEntity values) {
@@ -69,7 +73,8 @@ public class FieldEntity extends CodeEntity {
         return annotations
                 + StringUtil.checkForNull(modifiers,
                 getTab(getNestLvl()) + modifiers)
-                + type + SPACE + name
+                + (array ? "Set<" + type + ">" : type)
+                + SPACE + name
                 + StringUtil.checkStringForNull(value,
                 SPACE + EQUAL + SPACE + value)
                 + values;

@@ -1,7 +1,7 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
+import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.model.EndPoint;
-import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.annotation.QuotedValueList;
@@ -9,6 +9,7 @@ import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.*;
+import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -16,7 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 
-import static com.plohoy.generator.model.EndPointType.MAIN_END_POINT;
+import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
 
 public class CodeTemplate {
     public static final String INDENT = "\n";
@@ -93,7 +94,7 @@ public class CodeTemplate {
     public static final String THROWS = "throws";
     public static final String THROW = "throw";
     public static final String EQUALS = "equals";
-    public static final String HASHCODE = "hashcode";
+    public static final String HASHCODE = "hashCode";
     public static final String TO_STRING = "toString";
 
     public static final String BOOLEAN = "boolean";
@@ -250,10 +251,12 @@ public class CodeTemplate {
                 return new FindMethodEntity(dtoEntity, endPoint);
             case UPDATE_END_POINT:
                 return new UpdateMethodEntity(dtoEntity, endPoint);
-            case DELETE_HARD_END_POINT:
-                return new DeleteHardMethodEntity(dtoEntity, endPoint);
-            case DELETE_SOFT_END_POINT:
-                return new DeleteSoftMethodEntity(dtoEntity, endPoint);
+            case DELETE_HARDLY_END_POINT:
+                return new DeleteHardlyMethodEntity(dtoEntity, endPoint);
+            case DELETE_SOFTLY_END_POINT:
+                return new DeleteSoftlyMethodEntity(dtoEntity, endPoint);
+            case RESTORE_END_POINT:
+                return new RestoreMethodEntity(dtoEntity, endPoint);
             default:
                 return null;
         }
@@ -269,10 +272,10 @@ public class CodeTemplate {
                 return new FindMethodEntity(entity, dtoEntity, endPoint);
             case UPDATE_END_POINT:
                 return new UpdateMethodEntity(entity, dtoEntity, endPoint);
-            case DELETE_HARD_END_POINT:
-                return new DeleteHardMethodEntity(entity, dtoEntity, endPoint);
-            case DELETE_SOFT_END_POINT:
-                return new DeleteSoftMethodEntity(entity, dtoEntity, endPoint);
+            case DELETE_HARDLY_END_POINT:
+                return new DeleteHardlyMethodEntity(entity, dtoEntity, endPoint);
+            case DELETE_SOFTLY_END_POINT:
+                return new DeleteSoftlyMethodEntity(entity, dtoEntity, endPoint);
             default:
                 return null;
         }
@@ -317,8 +320,7 @@ public class CodeTemplate {
                                     .quotedValueList(QuotedValueList.builder()
                                                 .values(new IndentList<String>(DelimiterType.COMMA, false,
                                                         CLASSPATH + MESSAGE_PROPERTIES_NAME,
-                                                        CLASSPATH + DB_PROPERTIES_NAME
-                                                ))
+                                                        CLASSPATH + DB_PROPERTIES_NAME))
                                                 .build())
                                     .build()))
                         .build(),
@@ -392,7 +394,7 @@ public class CodeTemplate {
         List<MethodEntity> methods = new ArrayList<>();
         for (EndPoint endPoint : endPoints) {
 
-            if (!MAIN_END_POINT.equals(endPoint.getType())) {
+            if (!CONTROLLER_END_POINT.equals(endPoint.getType())) {
                 methods.add(getMethodByEndPointType(endPoint, mainDtoEntity));
             }
         }
@@ -490,7 +492,7 @@ public class CodeTemplate {
         List<MethodEntity> methods = new ArrayList<>();
         for (EndPoint endPoint : endPoints) {
 
-            if (!MAIN_END_POINT.equals(endPoint.getType())) {
+            if (!CONTROLLER_END_POINT.equals(endPoint.getType())) {
                 methods.add(getMethodByEndPointType(endPoint, mainEntity, mainDtoEntity));
             }
         }
@@ -552,21 +554,35 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<ImportEntity> getMapstructImports(String corePackageName, String entityName) {
-        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
-                ImportEntity.builder()
-                        .value(MAPSTRUCT_MAIN_PACKAGE + ".Mapper")
-                        .build(),
-                ImportEntity.builder()
-                        .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
-                        .build(),
-                ImportEntity.builder()
-                        .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + entityName + DTO_SUFFIX)
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".List")
-                        .build()
-        );
+    public IndentList<ImportEntity> getMapstructImports(String corePackageName, String entityName, List<FieldEntity> relationFields) {
+        List<ImportEntity> imports = new ArrayList<>();
+
+        imports.add(ImportEntity.builder()
+                .value(MAPSTRUCT_MAIN_PACKAGE + ".Mapper")
+                .build());
+        imports.add(ImportEntity.builder()
+                .value(MAPSTRUCT_MAIN_PACKAGE + ".Mapping")
+                .build());
+        imports.add(ImportEntity.builder()
+                .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
+                .build());
+        imports.add(ImportEntity.builder()
+                .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + entityName + DTO_SUFFIX)
+                .build());
+        imports.add(ImportEntity.builder()
+                .value(JAVA_UTIL_PACKAGE + ".List")
+                .build());
+
+        for (FieldEntity relationField : relationFields) {
+            imports.add(ImportEntity.builder()
+                    .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(relationField.getType()))
+                    .build());
+            imports.add(ImportEntity.builder()
+                    .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(relationField.getType()) + DTO_SUFFIX)
+                    .build());
+        }
+
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true, imports);
     }
 
     public IndentList<AnnotationEntity> getMapstructAnnotations() {
@@ -580,36 +596,101 @@ public class CodeTemplate {
                         .build());
     }
 
-    public IndentList<MethodEntity> getMapstructMethods(ClassEntity mainEntity) {
-        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
-                MethodEntity.builder()
-                        .returnType(mainEntity.getName() + DTO_SUFFIX)
-                        .name("toDto")
-                        .args(new EnumerationList<ArgumentEntity>(false,
-                                ArgumentEntity.builder()
-                                        .type(mainEntity.getName())
-                                        .name(ENTITY_SUFFIX.toLowerCase())
-                                        .build()))
-                        .build(),
-                MethodEntity.builder()
-                        .returnType(mainEntity.getName())
-                        .name("toEntity")
-                        .args(new EnumerationList<ArgumentEntity>(false,
-                                ArgumentEntity.builder()
-                                        .type(mainEntity.getName() + DTO_SUFFIX)
-                                        .name(DTO_SUFFIX.toLowerCase())
-                                        .build()))
-                        .build(),
-                MethodEntity.builder()
-                        .returnType(String.format(LIST_TEMPLATE, mainEntity.getName() + DTO_SUFFIX))
-                        .name("toDtoList")
-                        .args(new EnumerationList<ArgumentEntity>(false,
-                                ArgumentEntity.builder()
-                                        .type(String.format(LIST_TEMPLATE, mainEntity.getName()))
-                                        .name(ENTITY_SUFFIX.toLowerCase() + "List")
-                                        .build()))
-                        .build()
-        );
+    public IndentList<MethodEntity> getMapstructMethods(ClassEntity mainEntity, List<FieldEntity> relationFields) {
+        List<MethodEntity> mapstructMethods = new ArrayList<>();
+
+        MethodEntity toDtoMethod = MethodEntity.builder()
+                .returnType(mainEntity.getName() + DTO_SUFFIX)
+                .name("toDto")
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(mainEntity.getName())
+                                .name(ENTITY_SUFFIX.toLowerCase())
+                                .build()))
+                .build();
+
+        MethodEntity toEntityMethod = MethodEntity.builder()
+                .returnType(mainEntity.getName())
+                .name("toEntity")
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(mainEntity.getName() + DTO_SUFFIX)
+                                .name(DTO_SUFFIX.toLowerCase())
+                                .build()))
+                .build();
+
+        MethodEntity toDtoListMethod = MethodEntity.builder()
+                .returnType(String.format(LIST_TEMPLATE, mainEntity.getName() + DTO_SUFFIX))
+                .name("toDtoList")
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(String.format(LIST_TEMPLATE, mainEntity.getName()))
+                                .name(ENTITY_SUFFIX.toLowerCase() + "List")
+                                .build()))
+                .build();
+
+        for (FieldEntity relationField : relationFields) {
+            mapstructMethods.add(
+                    getToDtoRelationMethod(relationField.getType(), mainEntity.getName()));
+            mapstructMethods.add(
+                    getToEntityRelationMethod(relationField.getType(), mainEntity.getName()));
+        }
+
+        mapstructMethods.add(toEntityMethod);
+        mapstructMethods.add(toDtoMethod);
+        mapstructMethods.add(toDtoListMethod);
+
+        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true, mapstructMethods);
+    }
+
+    private MethodEntity getToDtoRelationMethod(String relationFieldName, String entityName) {
+        return MethodEntity.builder()
+                .annotations(new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                                .name("Mapping")
+                                .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                        PropertyEntity.builder()
+                                                .name("target")
+                                                .quotedValue(entityName.toLowerCase())
+                                                .build(),
+                                        PropertyEntity.builder()
+                                                .name("ignore")
+                                                .simpleValue("true")
+                                                .build()))
+                                .build()))
+                .returnType(StringUtils.capitalize(relationFieldName + DTO_SUFFIX))
+                .name(StringUtil.toCamelCase(relationFieldName, true) + "To" + StringUtils.capitalize(relationFieldName + DTO_SUFFIX))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(StringUtils.capitalize(relationFieldName))
+                                .name(relationFieldName.toLowerCase())
+                                .build()))
+                .build();
+    }
+
+    private MethodEntity getToEntityRelationMethod(String relationFieldName, String entityName) {
+        return MethodEntity.builder()
+                .annotations(new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                                .name("Mapping")
+                                .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                        PropertyEntity.builder()
+                                                .name("target")
+                                                .quotedValue(entityName.toLowerCase())
+                                                .build(),
+                                        PropertyEntity.builder()
+                                                .name("ignore")
+                                                .simpleValue("true")
+                                                .build()))
+                                .build()))
+                .returnType(StringUtils.capitalize(relationFieldName))
+                .name(StringUtil.toCamelCase(relationFieldName, true) + DTO_SUFFIX + "To" + StringUtils.capitalize(relationFieldName))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(StringUtils.capitalize(relationFieldName + DTO_SUFFIX))
+                                .name(DTO_SUFFIX.toLowerCase())
+                                .build()))
+                .build();
     }
 
     public IndentList<ImportEntity> getEntityImports(String corePackageName, String entityName) {
@@ -688,13 +769,18 @@ public class CodeTemplate {
                     .modifiers(getPrivateMod())
                     .type(requestField.getType())
                     .name(requestField.getName())
+                    .relation(requestField.getRelation())
+                    .array(requestField.isArray())
                     .build());
         }
-        fields.add(FieldEntity.builder()
-                .modifiers(getPrivateMod())
-                .type(StringUtils.capitalize(BOOLEAN))
-                .name("deleted")
-                .build());
+
+        if (DomainHelper.needSoftDeleteField(entity)) {
+            fields.add(FieldEntity.builder()
+                    .modifiers(getPrivateMod())
+                    .type(StringUtils.capitalize(BOOLEAN))
+                    .name("deleted")
+                    .build());
+        }
 
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 fields
@@ -708,15 +794,20 @@ public class CodeTemplate {
                     .modifiers(getPrivateMod())
                     .type(requestField.getType())
                     .name(requestField.getName())
+                    .relation(requestField.getRelation())
                     .schemaDescription(requestField.getSchemaDescription())
+                    .array(requestField.isArray())
                     .build());
         }
-        dtoFields.add(FieldEntity.builder()
-                .modifiers(getPrivateMod())
-                .type(StringUtils.capitalize(BOOLEAN))
-                .name("deleted")
-                .value("Boolean.FALSE")
-                .build());
+
+        if (DomainHelper.needSoftDeleteField(dtoEntity)) {
+            dtoFields.add(FieldEntity.builder()
+                    .modifiers(getPrivateMod())
+                    .type(StringUtils.capitalize(BOOLEAN))
+                    .name("deleted")
+                    .value("Boolean.FALSE")
+                    .build());
+        }
 
         return new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
                 dtoFields
@@ -819,4 +910,40 @@ public class CodeTemplate {
         propertiesMap.put("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQL9Dialect");
         return propertiesMap;
     }
+
+//    public IndentList<MethodEntity> getEqualsAndHashMethods(String entityName) {
+//        List<MethodEntity> methods = new ArrayList<>();
+//
+//        MethodEntity equalsMethod = MethodEntity.builder()
+//                .annotations(new IndentList<AnnotationEntity>(
+//                        AnnotationEntity.builder().name("Override").build()))
+//                .modifiers(getPublicMod())
+//                .returnType(BOOLEAN)
+//                .name(EQUALS)
+//                .args(new EnumerationList<ArgumentEntity>(false,
+//                        ArgumentEntity.builder()
+//                                .type("Object").name("o")
+//                                .build()))
+//                .body("if (this == o) return true;\n" +
+//                        "\t\tif (Objects.isNull(o) || getClass() != o.getClass()) return false;\n" +
+//                        "\t\t"+ entityName + SPACE + entityName.toLowerCase()
+//                        + SPACE + EQUAL + SPACE + OPEN_PARAM_BRACKET + entityName + CLOSE_PARAM_BRACKET
+//                        + " o;\n" +
+//                        "\t\treturn Objects.equals(id, "+ entityName.toLowerCase() +".id);")
+//                .build();
+//
+//        MethodEntity hashCodeMethod = MethodEntity.builder()
+//                .annotations(new IndentList<AnnotationEntity>(
+//                        AnnotationEntity.builder().name("Override").build()))
+//                .modifiers(getPublicMod())
+//                .returnType(INT)
+//                .name(HASHCODE)
+//                .body("return Objects.hash(id);")
+//                .build();
+//
+//        methods.add(equalsMethod);
+//        methods.add(hashCodeMethod);
+//
+//        return new IndentList<MethodEntity>(DelimiterType.INDENT, true, false, methods);
+//    }
 }

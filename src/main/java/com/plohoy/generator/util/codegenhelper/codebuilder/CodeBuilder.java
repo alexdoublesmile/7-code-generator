@@ -1,16 +1,18 @@
 package com.plohoy.generator.util.codegenhelper.codebuilder;
 
 import com.plohoy.generator.model.EndPoint;
-import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.AppPropertiesEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassType;
+import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
+import com.plohoy.generator.util.domainhelper.DomainHelper;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.plohoy.generator.model.EndPointType.MAIN_END_POINT;
+import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @SuppressWarnings("Duplicates")
@@ -34,7 +36,7 @@ public class CodeBuilder {
         EndPoint mainEndPoint = mainEntity.getEndPoints()
                 .stream()
                 .filter(endPoint ->
-                        MAIN_END_POINT.equals(endPoint.getType()))
+                        CONTROLLER_END_POINT.equals(endPoint.getType()))
                 .findFirst()
                 .get();
 
@@ -80,15 +82,19 @@ public class CodeBuilder {
     }
 
     public ClassEntity buildMapperCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
+        List<FieldEntity> relationFields = mainEntity.getFields().stream()
+                .filter(field -> DomainHelper.hasOneToRelation(field))
+                .collect(Collectors.toList());
+
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + MAPPER_SUFFIX.toLowerCase()))
-                .imports(codeTemplate.getMapstructImports(source.getCorePackageName(), mainEntity.getName()))
+                .imports(codeTemplate.getMapstructImports(source.getCorePackageName(), mainEntity.getName(), relationFields))
                 .annotations(codeTemplate.getMapstructAnnotations())
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.INTERFACE)
                 .name(fileName)
-                .methods(codeTemplate.getMapstructMethods(mainEntity))
+                .methods(codeTemplate.getMapstructMethods(mainEntity, relationFields))
                 .build();
     }
 
@@ -103,6 +109,7 @@ public class CodeBuilder {
                 .classType(ClassType.CLASS)
                 .name(fileName)
                 .fields(codeTemplate.getEntityFields(entity))
+//                .methods(codeTemplate.getEqualsAndHashMethods(entity.getName()))
                 .build();
     }
 
@@ -118,6 +125,7 @@ public class CodeBuilder {
                 .name(dtoFileName)
                 .schemaDescription(dtoEntity.getSchemaDescription())
                 .fields(codeTemplate.getDTOFields(dtoEntity))
+//                .methods(codeTemplate.getEqualsAndHashMethods(dtoEntity.getName()))
                 .build();
     }
 

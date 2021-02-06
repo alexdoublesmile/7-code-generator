@@ -103,7 +103,8 @@ public class MavenTemplate {
     public static CodeEntity getSpringBootMavenPlugin() {
         return new PluginTag(
                 new GroupIdTag("org.springframework.boot"),
-                new ArtifactIdTag("spring-boot-maven-plugin")
+                new ArtifactIdTag("spring-boot-maven-plugin"),
+                new VersionTag(getVersionReference("spring_boot"))
         );
     }
 
@@ -242,6 +243,6 @@ public class MavenTemplate {
     }
 
     public static String getAppVersionReference() {
-        return "${version}";
+        return "${project.version}";
     }
 }

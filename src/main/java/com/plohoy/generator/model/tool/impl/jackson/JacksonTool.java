@@ -9,6 +9,7 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.tool.AbstractTool;
+import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class JacksonTool extends AbstractTool {
 
     public Source generateCode(Source source) {
         List<AbstractSourceFile> dtoFiles = source.getSourceData().get(FileType.DTO);
+
         for (AbstractSourceFile<ClassEntity> dtoFile : dtoFiles) {
             ClassEntity dto = dtoFile.getData();
 
@@ -46,7 +48,8 @@ public class JacksonTool extends AbstractTool {
                     field.setAnnotations(new IndentList<AnnotationEntity>());
                 }
 
-                if ("deleted".equals(field.getName())) {
+                if ("deleted".equals(field.getName())
+                        || DomainHelper.isOneToOneBackReference(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()
                                     .name("JsonIgnore")
@@ -59,7 +62,7 @@ public class JacksonTool extends AbstractTool {
                                     .name("JsonProperty")
                                     .property(PropertyEntity.builder().quotedValue(field.getName()).build())
                                     .build()
-                                    .setParentEntity(dto)
+                                    .setParentEntity(field)
                     );
                 }
             }

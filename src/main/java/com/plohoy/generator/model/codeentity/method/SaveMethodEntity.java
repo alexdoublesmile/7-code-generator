@@ -53,7 +53,10 @@ public class SaveMethodEntity extends MethodEntity {
                                 .name("dto")
                                 .build()),
                 null,
-                null,
+                new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()),
                 "return mapper.toDto(\n" +
                         "                repository.save(\n" +
                         "                        mapper.toEntity(dto)));",

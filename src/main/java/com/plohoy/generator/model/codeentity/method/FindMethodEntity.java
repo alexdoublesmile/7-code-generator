@@ -61,7 +61,10 @@ public class FindMethodEntity extends MethodEntity {
                             .name("id")
                             .build()),
                 null,
-                null,
+                new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()),
                 "return mapper.toDto(\n" +
                         "                repository.findByIdAndDeleted(id, false)\n" +
                         "                        .orElseThrow(() -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND); }));",

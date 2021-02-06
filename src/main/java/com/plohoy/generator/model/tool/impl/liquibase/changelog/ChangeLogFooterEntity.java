@@ -1,12 +1,9 @@
 package com.plohoy.generator.model.tool.impl.liquibase.changelog;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
-import com.plohoy.generator.util.stringhelper.list.DelimiterType;
-import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.stream.Collectors;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
@@ -14,18 +11,15 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 @Builder
 public class ChangeLogFooterEntity extends CodeEntity<ChangeLogFooterEntity> {
     private final String ROLLBACK_WORD = "rollback drop table";
-    private IndentList<String> rollbackValues;
+    private EnumerationList<String> rollbackValues;
 
-    public ChangeLogFooterEntity(IndentList<String> rollbackValues) {
-        this.rollbackValues = new IndentList<String>(DelimiterType.SEMICOLON, true, true,
-                rollbackValues.stream()
-                        .map(rollback -> MINUS + MINUS + ROLLBACK_WORD + SPACE + rollback)
-                        .collect(Collectors.toList()));
+    public ChangeLogFooterEntity(EnumerationList<String> rollbackValues) {
+        this.rollbackValues = rollbackValues;
     }
 
     @Override
     public String toString() {
-        return rollbackValues.toString();
+        return MINUS + MINUS + ROLLBACK_WORD + SPACE + rollbackValues.toString() + SEMICOLON;
     }
 
     @Override

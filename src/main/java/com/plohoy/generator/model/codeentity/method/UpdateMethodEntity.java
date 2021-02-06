@@ -86,9 +86,7 @@ public class UpdateMethodEntity extends MethodEntity {
                         "        repository.getOne(id);\n" +
                         "        dto.setId(id);\n" +
                         "\n" +
-                        "        return mapper.toDto(\n" +
-                        "                repository.save(\n" +
-                        "                        mapper.toEntity(dto)));",
+                        "        return save(dto);",
                 endPoint
         );
     }

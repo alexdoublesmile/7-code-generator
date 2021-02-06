@@ -4,6 +4,7 @@ import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
+import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.file.SimpleSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
@@ -14,6 +15,7 @@ import com.plohoy.generator.model.tool.impl.liquibase.changelog.ChangeLogSqlEnti
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.ConstraintEntity;
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.DBFieldEntity;
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.DBTableEntity;
+import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -21,8 +23,8 @@ import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.plohoy.generator.model.file.FileType.ENTITY;
 import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.CORE;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.ID;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH;
@@ -87,7 +89,8 @@ public class LiquibaseTool extends AbstractTool {
                         .constraints(getSqlAddConstraint(source))
                         .build())
                 .footer(ChangeLogFooterEntity.builder()
-                        .rollbackValues(new IndentList<String>(DelimiterType.SEMICOLON, true, true, getRollbackValues()))
+                        .rollbackValues(new EnumerationList<String>(DelimiterType.COMMA, false,
+                                getRollbackValues()))
                         .build())
                 .build();
     }
@@ -97,8 +100,11 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private IndentList<DBTableEntity> getSqlCreateTable(Source source) {
+        List<AbstractSourceFile> entityFiles = source.getSourceData().get(ENTITY);
 
-        for (ClassEntity entity : source.getEntities()) {
+        for (AbstractSourceFile<ClassEntity> entityFile : entityFiles) {
+            ClassEntity entity = entityFile.getData();
+
             this.tables.add(
                     DBTableEntity.builder()
                             .tableName(StringUtil.toSnakeCase(entity.getName()))
@@ -126,7 +132,9 @@ public class LiquibaseTool extends AbstractTool {
         List<DBFieldEntity> dbFields = new ArrayList<>();
 
         for (FieldEntity fieldEntity : fields) {
-            dbFields.add(mapFieldToDB(fieldEntity, idType));
+            if (!DomainHelper.isOneToOneBackReference(fieldEntity)) {
+                dbFields.add(mapFieldToDB(fieldEntity, idType));
+            }
         }
         return new IndentList<DBFieldEntity>(DelimiterType.COMMA, true, true, dbFields);
     }
@@ -148,7 +156,7 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private EnumerationList<String> setDBProperties(FieldEntity fieldEntity) {
-        return null;
+        return ID.equals(fieldEntity.getName()) ? new EnumerationList<String>(false, "NOT NULL") : null;
     }
 
     private String mapFieldTypeToDB(String type) {
@@ -181,15 +189,24 @@ public class LiquibaseTool extends AbstractTool {
     private IndentList<ConstraintEntity> getSqlAddConstraint(Source source) {
         List<ConstraintEntity> constraintList = new ArrayList<>();
 
-        constraintList.add(
-                ConstraintEntity.builder()
-                        .currentTableName("test_table")
-                        .referencedTableName("ref_test_table")
-                        .foreignKey("some_id")
-                        .build()
-        );
+        for (ClassEntity entity : source.getEntities()) {
+            List<FieldEntity> oneToOwnerFields = entity.getFields().stream()
+                    .filter(DomainHelper::hasOneToRelation)
+                    .filter(DomainHelper::isRelationOwner)
+                    .collect(Collectors.toList());
 
-        return null;
+            for (FieldEntity field : oneToOwnerFields) {
+                constraintList.add(
+                        ConstraintEntity.builder()
+                                .currentTableName(entity.getName().toLowerCase())
+                                .referencedTableName(field.getName())
+                                .foreignKey(field.getName() + "_id")
+                                .build()
+                );
+            }
+        }
+
+        return new IndentList<ConstraintEntity>(DelimiterType.SEMICOLON, true, constraintList);
     }
 
     private List<String> getRollbackValues() {

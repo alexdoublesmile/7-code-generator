@@ -85,7 +85,10 @@ public class FindAllMethodEntity extends MethodEntity {
                                 .name("deleted")
                                 .build()),
                 null,
-                null,
+                new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Transactional")
+                                .build()),
                 "List<" + dtoEntity.getName() + "> dtoList;\n" +
                         "\n" +
                         "        if (deleted) {\n" +

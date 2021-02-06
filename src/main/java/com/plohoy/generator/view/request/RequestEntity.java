@@ -16,5 +16,4 @@ public class RequestEntity {
     private List<RequestEntityField> dtoFields;
     private String description;
     private List<EndPoint> endPoints;
-    private boolean restEntity;
 }

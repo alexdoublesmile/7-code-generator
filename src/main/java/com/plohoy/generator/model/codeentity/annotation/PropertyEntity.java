@@ -19,6 +19,7 @@ public class PropertyEntity extends CodeEntity {
     private String simpleValue;
     private String quotedValue;
     private QuotedValueList quotedValueList;
+    private IndentList<String> simpleValueList;
     private IndentList<AnnotationEntity> annotationList;
 
     public PropertyEntity(
@@ -26,11 +27,13 @@ public class PropertyEntity extends CodeEntity {
             String simpleValue,
             String quotedValue,
             QuotedValueList quotedValueList,
+            IndentList<String> simpleValueList,
             IndentList<AnnotationEntity> annotationList
     ) {
         this.name = name;
         this.simpleValue = simpleValue;
         this.quotedValue = quotedValue;
+        this.simpleValueList = simpleValueList;
 
         if (Objects.nonNull(quotedValueList)) setQuotedValueList(quotedValueList);
         if (Objects.nonNull(annotationList)) setAnnotationList(annotationList);
@@ -59,6 +62,7 @@ public class PropertyEntity extends CodeEntity {
                 + simpleValue
                 + StringUtil.checkForNull(quotedValue, QUOTE + quotedValue + QUOTE)
                 + quotedValueList
+                + new BodyBracketWrapper<>(DelimiterType.NONE, simpleValueList, getNestLvl())
                 + new BodyBracketWrapper<>(DelimiterType.INDENT, annotationList, getParentNestLvl() - 1);
     }
 }

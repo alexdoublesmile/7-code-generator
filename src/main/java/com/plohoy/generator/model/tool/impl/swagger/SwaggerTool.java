@@ -130,15 +130,48 @@ public class SwaggerTool extends AbstractTool {
 
     private void setParameterDescriptions(MethodEntity method) {
         switch (method.getEndPoint().getType()) {
-            case CREATE_END_POINT: addDescriptionToArg(method.getArgs().stream().filter(arg -> DTO_SUFFIX.toLowerCase().equals(arg.getName())).collect(Collectors.toList()));
+            case CREATE_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    DTO_SUFFIX.toLowerCase().equals(arg.getName()))
+                            .collect(Collectors.toList()));
                 break;
-            case FIND_END_POINT: addDescriptionToArg(method.getArgs().stream().filter(arg -> ID.equals(arg.getName())).collect(Collectors.toList()));
+            case FIND_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    ID.equals(arg.getName()))
+                            .collect(Collectors.toList()));
                 break;
-            case UPDATE_END_POINT: addDescriptionToArg(method.getArgs().stream().filter(arg -> DTO_SUFFIX.toLowerCase().equals(arg.getName()) || ID.equals(arg.getName())).collect(Collectors.toList()));
+            case UPDATE_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    DTO_SUFFIX.toLowerCase().equals(arg.getName())
+                                            || ID.equals(arg.getName()))
+                            .collect(Collectors.toList()));
                 break;
-            case DELETE_SOFT_END_POINT: addDescriptionToArg(method.getArgs().stream().filter(arg -> ID.equals(arg.getName())).collect(Collectors.toList()));
+            case DELETE_SOFTLY_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    ID.equals(arg.getName()))
+                            .collect(Collectors.toList()));
                 break;
-            case DELETE_HARD_END_POINT: addDescriptionToArg(method.getArgs().stream().filter(arg -> ID.equals(arg.getName())).collect(Collectors.toList()));
+            case DELETE_HARDLY_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    ID.equals(arg.getName()))
+                            .collect(Collectors.toList()));
+                break;
+            case RESTORE_END_POINT: addDescriptionToArg(
+                    method.getArgs()
+                            .stream()
+                            .filter(arg ->
+                                    ID.equals(arg.getName()))
+                            .collect(Collectors.toList()));
         }
     }
 
@@ -190,8 +223,9 @@ public class SwaggerTool extends AbstractTool {
             case FIND_END_POINT: return "Получение по идентификатору из БД";
             case FIND_ALL_END_POINT: return "Получение полного списка из БД";
             case UPDATE_END_POINT: return "Редактирование по идентификатору в БД";
-            case DELETE_SOFT_END_POINT: return "Программное удаление по идентификатору (установка флага deleted)";
-            case DELETE_HARD_END_POINT: return "Фактическое удаление из БД по идентификатору";
+            case DELETE_SOFTLY_END_POINT: return "Программное удаление по идентификатору (установка флага deleted)";
+            case DELETE_HARDLY_END_POINT: return "Фактическое удаление из БД по идентификатору";
+            case RESTORE_END_POINT: return "Восстановление в БД по идентификатору";
             default: return null;
         }
     }
@@ -245,8 +279,9 @@ public class SwaggerTool extends AbstractTool {
             case FIND_END_POINT: responseCodes = getStandartResponseCodeSet();
             case FIND_ALL_END_POINT: responseCodes = getMinimalResponseCodeSet();
             case UPDATE_END_POINT: responseCodes = getStandartResponseCodeSet();
-            case DELETE_SOFT_END_POINT: responseCodes = getStandartResponseCodeSet();
-            case DELETE_HARD_END_POINT: responseCodes = getStandartResponseCodeSet();
+            case DELETE_SOFTLY_END_POINT: responseCodes = getStandartResponseCodeSet();
+            case DELETE_HARDLY_END_POINT: responseCodes = getStandartResponseCodeSet();
+            case RESTORE_END_POINT: responseCodes = getStandartResponseCodeSet();
         }
         return responseCodes;
     }
