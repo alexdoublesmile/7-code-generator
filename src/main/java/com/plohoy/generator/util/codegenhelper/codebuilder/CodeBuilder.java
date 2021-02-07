@@ -109,7 +109,7 @@ public class CodeBuilder {
                 .classType(ClassType.CLASS)
                 .name(fileName)
                 .fields(codeTemplate.getEntityFields(entity))
-//                .methods(codeTemplate.getEqualsAndHashMethods(entity.getName()))
+                .methods(codeTemplate.getEntityMethods(entity, source.getEntities()))
                 .build();
     }
 

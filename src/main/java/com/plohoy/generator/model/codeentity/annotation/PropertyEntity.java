@@ -19,7 +19,7 @@ public class PropertyEntity extends CodeEntity {
     private String simpleValue;
     private String quotedValue;
     private QuotedValueList quotedValueList;
-    private IndentList<String> simpleValueList;
+    private SimpleValueList simpleValueList;
     private IndentList<AnnotationEntity> annotationList;
 
     public PropertyEntity(
@@ -27,26 +27,31 @@ public class PropertyEntity extends CodeEntity {
             String simpleValue,
             String quotedValue,
             QuotedValueList quotedValueList,
-            IndentList<String> simpleValueList,
+            SimpleValueList simpleValueList,
             IndentList<AnnotationEntity> annotationList
     ) {
         this.name = name;
         this.simpleValue = simpleValue;
         this.quotedValue = quotedValue;
-        this.simpleValueList = simpleValueList;
 
         if (Objects.nonNull(quotedValueList)) setQuotedValueList(quotedValueList);
+        if (Objects.nonNull(simpleValueList)) setSimpleValueList(simpleValueList);
         if (Objects.nonNull(annotationList)) setAnnotationList(annotationList);
     }
 
     public void setQuotedValueList(QuotedValueList quotedValueList) {
+        quotedValueList.setParentEntity(this);
         this.quotedValueList = quotedValueList;
-        this.quotedValueList.setParentEntity(this);
+    }
+
+    public void setSimpleValueList(SimpleValueList simpleValueList) {
+        simpleValueList.setParentEntity(this);
+        this.simpleValueList = simpleValueList;
     }
 
     public void setAnnotationList(IndentList<AnnotationEntity> annotationList) {
+        annotationList.stream().forEach(annotation -> annotation.setParentEntity(this));
         this.annotationList = annotationList;
-        this.annotationList.stream().forEach(annotation -> annotation.setParentEntity(this));
     }
 
     @Override
@@ -62,7 +67,7 @@ public class PropertyEntity extends CodeEntity {
                 + simpleValue
                 + StringUtil.checkForNull(quotedValue, QUOTE + quotedValue + QUOTE)
                 + quotedValueList
-                + new BodyBracketWrapper<>(DelimiterType.NONE, simpleValueList, getNestLvl())
+                + simpleValueList
                 + new BodyBracketWrapper<>(DelimiterType.INDENT, annotationList, getParentNestLvl() - 1);
     }
 }

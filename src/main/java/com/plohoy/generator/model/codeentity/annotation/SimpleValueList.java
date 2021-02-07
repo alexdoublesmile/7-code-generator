@@ -4,7 +4,6 @@ import com.plohoy.generator.model.codeentity.CodeEntity;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import com.plohoy.generator.util.stringhelper.wrapper.BodyBracketWrapper;
-import com.plohoy.generator.util.stringhelper.wrapper.QuoteWrapper;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,23 +14,23 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 
 @Data
 @Builder
-public class QuotedValueList extends CodeEntity {
+public class SimpleValueList extends CodeEntity {
     private IndentList<String> values;
 
     @Override
-    public QuotedValueList setParentEntity(CodeEntity parentEntity) {
+    public SimpleValueList setParentEntity(CodeEntity parentEntity) {
         this.parentEntity = parentEntity;
         return this;
     }
 
     @Override
     public String toString() {
-        List<String> quotedValues = values.stream()
-                .map(element -> getTab(getNestLvl() + 1) + new QuoteWrapper<>(DelimiterType.NONE, element).toString())
+        List<String> simpleValues = values.stream()
+                .map(element -> getTab(getNestLvl() + 1) +  element)
                 .collect(Collectors.toList());
 
         return new BodyBracketWrapper<>(DelimiterType.INDENT,
-                new IndentList<>(DelimiterType.COMMA, false, quotedValues),
-                        getParentNestLvl()).toString();
+                new IndentList<>(DelimiterType.COMMA, false, simpleValues),
+                getParentNestLvl()).toString();
     }
 }

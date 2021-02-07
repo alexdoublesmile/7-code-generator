@@ -2,13 +2,11 @@ package com.plohoy.generator.model.tool.impl.lombok;
 
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
-import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.MethodEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
-import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -97,7 +95,9 @@ public class LombokTool extends AbstractTool {
     private boolean hasExcludeAnnotations(IndentList<FieldEntity> fields) {
 
         return fields.stream().anyMatch(field ->
-                field.getAnnotations().stream().anyMatch(annotation ->
+                Objects.nonNull(field.getAnnotations()) &&
+                field.getAnnotations().stream()
+                        .anyMatch(annotation ->
                         TO_STRING_EXCLUDE.equals(annotation.getName())
                                 || EQUALS_EXCLUDE.equals(annotation.getName()))
         );

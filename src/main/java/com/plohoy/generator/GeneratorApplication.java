@@ -90,6 +90,7 @@ public class GeneratorApplication {
         RequestEntity passportRequestEntity = RequestEntity.builder()
                 .name("Passport")
                 .fields(getTestPassportFields())
+//                .endPoints(getTestPassportEndPoints())
                 .build();
 
         RequestEntity addressRequestEntity = RequestEntity.builder()
@@ -100,7 +101,7 @@ public class GeneratorApplication {
         entities.add(personRequestEntity);
         entities.add(detailsRequestEntity);
         entities.add(passportRequestEntity);
-//        entities.add(addressRequestEntity);
+        entities.add(addressRequestEntity);
 
         return entities;
     }
@@ -147,18 +148,18 @@ public class GeneratorApplication {
                 .description("Паспорта персоны")
                 .relation(RequestEntityRelation.builder()
                         .relationType(ONE_TO_MANY)
-                        .relationOwner(true)
+//                        .relationOwner(true)
                         .build())
                 .array(true)
                 .build();
 
         RequestEntityField addressesField = RequestEntityField.builder()
                 .type("Address")
-                .name("address")
+                .name("addresses")
                 .description("Адреса персоны")
                 .relation(RequestEntityRelation.builder()
                         .relationType(MANY_TO_MANY)
-                        .relationOwner(true)
+//                        .relationOwner(true)
                         .build())
                 .array(true)
                 .build();
@@ -169,7 +170,7 @@ public class GeneratorApplication {
         fields.add(patronymicField);
         fields.add(detailsField);
         fields.add(passportsField);
-//        fields.add(addressesField);
+        fields.add(addressesField);
 
         return fields;
     }
@@ -264,6 +265,7 @@ public class GeneratorApplication {
                 .description("Владелец паспорта")
                 .relation(RequestEntityRelation.builder()
                         .relationType(MANY_TO_ONE)
+                        .relationOwner(true)
                         .build())
                 .build();
 
@@ -309,9 +311,13 @@ public class GeneratorApplication {
                 .build();
 
         RequestEntityField personsField = RequestEntityField.builder()
-                .type("List<Person>")
+                .type("Person")
                 .name("persons")
                 .description("Проживающие персоны")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_MANY)
+                        .build())
+                .array(true)
                 .build();
 
         addressFields.add(idField);
@@ -437,6 +443,45 @@ public class GeneratorApplication {
                         .type(RESTORE_END_POINT)
                         .path("/{id}/restore")
                         .description("Восстановление записи в БД по идентификатору")
+                        .build());
+
+        return endPoints;
+
+    }
+
+    private static List<EndPoint> getTestPassportEndPoints() {
+
+        List<EndPoint> endPoints = new ArrayList<>();
+        endPoints.add(EndPoint.builder()
+                        .type(CONTROLLER_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(CREATE_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(FIND_ALL_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(FIND_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(UPDATE_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(DELETE_HARDLY_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(DELETE_SOFTLY_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(RESTORE_END_POINT)
                         .build());
 
         return endPoints;

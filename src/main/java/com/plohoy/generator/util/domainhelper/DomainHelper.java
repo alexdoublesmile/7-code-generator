@@ -19,8 +19,8 @@ public class DomainHelper {
                         type.equals(EndPointType.DELETE_SOFTLY_END_POINT));
     }
 
-    public boolean isOneToOneBackReference(FieldEntity fieldEntity) {
-        return DomainHelper.hasOneToOneRelation(fieldEntity) && !fieldEntity.getRelation().isRelationOwner();
+    public boolean isBackReference(FieldEntity fieldEntity) {
+        return DomainHelper.hasOneToRelation(fieldEntity) && !fieldEntity.getRelation().isRelationOwner();
     }
 
     public boolean hasOneToOneRelation(FieldEntity field) {
@@ -41,7 +41,8 @@ public class DomainHelper {
     public boolean hasOneToRelation(FieldEntity field) {
         return Objects.nonNull(field.getRelation())
                 && (field.getRelation().getRelationType().equals(RelationType.ONE_TO_ONE)
-                || field.getRelation().getRelationType().equals(RelationType.ONE_TO_MANY));
+                    || field.getRelation().getRelationType().equals(RelationType.ONE_TO_MANY)
+                    || field.getRelation().getRelationType().equals(RelationType.MANY_TO_ONE));
     }
 
     public boolean hasManyToManyRelation(FieldEntity field) {
@@ -52,5 +53,9 @@ public class DomainHelper {
     public boolean isRelationOwner(FieldEntity field) {
         return Objects.nonNull(field.getRelation())
                 && field.getRelation().isRelationOwner();
+    }
+
+    public static boolean isOneToOneBackReference(FieldEntity field) {
+        return DomainHelper.hasOneToOneRelation(field) && !field.getRelation().isRelationOwner();
     }
 }

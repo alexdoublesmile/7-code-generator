@@ -1,5 +1,7 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
+import com.plohoy.generator.model.codeentity.field.FieldRelation;
+import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
@@ -18,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
+import static com.plohoy.generator.model.codeentity.field.RelationType.ONE_TO_MANY;
 
 public class CodeTemplate {
     public static final String INDENT = "\n";
@@ -708,16 +711,7 @@ public class CodeTemplate {
                         .value("java.time.LocalDateTime")
                         .build(),
                 ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".List")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".ArrayList")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".Objects")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".UUID")
+                        .value(JAVA_UTIL_PACKAGE + ".*")
                         .build()
         );
     }
@@ -734,16 +728,7 @@ public class CodeTemplate {
                         .value("java.time.LocalDateTime")
                         .build(),
                 ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".List")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".ArrayList")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".Objects")
-                        .build(),
-                ImportEntity.builder()
-                        .value(JAVA_UTIL_PACKAGE + ".UUID")
+                        .value(JAVA_UTIL_PACKAGE + ".*")
                         .build()
         );
     }
@@ -909,6 +894,70 @@ public class CodeTemplate {
         propertiesMap.put("spring.datasource.password", "${DB_PASSWORD:mysecretpassword}");
         propertiesMap.put("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQL9Dialect");
         return propertiesMap;
+    }
+
+    public IndentList<MethodEntity> getEntityMethods(ClassEntity entity, List<ClassEntity> entities) {
+        List<MethodEntity> methods = new ArrayList<>();
+        FieldRelation relation;
+
+        for (FieldEntity field : entity.getFields()) {
+            relation = field.getRelation();
+
+            if (Objects.nonNull(relation)
+                    && ONE_TO_MANY.equals(relation.getRelationType())) {
+
+                MethodEntity setter = MethodEntity.builder()
+                        .modifiers(getPublicMod())
+                        .returnType(VOID)
+                        .name("set" + StringUtils.capitalize(field.getName()))
+                        .args(new EnumerationList<ArgumentEntity>(false,
+                                ArgumentEntity.builder()
+                                        .type("Set<" + field.getType() + ">")
+                                        .name(field.getName())
+                                        .build()))
+                        .body(getListSetterBody(field, entity.getName(), entities))
+                        .build();
+
+                methods.add(setter);
+            }
+        }
+
+        return new IndentList<MethodEntity>(DelimiterType.INDENT, true, false, methods);
+    }
+
+    private String getListSetterBody(FieldEntity field, String fieldType, List<ClassEntity> entities) {
+        String mappedFieldName = "";
+        String ownerClassName = field.getType();
+        String fieldName = field.getName();
+
+        for (ClassEntity entity : entities) {
+
+            if (ownerClassName.equals(entity.getName())) {
+                mappedFieldName = entity.getFields()
+                        .stream()
+                        .filter(entityField -> fieldType.equals(entityField.getType()))
+                        .findFirst()
+                        .orElseGet(() -> getAnyMatchFieldType(fieldType, entity.getFields()))
+                        .getName();
+            }
+        }
+
+        return "if (Objects.nonNull(" + fieldName + ") && !" + fieldName + ".isEmpty()) {\n" +
+                "\n" +
+                "\t\t\t" + fieldName + ".forEach(" + ownerClassName.toLowerCase() + " -> {\n" +
+                "\t\t\t\tif (Objects.nonNull(" + ownerClassName.toLowerCase() + ")) {\n" +
+                "\t\t\t\t\t" + ownerClassName.toLowerCase() + ".set"+ StringUtils.capitalize(mappedFieldName) + "(this);\n" +
+                "\t\t\t\t}\n" +
+                "\t\t\t});\n" +
+                "\t\t}\n" +
+                "\t\tthis." + fieldName + " = " + fieldName + ";";
+    }
+
+    private FieldEntity getAnyMatchFieldType(String fieldType, IndentList<FieldEntity> fields) {
+        return fields.stream()
+                .filter(field -> fieldType.contains(field.getType()))
+                .findFirst()
+                .orElseGet(() -> FieldEntity.builder().name("unknown mapping").build());
     }
 
 //    public IndentList<MethodEntity> getEqualsAndHashMethods(String entityName) {

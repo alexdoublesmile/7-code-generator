@@ -49,7 +49,8 @@ public class JacksonTool extends AbstractTool {
                 }
 
                 if ("deleted".equals(field.getName())
-                        || DomainHelper.isOneToOneBackReference(field)) {
+                        || DomainHelper.isOneToOneBackReference(field)
+                        || DomainHelper.hasManyToOneRelation(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()
                                     .name("JsonIgnore")

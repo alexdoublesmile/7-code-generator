@@ -132,7 +132,7 @@ public class LiquibaseTool extends AbstractTool {
         List<DBFieldEntity> dbFields = new ArrayList<>();
 
         for (FieldEntity fieldEntity : fields) {
-            if (!DomainHelper.isOneToOneBackReference(fieldEntity)) {
+            if (!DomainHelper.isBackReference(fieldEntity)) {
                 dbFields.add(mapFieldToDB(fieldEntity, idType));
             }
         }
@@ -190,16 +190,16 @@ public class LiquibaseTool extends AbstractTool {
         List<ConstraintEntity> constraintList = new ArrayList<>();
 
         for (ClassEntity entity : source.getEntities()) {
-            List<FieldEntity> oneToOwnerFields = entity.getFields().stream()
+            List<FieldEntity> needConstraintFields = entity.getFields().stream()
                     .filter(DomainHelper::hasOneToRelation)
                     .filter(DomainHelper::isRelationOwner)
                     .collect(Collectors.toList());
 
-            for (FieldEntity field : oneToOwnerFields) {
+            for (FieldEntity field : needConstraintFields) {
                 constraintList.add(
                         ConstraintEntity.builder()
                                 .currentTableName(entity.getName().toLowerCase())
-                                .referencedTableName(field.getName())
+                                .referencedTableName(StringUtil.toSnakeCase(field.getType()))
                                 .foreignKey(field.getName() + "_id")
                                 .build()
                 );

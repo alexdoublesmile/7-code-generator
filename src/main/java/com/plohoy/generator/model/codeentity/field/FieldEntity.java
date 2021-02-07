@@ -47,7 +47,7 @@ public class FieldEntity extends CodeEntity {
 
         if (Objects.nonNull(values)) setValues(values);
         if (Objects.nonNull(annotations)) setAnnotations(annotations);
-        if (array) this.value = "new ArrayList<>()";
+        if (array) this.value = "new HashSet<>()";
     }
 
     public void setValues(FieldValueEntity values) {
