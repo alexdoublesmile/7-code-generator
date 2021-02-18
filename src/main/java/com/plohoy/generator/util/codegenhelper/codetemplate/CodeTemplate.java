@@ -1,6 +1,5 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
-import com.plohoy.generator.model.codeentity.field.FieldRelation;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.model.EndPoint;
@@ -15,12 +14,14 @@ import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
-import static com.plohoy.generator.model.codeentity.field.RelationType.ONE_TO_MANY;
 
 public class CodeTemplate {
     public static final String INDENT = "\n";
@@ -557,7 +558,10 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<ImportEntity> getMapstructImports(String corePackageName, String entityName, List<FieldEntity> relationFields) {
+    public IndentList<ImportEntity> getMapStructImports(
+            String corePackageName,
+            String entityName,
+            HashMap<FieldEntity, FieldEntity> loopPossibleWithMappedFields) {
         List<ImportEntity> imports = new ArrayList<>();
 
         imports.add(ImportEntity.builder()
@@ -573,22 +577,28 @@ public class CodeTemplate {
                 .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + entityName + DTO_SUFFIX)
                 .build());
         imports.add(ImportEntity.builder()
+                .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + "*")
+                .build());
+        imports.add(ImportEntity.builder()
+                .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + "*")
+                .build());
+        imports.add(ImportEntity.builder()
                 .value(JAVA_UTIL_PACKAGE + ".List")
                 .build());
 
-        for (FieldEntity relationField : relationFields) {
+        for (FieldEntity loopPossibleFields : loopPossibleWithMappedFields.keySet()) {
             imports.add(ImportEntity.builder()
-                    .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(relationField.getType()))
+                    .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(loopPossibleFields.getType()))
                     .build());
             imports.add(ImportEntity.builder()
-                    .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(relationField.getType()) + DTO_SUFFIX)
+                    .value(corePackageName + DOT + DTO_SUFFIX.toLowerCase() + DOT  + StringUtils.capitalize(loopPossibleFields.getType()) + DTO_SUFFIX)
                     .build());
         }
 
         return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true, imports);
     }
 
-    public IndentList<AnnotationEntity> getMapstructAnnotations() {
+    public IndentList<AnnotationEntity> getMapStructAnnotations() {
         return new IndentList<>(
                 AnnotationEntity.builder()
                         .name(MAPPER_SUFFIX)
@@ -599,8 +609,133 @@ public class CodeTemplate {
                         .build());
     }
 
-    public IndentList<MethodEntity> getMapstructMethods(ClassEntity mainEntity, List<FieldEntity> relationFields) {
-        List<MethodEntity> mapstructMethods = new ArrayList<>();
+    public IndentList<MethodEntity> getMapStructMethods(ClassEntity mainEntity, List<AbstractSourceFile> entityFiles) {
+        List<MethodEntity> mapStructMethods = new ArrayList<>();
+
+        HashMap<FieldEntity, FieldEntity> loopPossibleWithMappedFields = getLoopPossibleFields(mainEntity, entityFiles);
+
+        for (Map.Entry<FieldEntity, FieldEntity> loopPossibleFieldPair : loopPossibleWithMappedFields.entrySet()) {
+            FieldEntity loopPossibleField = loopPossibleFieldPair.getKey();
+            FieldEntity mappedField = loopPossibleFieldPair.getValue();
+
+            mapStructMethods.add(
+                    getToDtoLoopPreventMethod(loopPossibleField.getType(), mappedField.getName()));
+            mapStructMethods.add(
+                    getToEntityLoopPreventMethod(loopPossibleField.getType(), mappedField.getName()));
+        }
+
+        List<MethodEntity> differentMapStructMethods = mapStructMethods.stream()
+                .distinct()
+                .collect(Collectors.toList());
+
+        differentMapStructMethods.addAll(getBasicMapStructMethods(mainEntity));
+
+        differentMapStructMethods.forEach(method -> {
+            if (hasDuplicateTypes(differentMapStructMethods, method.getReturnType())) {
+                MethodEntity methodByType = getMethodByTypeForRemove(differentMapStructMethods, method.getReturnType(), method);
+
+                MethodEntity mergeMethod, removeMethod;
+                if (isRootMethod(method)) {
+                    mergeMethod = method;
+                    removeMethod = methodByType;
+                } else {
+                    mergeMethod = methodByType;
+                    removeMethod = method;
+                }
+
+                mergeMethodsByAnnotations(mergeMethod, removeMethod);
+            }
+        });
+
+        Iterator<MethodEntity> iterator = differentMapStructMethods.iterator();
+        while (iterator.hasNext()) {
+            if ("SHOULD_REMOVE".equals(iterator.next().getReturnType())) {
+                iterator.remove();
+            }
+        }
+
+
+        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true, differentMapStructMethods);
+    }
+
+    private boolean isRootMethod(MethodEntity method) {
+        return "toDto".equals(method.getName()) || "toEntity".equals(method.getName());
+    }
+
+    private MethodEntity getMethodByTypeForRemove(List<MethodEntity> mapStructMethods, String returnType, MethodEntity methodForMerge) {
+        List<MethodEntity> methodsByType = mapStructMethods.stream()
+                .filter(method -> returnType.equals(method.getReturnType())
+                        && !methodForMerge.equals(method))
+                .collect(Collectors.toList());
+
+        return methodsByType.get(0);
+    }
+
+    public boolean hasDuplicateTypes(List<MethodEntity> methods, String returnType) {
+        return methods.stream()
+                .filter(method -> returnType.equals(method.getReturnType()))
+                .count() > 1;
+    }
+
+    private MethodEntity mergeMethodsByAnnotations(MethodEntity methodForMerge, MethodEntity methodForRemove) {
+        methodForRemove.getAnnotations()
+                .stream()
+                .forEach(annotationFromRemovedMethod -> {
+                    if (Objects.isNull(methodForMerge.getAnnotations())) {
+                        methodForMerge.setAnnotations(new IndentList<AnnotationEntity>());
+                    }
+
+                    methodForMerge.getAnnotations()
+                            .add(AnnotationEntity.builder()
+                                    .name(annotationFromRemovedMethod.getName())
+                                    .value(annotationFromRemovedMethod.getValue())
+                                    .property(annotationFromRemovedMethod.getProperty())
+                                    .properties(annotationFromRemovedMethod.getProperties())
+                                    .build().setParentEntity(methodForMerge));
+
+                });
+
+        methodForRemove.setReturnType("SHOULD_REMOVE");
+
+        return methodForMerge;
+    }
+
+    private HashMap<FieldEntity, FieldEntity> getLoopPossibleFields(ClassEntity mainEntity, List<AbstractSourceFile> entityFiles) {
+        HashMap<FieldEntity, FieldEntity> loopFieldsMap = new HashMap<>();
+
+        List<ClassEntity> loopPossibleEntities = new ArrayList<>();
+
+        mainEntity.getFields()
+                .stream()
+                .filter(DomainHelper::hasAnyRelations)
+                .filter(field -> DomainHelper.isExternalTypeField(field, mainEntity.getName())
+                                || DomainHelper.isSingleClassLoopPossible(field, mainEntity.getName()))
+                .forEach(field -> {
+                    loopFieldsMap.put(
+                            field,
+                            DomainHelper.getMappedFieldFromFiles(field, mainEntity.getName(), entityFiles));
+
+                    if (DomainHelper.isExternalTypeField(field, mainEntity.getName())) {
+                        loopPossibleEntities.add(DomainHelper.getEntityByType(field.getType(), entityFiles));
+                    }
+                });
+
+        for (ClassEntity loopPossibleEntity : loopPossibleEntities) {
+            loopPossibleEntity.getFields().stream()
+                    .filter(DomainHelper::hasAnyRelations)
+                    .filter(field -> DomainHelper.isExternalTypeField(field, mainEntity.getName()))
+                    .filter(field -> DomainHelper.isExternalTypeField(field, loopPossibleEntity.getName())
+                            || DomainHelper.isSingleClassLoopPossible(field, loopPossibleEntity.getName()))
+                    .forEach(field -> loopFieldsMap.put(
+                            field,
+                            DomainHelper.getMappedFieldFromFiles(field, loopPossibleEntity.getName(), entityFiles)));
+        }
+
+        return loopFieldsMap;
+    }
+
+    private Collection<? extends MethodEntity> getBasicMapStructMethods(ClassEntity mainEntity) {
+        List<MethodEntity> basicMapStructMethods = new ArrayList<>();
 
         MethodEntity toDtoMethod = MethodEntity.builder()
                 .returnType(mainEntity.getName() + DTO_SUFFIX)
@@ -632,21 +767,13 @@ public class CodeTemplate {
                                 .build()))
                 .build();
 
-        for (FieldEntity relationField : relationFields) {
-            mapstructMethods.add(
-                    getToDtoRelationMethod(relationField.getType(), mainEntity.getName()));
-            mapstructMethods.add(
-                    getToEntityRelationMethod(relationField.getType(), mainEntity.getName()));
-        }
-
-        mapstructMethods.add(toEntityMethod);
-        mapstructMethods.add(toDtoMethod);
-        mapstructMethods.add(toDtoListMethod);
-
-        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true, mapstructMethods);
+        basicMapStructMethods.add(toDtoMethod);
+        basicMapStructMethods.add(toEntityMethod);
+        basicMapStructMethods.add(toDtoListMethod);
+        return basicMapStructMethods;
     }
 
-    private MethodEntity getToDtoRelationMethod(String relationFieldName, String entityName) {
+    private MethodEntity getToDtoLoopPreventMethod(String loopPossibleFieldName, String mappedFieldName) {
         return MethodEntity.builder()
                 .annotations(new IndentList<AnnotationEntity>(
                         AnnotationEntity.builder()
@@ -654,24 +781,25 @@ public class CodeTemplate {
                                 .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                         PropertyEntity.builder()
                                                 .name("target")
-                                                .quotedValue(entityName.toLowerCase())
+                                                .quotedValue(mappedFieldName)
                                                 .build(),
                                         PropertyEntity.builder()
                                                 .name("ignore")
                                                 .simpleValue("true")
                                                 .build()))
                                 .build()))
-                .returnType(StringUtils.capitalize(relationFieldName + DTO_SUFFIX))
-                .name(StringUtil.toCamelCase(relationFieldName, true) + "To" + StringUtils.capitalize(relationFieldName + DTO_SUFFIX))
+                .returnType(StringUtils.capitalize(loopPossibleFieldName + DTO_SUFFIX))
+                .name(StringUtil.toCamelCase(loopPossibleFieldName, true)
+                        + "To" + StringUtils.capitalize(loopPossibleFieldName + DTO_SUFFIX))
                 .args(new EnumerationList<ArgumentEntity>(false,
                         ArgumentEntity.builder()
-                                .type(StringUtils.capitalize(relationFieldName))
-                                .name(relationFieldName.toLowerCase())
+                                .type(StringUtils.capitalize(loopPossibleFieldName))
+                                .name(loopPossibleFieldName.toLowerCase())
                                 .build()))
                 .build();
     }
 
-    private MethodEntity getToEntityRelationMethod(String relationFieldName, String entityName) {
+    private MethodEntity getToEntityLoopPreventMethod(String relationFieldName, String entityName) {
         return MethodEntity.builder()
                 .annotations(new IndentList<AnnotationEntity>(
                         AnnotationEntity.builder()
@@ -898,66 +1026,165 @@ public class CodeTemplate {
 
     public IndentList<MethodEntity> getEntityMethods(ClassEntity entity, List<ClassEntity> entities) {
         List<MethodEntity> methods = new ArrayList<>();
-        FieldRelation relation;
 
         for (FieldEntity field : entity.getFields()) {
-            relation = field.getRelation();
 
-            if (Objects.nonNull(relation)
-                    && ONE_TO_MANY.equals(relation.getRelationType())) {
-
-                MethodEntity setter = MethodEntity.builder()
-                        .modifiers(getPublicMod())
-                        .returnType(VOID)
-                        .name("set" + StringUtils.capitalize(field.getName()))
-                        .args(new EnumerationList<ArgumentEntity>(false,
-                                ArgumentEntity.builder()
-                                        .type("Set<" + field.getType() + ">")
-                                        .name(field.getName())
-                                        .build()))
-                        .body(getListSetterBody(field, entity.getName(), entities))
-                        .build();
-
-                methods.add(setter);
+            if (Objects.nonNull(field.getRelation())) {
+                methods.addAll(setMethodsByRelation(field, entity.getName(), entities));
             }
         }
 
         return new IndentList<MethodEntity>(DelimiterType.INDENT, true, false, methods);
     }
 
-    private String getListSetterBody(FieldEntity field, String fieldType, List<ClassEntity> entities) {
-        String mappedFieldName = "";
-        String ownerClassName = field.getType();
-        String fieldName = field.getName();
-
-        for (ClassEntity entity : entities) {
-
-            if (ownerClassName.equals(entity.getName())) {
-                mappedFieldName = entity.getFields()
-                        .stream()
-                        .filter(entityField -> fieldType.equals(entityField.getType()))
-                        .findFirst()
-                        .orElseGet(() -> getAnyMatchFieldType(fieldType, entity.getFields()))
-                        .getName();
-            }
+    private Collection<? extends MethodEntity> setMethodsByRelation(FieldEntity field, String entityName, List<ClassEntity> entities) {
+        switch (field.getRelation().getRelationType()) {
+            case ONE_TO_ONE: return setOneToRelationMethods(field, entityName, entities, false);
+            case MANY_TO_ONE: return setOneToRelationMethods(field, entityName, entities, true);
+            case ONE_TO_MANY: return setListRelationMethods(field, entityName, entities, false);
+            case MANY_TO_MANY: return setListRelationMethods(field, entityName, entities, true);
+            default: return Collections.emptyList();
         }
-
-        return "if (Objects.nonNull(" + fieldName + ") && !" + fieldName + ".isEmpty()) {\n" +
-                "\n" +
-                "\t\t\t" + fieldName + ".forEach(" + ownerClassName.toLowerCase() + " -> {\n" +
-                "\t\t\t\tif (Objects.nonNull(" + ownerClassName.toLowerCase() + ")) {\n" +
-                "\t\t\t\t\t" + ownerClassName.toLowerCase() + ".set"+ StringUtils.capitalize(mappedFieldName) + "(this);\n" +
-                "\t\t\t\t}\n" +
-                "\t\t\t});\n" +
-                "\t\t}\n" +
-                "\t\tthis." + fieldName + " = " + fieldName + ";";
     }
 
-    private FieldEntity getAnyMatchFieldType(String fieldType, IndentList<FieldEntity> fields) {
-        return fields.stream()
-                .filter(field -> fieldType.contains(field.getType()))
-                .findFirst()
-                .orElseGet(() -> FieldEntity.builder().name("unknown mapping").build());
+    private Collection<? extends MethodEntity> setListRelationMethods(FieldEntity field, String entityName, List<ClassEntity> entities, boolean isManyToMany) {
+        List<MethodEntity> relationMethods = new ArrayList<>();
+
+        FieldEntity mappedField = DomainHelper.getMappedFieldFromEntities(field, entityName, entities);
+        String mappedFieldName = mappedField.getName();
+        String mappedFieldType = mappedField.getType();
+        String fieldName = field.getName();
+        String fieldType = field.getType();
+
+        MethodEntity setListMethod = MethodEntity.builder()
+                .modifiers(getPublicMod())
+                .returnType(VOID)
+                .name("set" + StringUtils.capitalize(field.getName()))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type("Set<" + field.getType() + ">")
+                                .name(field.getName())
+                                .build()))
+                .body(this.getListSetterBody(fieldName, mappedFieldName, fieldType, mappedFieldType, isManyToMany))
+                .build();
+
+        MethodEntity getListMethod = MethodEntity.builder()
+                .modifiers(getPublicMod())
+                .returnType("Set<" + field.getType() + ">")
+                .name("get" + StringUtils.capitalize(field.getName()))
+                .body(getListGetterBody(fieldName))
+                .build();
+
+        MethodEntity addMethod = MethodEntity.builder()
+                .modifiers(getPublicMod())
+                .returnType(VOID)
+                .name("add" + StringUtil.toSingle(StringUtils.capitalize(field.getName())))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(field.getType())
+                                .name(field.getType().toLowerCase())
+                                .build()))
+                .body(getAddToListBody(fieldName, mappedFieldName, fieldType, mappedFieldType, isManyToMany))
+                .build();
+
+        MethodEntity removeMethod = MethodEntity.builder()
+                .modifiers(getPublicMod())
+                .returnType(VOID)
+                .name("remove" + StringUtil.toSingle(StringUtils.capitalize(field.getName())))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(field.getType())
+                                .name(field.getType().toLowerCase())
+                                .build()))
+                .body(getRemoveFromListBody(fieldName, mappedFieldName, fieldType, mappedFieldType, isManyToMany))
+                .build();
+
+        relationMethods.add(setListMethod);
+        relationMethods.add(getListMethod);
+        relationMethods.add(addMethod);
+        relationMethods.add(removeMethod);
+
+        return relationMethods;
+    }
+
+    private Collection<? extends MethodEntity> setOneToRelationMethods(FieldEntity field, String entityName, List<ClassEntity> entities, boolean isManyToOne) {
+        List<MethodEntity> relationMethods = new ArrayList<>();
+
+        FieldEntity mappedField = DomainHelper.getMappedFieldFromEntities(field, entityName, entities);
+        String mappedFieldName = mappedField.getName();
+        String mappedFieldType = mappedField.getType();
+        String fieldName = field.getName();
+        String fieldType = field.getType();
+
+        MethodEntity setMethod = MethodEntity.builder()
+                .modifiers(getPublicMod())
+                .returnType(VOID)
+                .name("set" + StringUtils.capitalize(field.getName()))
+                .args(new EnumerationList<ArgumentEntity>(false,
+                        ArgumentEntity.builder()
+                                .type(field.getType())
+                                .name("new" + StringUtils.capitalize(field.getName()))
+                                .build()))
+                .body(getSetterRelationBody(fieldName, mappedFieldName, fieldType, mappedFieldType, isManyToOne))
+                .build();
+
+        relationMethods.add(setMethod);
+
+        return relationMethods;
+    }
+
+    private String getSetterRelationBody(String fieldName, String mappedFieldName, String fieldType, String mappedFieldType, boolean isManyToOne) {
+        return "if (Objects.equals(" + fieldName + ", new" + StringUtils.capitalize(fieldName) + ")) { return; }\n" +
+                "\n" +
+                "\t\t" + fieldType + " old" + StringUtils.capitalize(fieldName) + " = " + fieldName + ";\n" +
+                "\t\t" + fieldName + " = new" + StringUtils.capitalize(fieldName) + ";\n" +
+                "\t\tif (Objects.nonNull(old" + StringUtils.capitalize(fieldName) + "))\n" +
+                "\t\t\told" + StringUtils.capitalize(fieldName) + (isManyToOne ?
+                        ".remove" + StringUtil.toSingle(StringUtils.capitalize(mappedFieldName)) + "(this);\n"
+                        : ".set" + StringUtils.capitalize(mappedFieldName) + "(NULL);\n") +
+                "\n" +
+                "\t\tif (Objects.nonNull(" + fieldName + "))\n" +
+                "\t\t\t" + fieldName + (isManyToOne ?
+                        ".add" + StringUtil.toSingle(StringUtils.capitalize(mappedFieldName)) + "(this);\n"
+                        : ".set" + StringUtils.capitalize(mappedFieldName) + "(this);");
+    }
+
+    private String getListSetterBody(String fieldName, String mappedFieldName, String fieldType, String mappedFieldType, boolean isManyToMany) {
+        return "if (Objects.nonNull("+ fieldName + ") && !" + fieldName + ".isEmpty()) {\n" +
+                "\t\t\t" + fieldName + ".forEach(" + fieldType.toLowerCase()
+                    + " -> " + fieldType.toLowerCase() + (isManyToMany ?
+                        ".add" + StringUtil.toSingle(StringUtils.capitalize(mappedFieldName))
+                        : ".set" + StringUtils.capitalize(mappedFieldName))
+                    + "(this));\n" +
+                "\t\t\tthis." + fieldName + " = " + fieldName + ";\n" +
+                "\t\t}";
+    }
+
+    private String getListGetterBody(String fieldName) {
+        return "return new HashSet<>(" + fieldName + ");";
+    }
+
+    private String getAddToListBody(String fieldName, String mappedFieldName, String fieldType, String mappedFieldType, boolean isManyToMany) {
+        return "if (Objects.isNull(" + fieldType.toLowerCase() + ") || " + fieldName + ".contains(" + fieldType.toLowerCase() + ")) {\n" +
+                "\t\t\treturn;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t" + fieldName + ".add(" + fieldType.toLowerCase() + ");\n" +
+                "\t\t" + fieldType.toLowerCase() + (isManyToMany ?
+                    ".add" + StringUtil.toSingle(StringUtils.capitalize(mappedFieldName))
+                    : ".set" + StringUtils.capitalize(mappedFieldName))
+                    + "(this);";
+    }
+
+    private String getRemoveFromListBody(String fieldName, String mappedFieldName, String fieldType, String mappedFieldType, boolean isManyToMany) {
+        return "if (!" + fieldName + ".contains(" + fieldType.toLowerCase() + ")) {\n" +
+                "\t\t\treturn;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t" + fieldName + ".remove(" + fieldType.toLowerCase() + ");\n" +
+                "\t\t" + fieldType.toLowerCase() + (isManyToMany ?
+                    ".remove" + StringUtil.toSingle(StringUtils.capitalize(mappedFieldName)) + "(this);"
+                    : ".set" + StringUtils.capitalize(mappedFieldName) + "(NULL);");
     }
 
 //    public IndentList<MethodEntity> getEqualsAndHashMethods(String entityName) {

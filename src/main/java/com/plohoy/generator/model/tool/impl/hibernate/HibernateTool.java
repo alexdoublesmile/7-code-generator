@@ -9,6 +9,7 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.field.FieldRelation;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
+import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -150,37 +151,15 @@ public class HibernateTool extends AbstractTool {
                             .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                     PropertyEntity.builder()
                                             .name("mappedBy")
-                                            .quotedValue(getMappedByOwner(field.getType(), entity.getName(), entityFiles))
+                                            .quotedValue(
+                                                    DomainHelper
+                                                        .getMappedFieldFromFiles(field, entity.getName(), entityFiles)
+                                                        .getName())
                                             .build()))
                             .build());
         }
 
         return annotations;
-    }
-
-    private String getMappedByOwner(String ownerClassName, String fieldType, List<AbstractSourceFile> entityFiles) {
-        String mappedFieldName = "";
-
-        for (AbstractSourceFile<ClassEntity> file : entityFiles) {
-            ClassEntity entity = file.getData();
-
-            if (ownerClassName.equals(entity.getName())) {
-                mappedFieldName = entity.getFields()
-                        .stream()
-                        .filter(field -> fieldType.equals(field.getType()))
-                        .findFirst()
-                        .orElseGet(() -> getAnyMatchFieldType(fieldType, entity.getFields()))
-                        .getName();
-            }
-        }
-        return mappedFieldName;
-    }
-
-    private FieldEntity getAnyMatchFieldType(String fieldType, IndentList<FieldEntity> fields) {
-        return fields.stream()
-                .filter(field -> fieldType.contains(field.getType()))
-                .findFirst()
-                .orElseGet(() -> FieldEntity.builder().name("unknown mapping").build());
     }
 
     private List<AnnotationEntity> getAnnotationsForOneToMany(FieldEntity field, ClassEntity entity, List<AbstractSourceFile> entityFiles) {
@@ -192,7 +171,10 @@ public class HibernateTool extends AbstractTool {
                         .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                 PropertyEntity.builder()
                                         .name("mappedBy")
-                                        .quotedValue(getMappedByOwner(field.getType(), entity.getName(), entityFiles))
+                                        .quotedValue(
+                                                DomainHelper
+                                                        .getMappedFieldFromFiles(field, entity.getName(), entityFiles)
+                                                        .getName())
                                         .build(),
                                 PropertyEntity.builder()
                                         .name("fetch")
@@ -223,18 +205,6 @@ public class HibernateTool extends AbstractTool {
                                 PropertyEntity.builder()
                                         .name("fetch")
                                         .simpleValue("FetchType.EAGER")
-                                        .build(),
-                                PropertyEntity.builder()
-                                        .name("cascade")
-                                        .simpleValueList(
-                                                SimpleValueList.builder()
-                                                    .values(new IndentList<String>(DelimiterType.COMMA, false,
-                                                            "CascadeType.MERGE",
-                                                            "CascadeType.DETACH",
-                                                            "CascadeType.PERSIST",
-                                                            "CascadeType.REFRESH"
-                                                    ))
-                                                    .build())
                                         .build()))
                         .build());
 
@@ -252,25 +222,49 @@ public class HibernateTool extends AbstractTool {
     }
 
     private List<AnnotationEntity> getAnnotationsForManyToMany(FieldEntity field, ClassEntity entity, List<AbstractSourceFile> entityFiles) {
+        FieldEntity mappedField = DomainHelper
+                .getMappedFieldFromFiles(field, entity.getName(), entityFiles);
+
+        boolean isRelationOwner = field.getRelation().isRelationOwner();
+
+        return isRelationOwner ? setManyToManyOwnerAnnotations(entity, field, mappedField)
+                : setManyToManyInverseAnnotations(entity, field, mappedField);
+    }
+
+    private List<AnnotationEntity> setManyToManyInverseAnnotations(ClassEntity entity, FieldEntity field, FieldEntity mappedField) {
         List<AnnotationEntity> annotations = new ArrayList<>();
-        FieldEntity mappedField = null;
+        annotations.add(
+                AnnotationEntity.builder()
+                        .name(StringUtil.toCamelCase(MANY_TO_MANY.name()))
+                        .property(PropertyEntity.builder()
+                                .name("mappedBy")
+                                .quotedValue(mappedField.getName())
+                                .build())
+                        .build());
 
-        for (AbstractSourceFile<ClassEntity> file : entityFiles) {
-            ClassEntity someEntity = file.getData();
+        return annotations;
+    }
 
-            if (field.getType().equals(someEntity.getName())) {
-                mappedField = someEntity.getFields()
-                        .stream()
-                        .filter(someField -> entity.getName().equals(someField.getType()))
-                        .findFirst()
-                        .orElseGet(() ->
-                                getAnyMatchFieldType(entity.getName(), someEntity.getFields()));
-            }
-        }
+    private List<AnnotationEntity> setManyToManyOwnerAnnotations(ClassEntity entity, FieldEntity field, FieldEntity mappedField) {
+        List<AnnotationEntity> annotations = new ArrayList<>();
 
         annotations.add(
                 AnnotationEntity.builder()
                         .name(StringUtil.toCamelCase(MANY_TO_MANY.name()))
+                        .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                PropertyEntity.builder()
+                                        .name("fetch")
+                                        .simpleValue("FetchType.LAZY")
+                                        .build(),
+                                PropertyEntity.builder()
+                                        .name("cascade")
+                                        .simpleValueList(
+                                                SimpleValueList.builder()
+                                                        .values(new IndentList<String>(DelimiterType.COMMA, false,
+                                                                "CascadeType.PERSIST",
+                                                                "CascadeType.REFRESH"))
+                                                        .build())
+                                        .build()))
                         .build());
 
         annotations.add(
@@ -279,7 +273,7 @@ public class HibernateTool extends AbstractTool {
                         .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
                                 PropertyEntity.builder()
                                         .name("name")
-                                        .quotedValue(getManyToManyTable(mappedField, entity.getName(), field.getType()))
+                                        .quotedValue(getManyToManyTable(field, mappedField))
                                         .build(),
                                 PropertyEntity.builder()
                                         .name("joinColumns")
@@ -287,10 +281,10 @@ public class HibernateTool extends AbstractTool {
                                                 AnnotationEntity.builder()
                                                         .name("JoinColumn")
                                                         .property(
-                                                            PropertyEntity.builder()
-                                                                    .name("name")
-                                                                    .quotedValue(StringUtil.toSnakeCase(entity.getName()) + "_id")
-                                                                    .build())
+                                                                PropertyEntity.builder()
+                                                                        .name("name")
+                                                                        .quotedValue(StringUtil.toSnakeCase(StringUtil.toSingle(field.getName())) + "_id")
+                                                                        .build())
                                                         .build()
                                         ))
                                         .build(),
@@ -302,18 +296,15 @@ public class HibernateTool extends AbstractTool {
                                                         .property(
                                                                 PropertyEntity.builder()
                                                                         .name("name")
-                                                                        .quotedValue(StringUtil.toSnakeCase(field.getType()) + "_id")
+                                                                        .quotedValue(StringUtil.toSnakeCase(StringUtil.toSingle(mappedField.getName())) + "_id")
                                                                         .build())
-                                                        .build()
-                                        ))
-                                        .build()
-                        ))
+                                                        .build()))
+                                        .build()))
                         .build());
-
         return annotations;
     }
 
-    private String getManyToManyTable(FieldEntity mappedField, String ownerName, String mappedName) {
+    private String getManyToManyTable(FieldEntity field, FieldEntity mappedField) {
         PropertyEntity nameProperty = null;
         EnumerationList<PropertyEntity> joinTableAnnotationProperties = null;
 
@@ -338,8 +329,8 @@ public class HibernateTool extends AbstractTool {
         } else {
             return String.format(
                     "%s_%s",
-                    StringUtil.toSnakeCase(ownerName),
-                    StringUtil.toSnakeCase(mappedName)
+                    StringUtil.toSnakeCase(field.getName()),
+                    StringUtil.toSnakeCase(mappedField.getName())
             );
         }
     }

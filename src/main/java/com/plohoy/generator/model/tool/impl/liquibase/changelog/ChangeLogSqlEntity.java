@@ -19,7 +19,7 @@ public class ChangeLogSqlEntity extends CodeEntity<ChangeLogSqlEntity> {
 
     @Override
     public String toString() {
-        return (tables.toString() + constraints).replace(NULL, EMPTY);
+        return (tables.toString() + constraints).replace(NULL, EMPTY).replace("NULL", "null");
     }
 
     @Override

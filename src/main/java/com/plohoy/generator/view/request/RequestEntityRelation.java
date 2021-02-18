@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class RequestEntityRelation {
     private RelationType relationType;
+    private String relationName;
     private boolean relationOwner;
     private List<PropertyEntity> properties;
 }

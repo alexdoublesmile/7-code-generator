@@ -61,10 +61,7 @@ public class DeleteHardlyMethodEntity extends MethodEntity {
                                 .name("id")
                                 .build()),
                 null,
-                new IndentList<>(
-                        AnnotationEntity.builder()
-                                .name("Transactional")
-                                .build()),
+                null,
                 "try {\n" +
                         "            repository.deleteById(id);\n" +
                         "        } catch (EmptyResultDataAccessException e) {\n" +

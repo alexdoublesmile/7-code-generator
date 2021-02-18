@@ -43,6 +43,7 @@ public class DTOPomBuilder implements PomBuilder {
 
         PropertiesTag properties = new PropertiesTag();
         IndentList<CodeEntity> propertyList = MavenTemplate.getPropertiesFromTools(tools);
+        propertyList.add(new SimpleTag("project.build.sourceEncoding", "UTF-8"));
         propertyList.add(new PropertyTag(JAVA, source.getJdkVersion()));
         propertyList.add(new PropertyTag("hibernate_validator", "6.1.6.Final"));
 

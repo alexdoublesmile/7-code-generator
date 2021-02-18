@@ -177,6 +177,7 @@ public class RequestMapper {
 
             fieldRelation = FieldRelation.builder()
                     .relationType(requestRelation.getRelationType())
+                    .relationName(requestRelation.getRelationName())
                     .relationOwner(requestRelation.isRelationOwner())
                     .properties(relationProperties)
                     .build();

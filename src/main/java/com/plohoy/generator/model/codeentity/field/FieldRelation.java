@@ -9,6 +9,7 @@ import lombok.Data;
 @Builder
 public class FieldRelation {
     private RelationType relationType;
+    private String relationName;
     private boolean relationOwner;
     private EnumerationList<PropertyEntity> properties;
 }

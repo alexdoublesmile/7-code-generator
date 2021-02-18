@@ -143,4 +143,15 @@ public class StringUtil {
         return StringUtil.toCamelCase(rootName + EXCEPTION_SUFFIX);
     }
 
+    public static String toSingle(String name) {
+        String result = "";
+
+        result = name.substring(0, name.length() - 1);
+        String single = result;
+        String substring = single.substring(single.length() - 2);
+        if ("se".equals(substring)) {
+            result = single.substring(0, name.length() - 2);
+        }
+        return result;
+    }
 }

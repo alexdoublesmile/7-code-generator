@@ -1,6 +1,7 @@
 package com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity;
 
 import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Builder;
 import lombok.Data;
@@ -15,9 +16,9 @@ public class DBTableEntity extends CodeEntity<DBTableEntity> {
 
     private String tableName;
     private IndentList<DBFieldEntity> fields;
-    private DBFieldEntity primaryKey;
+    private EnumerationList<String> primaryKey;
 
-    public DBTableEntity(String tableName, IndentList<DBFieldEntity> fields, DBFieldEntity primaryKey) {
+    public DBTableEntity(String tableName, IndentList<DBFieldEntity> fields, EnumerationList<String> primaryKey) {
         this.tableName = tableName;
         this.primaryKey = primaryKey;
 
@@ -42,7 +43,7 @@ public class DBTableEntity extends CodeEntity<DBTableEntity> {
         return CREATE_TABLE_WORD + SPACE + tableName + SPACE + OPEN_PARAM_BRACKET + INDENT
                 + fields
                 + getTab(getNestLvl() + 1) + PRIMARY_KEY_WORD + SPACE
-                + OPEN_PARAM_BRACKET + primaryKey.getFieldName() + CLOSE_PARAM_BRACKET + INDENT
+                + OPEN_PARAM_BRACKET + primaryKey + CLOSE_PARAM_BRACKET + INDENT
                 + CLOSE_PARAM_BRACKET;
     }
 

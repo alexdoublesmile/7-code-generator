@@ -23,11 +23,11 @@ import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.plohoy.generator.model.file.FileType.ENTITY;
 import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.CORE;
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.ID;
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.SLASH;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public class LiquibaseTool extends AbstractTool {
 
@@ -39,6 +39,7 @@ public class LiquibaseTool extends AbstractTool {
     private static final String DEFAULT_HEADER_VALUE = "--liquibase formatted sql\n";
 
     private List<DBTableEntity> tables = new ArrayList<>();
+    private List<ConstraintEntity> manyToManyConstraints = new ArrayList<>();
 
     public LiquibaseTool(String version) {
         super(version, DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, SCOPE,
@@ -109,30 +110,113 @@ public class LiquibaseTool extends AbstractTool {
                     DBTableEntity.builder()
                             .tableName(StringUtil.toSnakeCase(entity.getName()))
                             .fields(getDBFieldsFromEntity(entity.getFields(), entity.getIdType()))
-                            .primaryKey(mapFieldToDB(entity.getFields()
-                                    .stream()
-                                    .filter(field ->
-                                            ID.equals(field.getName())
-                                                    && entity.getIdType().equals(field.getType()))
-                                    .findFirst()
-                                    .orElseGet(() -> {
-                                        return FieldEntity.builder()
-                                                .type(entity.getIdType())
-                                                .name(ID)
-                                                .build();
-                                    }), null))
+                            .primaryKey(getPrimaryKeyByName(entity, ID))
                             .build()
             );
+
+            List<FieldEntity> manyToManyFields = entity.getFields().stream()
+                    .filter(DomainHelper::hasManyToManyRelation)
+                    .filter(DomainHelper::isRelationOwner)
+                    .collect(Collectors.toList());
+
+            for (FieldEntity manyToManyField : manyToManyFields) {
+                String manyToManyOwnerName = StringUtil.toSnakeCase(manyToManyField.getName());
+                String manyToManyInverseEndName = StringUtil.toSnakeCase(
+                        DomainHelper.getMappedFieldFromFiles(manyToManyField, entity.getName(), entityFiles)
+                                .getName());
+
+                String manyToManyTableName = getManyToManyTableName(manyToManyOwnerName, manyToManyInverseEndName);
+
+                if (!hasSameTable(manyToManyTableName)) {
+                    tables.add(
+                            DBTableEntity.builder()
+                                .tableName(manyToManyTableName)
+                                .fields(new IndentList<DBFieldEntity>(DelimiterType.COMMA, true, true,
+                                        DBFieldEntity.builder()
+                                                .fieldType(StringUtil.toSnakeCase(entity.getIdType()))
+                                                .fieldName(getDBEntityKey(StringUtil.toSingle(manyToManyOwnerName)))
+                                                .fieldProperties(setNullDBProperty())
+                                                .build(),
+                                        DBFieldEntity.builder()
+                                                .fieldType(StringUtil.toSnakeCase(entity.getIdType()))
+                                                .fieldName(getDBEntityKey(StringUtil.toSingle(manyToManyInverseEndName)))
+                                                .fieldProperties(setNullDBProperty())
+                                                .build()))
+                                .primaryKey(getPrimaryKeysByName(
+                                        getDBEntityKey(StringUtil.toSingle(manyToManyOwnerName)),
+                                        getDBEntityKey(StringUtil.toSingle(manyToManyInverseEndName))))
+                                .build());
+                } else {
+                    manyToManyTableName = getManyToManyTableName(manyToManyInverseEndName, manyToManyOwnerName);
+                }
+
+                manyToManyConstraints.add(
+                        ConstraintEntity.builder()
+                                .currentTableName(manyToManyTableName)
+                                .referencedTableName(StringUtil.toSnakeCase(entity.getName()))
+                                .foreignKey(getDBEntityKey(StringUtil.toSingle(manyToManyOwnerName)))
+                                .build()
+                );
+
+                manyToManyConstraints.add(
+                        ConstraintEntity.builder()
+                                .currentTableName(manyToManyTableName)
+                                .referencedTableName(StringUtil.toSnakeCase(manyToManyField.getType()))
+                                .foreignKey(getDBEntityKey(StringUtil.toSingle(manyToManyInverseEndName)))
+                                .build()
+                );
+            }
         }
 
         return new IndentList<DBTableEntity>(DelimiterType.SEMICOLON, true, true, tables);
+    }
+
+    private EnumerationList<String> getPrimaryKeysByName(String ... primaryKeyNames) {
+        return new EnumerationList<String>(DelimiterType.COMMA, false, Arrays.asList(primaryKeyNames));
+    }
+
+    private EnumerationList<String> getPrimaryKeyByName(ClassEntity entity, String primaryKeyName) {
+        FieldEntity primaryKeyField = entity.getFields()
+                .stream()
+                .filter(field ->
+                        primaryKeyName.equals(field.getName())
+                                && entity.getIdType().equals(field.getType()))
+                .findFirst()
+                .orElseGet(() -> FieldEntity.builder()
+                        .type(entity.getIdType())
+                        .name(primaryKeyName)
+                        .build());
+
+        return new EnumerationList<String>(false, primaryKeyField.getName());
+    }
+
+    private String getDBEntityKey(String entityName) {
+        return StringUtil.toSnakeCase(entityName) + "_id";
+    }
+
+    private String getManyToManyTableName(String ownerName, String inverseName) {
+        return StringUtil.toSnakeCase(ownerName)
+                + "_"
+                + StringUtil.toSnakeCase(inverseName);
+    }
+
+    private boolean hasSameTable(String manyToManyTableName) {
+        return tables.stream()
+                .anyMatch(table -> manyToManyTableName.equals(table.getTableName())
+                        || checkInverseTableName(manyToManyTableName, table.getTableName()));
+    }
+
+    private boolean checkInverseTableName(String manyToManyTableName, String tableName) {
+        return Stream.of(manyToManyTableName.split("_"))
+                .allMatch(tableName::contains);
     }
 
     private IndentList<DBFieldEntity> getDBFieldsFromEntity(IndentList<FieldEntity> fields, String idType) {
         List<DBFieldEntity> dbFields = new ArrayList<>();
 
         for (FieldEntity fieldEntity : fields) {
-            if (!DomainHelper.isBackReference(fieldEntity)) {
+            if (!DomainHelper.isOneToBackReference(fieldEntity)
+                    && !DomainHelper.hasManyToManyRelation(fieldEntity)) {
                 dbFields.add(mapFieldToDB(fieldEntity, idType));
             }
         }
@@ -156,7 +240,11 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private EnumerationList<String> setDBProperties(FieldEntity fieldEntity) {
-        return ID.equals(fieldEntity.getName()) ? new EnumerationList<String>(false, "NOT NULL") : null;
+        return ID.equals(fieldEntity.getName()) ? new EnumerationList<String>(false, "not NULL") : null;
+    }
+
+    private EnumerationList<String> setNullDBProperty() {
+        return new EnumerationList<String>(false, "not NULL");
     }
 
     private String mapFieldTypeToDB(String type) {
@@ -200,13 +288,15 @@ public class LiquibaseTool extends AbstractTool {
                         ConstraintEntity.builder()
                                 .currentTableName(entity.getName().toLowerCase())
                                 .referencedTableName(StringUtil.toSnakeCase(field.getType()))
-                                .foreignKey(field.getName() + "_id")
+                                .foreignKey(getDBEntityKey(field.getName()))
                                 .build()
                 );
             }
         }
 
-        return new IndentList<ConstraintEntity>(DelimiterType.SEMICOLON, true, constraintList);
+        constraintList.addAll(manyToManyConstraints);
+
+        return new IndentList<ConstraintEntity>(DelimiterType.SEMICOLON, true, true, constraintList);
     }
 
     private List<String> getRollbackValues() {

@@ -10,6 +10,8 @@ import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.stringhelper.list.DelimiterType;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.List;
@@ -48,8 +50,24 @@ public class JacksonTool extends AbstractTool {
                     field.setAnnotations(new IndentList<AnnotationEntity>());
                 }
 
-                if ("deleted".equals(field.getName())
-                        || DomainHelper.isOneToOneBackReference(field)
+                if ("deleted".equals(field.getName())) {
+                    field.getAnnotations().add(
+                            AnnotationEntity.builder()
+                                    .name("JsonProperty")
+                                    .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                            PropertyEntity.builder()
+                                                    .name("value")
+                                                    .quotedValue("deleted")
+                                                    .build(),
+                                            PropertyEntity.builder()
+                                                    .name("access")
+                                                    .simpleValue("JsonProperty.Access.READ_ONLY")
+                                                    .build()
+                                    ))
+                                    .build()
+                                    .setParentEntity(field)
+                    );
+                } else if (DomainHelper.isOneToOneBackReference(field)
                         || DomainHelper.hasManyToOneRelation(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()

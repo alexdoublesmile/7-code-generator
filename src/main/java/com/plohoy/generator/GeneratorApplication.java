@@ -78,7 +78,7 @@ public class GeneratorApplication {
                 .name("Person")
                 .fields(getTestPersonFields())
                 .description("Персона")
-                .endPoints(getTestEndPoints())
+                .endPoints(getTestPersonEndPoints())
                 .build();
 
         RequestEntity detailsRequestEntity = RequestEntity.builder()
@@ -96,6 +96,7 @@ public class GeneratorApplication {
         RequestEntity addressRequestEntity = RequestEntity.builder()
                 .name("Address")
                 .fields(getTestAddressFields())
+                .endPoints(getTestEndPoints())
                 .build();
 
         entities.add(personRequestEntity);
@@ -148,7 +149,6 @@ public class GeneratorApplication {
                 .description("Паспорта персоны")
                 .relation(RequestEntityRelation.builder()
                         .relationType(ONE_TO_MANY)
-//                        .relationOwner(true)
                         .build())
                 .array(true)
                 .build();
@@ -159,9 +159,75 @@ public class GeneratorApplication {
                 .description("Адреса персоны")
                 .relation(RequestEntityRelation.builder()
                         .relationType(MANY_TO_MANY)
-//                        .relationOwner(true)
+                        .relationOwner(true)
                         .build())
                 .array(true)
+                .build();
+
+        RequestEntityField mentorField = RequestEntityField.builder()
+                .type("Person")
+                .name("mentor")
+                .description("Ментор")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_ONE)
+                        .relationName("student")
+                        .build())
+                .build();
+
+        RequestEntityField studentField = RequestEntityField.builder()
+                .type("Person")
+                .name("student")
+                .description("Студент")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_ONE)
+                        .relationOwner(true)
+                        .relationName("mentor")
+                        .build())
+                .build();
+
+        RequestEntityField subscriptionsField = RequestEntityField.builder()
+                .type("Person")
+                .name("subscriptions")
+                .description("Подписки")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_MANY)
+                        .relationOwner(true)
+                        .relationName("subscribers")
+                        .build())
+                .array(true)
+                .build();
+
+        RequestEntityField subscribersField = RequestEntityField.builder()
+                .type("Person")
+                .name("subscribers")
+                .description("Подписчики")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_MANY)
+                        .relationName("subscriptions")
+                        .build())
+                .array(true)
+                .build();
+
+        RequestEntityField childrenField = RequestEntityField.builder()
+                .type("Person")
+                .name("childs")
+                .description("Потомки")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(ONE_TO_MANY)
+                        .relationName("parent")
+                        .build())
+                .array(true)
+                .build();
+
+        RequestEntityField parentField = RequestEntityField.builder()
+                .type("Person")
+                .name("parent")
+                .description("Предок")
+                .relation(RequestEntityRelation.builder()
+                        .relationType(MANY_TO_ONE)
+                        .relationName("childs")
+                        .relationOwner(true)
+                        .build())
                 .build();
 
         fields.add(idField);
@@ -171,6 +237,12 @@ public class GeneratorApplication {
         fields.add(detailsField);
         fields.add(passportsField);
         fields.add(addressesField);
+        fields.add(childrenField);
+        fields.add(parentField);
+        fields.add(mentorField);
+        fields.add(studentField);
+        fields.add(subscribersField);
+        fields.add(subscriptionsField);
 
         return fields;
     }
@@ -215,7 +287,7 @@ public class GeneratorApplication {
 
         RequestEntityField personField = RequestEntityField.builder()
                 .type("Person")
-                .name("person")
+                .name("owner")
                 .description("Сущность")
                 .relation(RequestEntityRelation.builder()
                         .relationType(ONE_TO_ONE)
@@ -261,7 +333,7 @@ public class GeneratorApplication {
 
         RequestEntityField personField = RequestEntityField.builder()
                 .type("Person")
-                .name("person")
+                .name("owner")
                 .description("Владелец паспорта")
                 .relation(RequestEntityRelation.builder()
                         .relationType(MANY_TO_ONE)
@@ -369,7 +441,7 @@ public class GeneratorApplication {
         return tools;
     }
 
-    private static List<EndPoint> getTestEndPoints() {
+    private static List<EndPoint> getTestPersonEndPoints() {
 
         List<EndPoint> endPoints = new ArrayList<>();
         endPoints.add(
@@ -449,7 +521,7 @@ public class GeneratorApplication {
 
     }
 
-    private static List<EndPoint> getTestPassportEndPoints() {
+    private static List<EndPoint> getTestEndPoints() {
 
         List<EndPoint> endPoints = new ArrayList<>();
         endPoints.add(EndPoint.builder()

@@ -9,10 +9,10 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
 import com.plohoy.generator.util.domainhelper.DomainHelper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
 
 import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
+import static com.plohoy.generator.model.file.FileType.ENTITY;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @SuppressWarnings("Duplicates")
@@ -82,19 +82,23 @@ public class CodeBuilder {
     }
 
     public ClassEntity buildMapperCode(Source source, String fileName, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
-        List<FieldEntity> relationFields = mainEntity.getFields().stream()
-                .filter(field -> DomainHelper.hasOneToRelation(field))
-                .collect(Collectors.toList());
+        HashMap<FieldEntity, FieldEntity> loopPossibleWithMappedFields = new HashMap<>();
+
+        mainEntity.getFields().stream()
+                .filter(DomainHelper::hasAnyRelations)
+                .forEach(field -> loopPossibleWithMappedFields.put(
+                        field,
+                        DomainHelper.getMappedFieldFromFiles(field, mainEntity.getName(), source.getSourceData().get(ENTITY))));
 
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + MAPPER_SUFFIX.toLowerCase()))
-                .imports(codeTemplate.getMapstructImports(source.getCorePackageName(), mainEntity.getName(), relationFields))
-                .annotations(codeTemplate.getMapstructAnnotations())
+                .imports(codeTemplate.getMapStructImports(source.getCorePackageName(), mainEntity.getName(), loopPossibleWithMappedFields))
+                .annotations(codeTemplate.getMapStructAnnotations())
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.INTERFACE)
                 .name(fileName)
-                .methods(codeTemplate.getMapstructMethods(mainEntity, relationFields))
+                .methods(codeTemplate.getMapStructMethods(mainEntity, source.getSourceData().get(ENTITY)))
                 .build();
     }
 

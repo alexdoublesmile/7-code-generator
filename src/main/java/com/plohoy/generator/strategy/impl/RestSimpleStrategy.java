@@ -27,13 +27,13 @@ public class RestSimpleStrategy implements Strategy {
 
         return fileBuilder
                 .registerSource(source)
-                .addSpringBootLauncher()
+                .addDomain()
                 .addSimpleController(mainEntities)
                 .addSimpleService(mainEntities)
                 .addSimpleRepository(mainEntities)
                 .addMapper(mainEntities)
-                .addDomain()
                 .addException()
+                .addSpringBootLauncher()
                 .addProperties()
                 .generateSource();
     }

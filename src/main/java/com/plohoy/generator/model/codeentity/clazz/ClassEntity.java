@@ -153,7 +153,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
                         + methods
                         + innerClasses
                         + CLOSE_BODY_BRACKET + getIndent()
-        ).replace(NULL, EMPTY);
+        ).replace(NULL, EMPTY).replace("NULL", "null");
     }
 }
 

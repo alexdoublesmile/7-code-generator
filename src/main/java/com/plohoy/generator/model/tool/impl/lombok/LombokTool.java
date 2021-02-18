@@ -59,8 +59,9 @@ public class LombokTool extends AbstractTool {
                 }
 
                 if ((DomainHelper.isOneToOneBackReference(field)
-                            || DomainHelper.hasManyToOneRelation(field))
-                        && !hasExcludeAnnotations(entity.getFields())) {
+                            || DomainHelper.hasManyToOneRelation(field)
+                            || DomainHelper.isManyToManyBackReference(field))
+                        && !hasExcludeAnnotations(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()
                                     .name(TO_STRING_EXCLUDE)
@@ -85,21 +86,23 @@ public class LombokTool extends AbstractTool {
                         }
                     }
 
-                    entity.getImports().add(ImportEntity.builder().value("lombok.ToString").build().setParentEntity(entity));
-                    entity.getImports().add(ImportEntity.builder().value("lombok.EqualsAndHashCode").build().setParentEntity(entity));
+                    ImportEntity toStringImport = ImportEntity.builder().value("lombok.ToString").build().setParentEntity(entity);
+                    if (!entity.getImports().contains(toStringImport)) {
+
+                        entity.getImports().add(toStringImport);
+                        entity.getImports().add(ImportEntity.builder().value("lombok.EqualsAndHashCode").build().setParentEntity(entity));
+                    }
                 }
             }
         }
     }
 
-    private boolean hasExcludeAnnotations(IndentList<FieldEntity> fields) {
+    private boolean hasExcludeAnnotations(FieldEntity field) {
 
-        return fields.stream().anyMatch(field ->
-                Objects.nonNull(field.getAnnotations()) &&
+        return Objects.nonNull(field.getAnnotations()) &&
                 field.getAnnotations().stream()
                         .anyMatch(annotation ->
                         TO_STRING_EXCLUDE.equals(annotation.getName())
-                                || EQUALS_EXCLUDE.equals(annotation.getName()))
-        );
+                                || EQUALS_EXCLUDE.equals(annotation.getName()));
     }
 }
