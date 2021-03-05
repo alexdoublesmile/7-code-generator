@@ -13,8 +13,7 @@ import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static com.plohoy.generator.model.tool.ToolType.MAVEN;
-import static com.plohoy.generator.model.tool.ToolType.SPRING_BOOT;
+import static com.plohoy.generator.model.tool.ToolType.*;
 import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.*;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
@@ -45,7 +44,7 @@ public class DTOPomBuilder implements PomBuilder {
         IndentList<CodeEntity> propertyList = MavenTemplate.getPropertiesFromTools(tools);
         propertyList.add(new SimpleTag("project.build.sourceEncoding", "UTF-8"));
         propertyList.add(new PropertyTag(JAVA, source.getJdkVersion()));
-        propertyList.add(new PropertyTag("hibernate_validator", "6.1.6.Final"));
+        propertyList.add(new PropertyTag("hibernate_validator", "7.0.0.Final"));
 
         properties.setInnerTags(propertyList);
 
@@ -76,6 +75,7 @@ public class DTOPomBuilder implements PomBuilder {
 
         DependenciesTag dependencies = new DependenciesTag();
         IndentList<CodeEntity> dependencyList = getDependenciesFromTools(tools, CORE);
+        dependencyList.add(getHibernateValidator());
 
         dependencies.setInnerTags(dependencyList);
 
@@ -104,9 +104,10 @@ public class DTOPomBuilder implements PomBuilder {
         dependencyList.add(getSpringBootTestStarter());
         dependencyList.add(getSpringBootDataJpaStarter());
         dependencyList.add(getSpringBootDevTools());
-        dependencyList.add(getSpringBootActuator());
+        if (tools.containsKey(SPRING_ACTUATOR)) {
+            dependencyList.add(getSpringBootActuator());
+        }
         dependencyList.add(getApiDependency(source));
-        dependencyList.add(getHibernateValidator());
 
         dependencies.setInnerTags(dependencyList);
 

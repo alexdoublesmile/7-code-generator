@@ -1,29 +1,26 @@
 package com.plohoy.generator.util.domainhelper;
 
-import com.plohoy.generator.model.EndPointType;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.field.RelationType;
-import com.plohoy.generator.model.codeentity.method.MethodEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 @UtilityClass
-public class DomainHelper {
+public class FieldHelper {
 
-    public boolean needSoftDeleteField(ClassEntity entity) {
-        return Objects.nonNull(entity.getEndPoints()) && entity.getEndPoints()
-                .stream()
-                .map(endPoint -> endPoint.getType())
-                .anyMatch((type) ->
-                        type.equals(EndPointType.DELETE_SOFTLY_END_POINT));
+    public boolean needValidation(FieldEntity field) {
+        return Objects.nonNull(field.getValidationList())
+                && field.getValidationList().size() > 0;
     }
 
     public boolean hasOneToOneRelation(FieldEntity field) {
@@ -67,7 +64,7 @@ public class DomainHelper {
     }
 
     public boolean isOneToBackReference(FieldEntity field) {
-        return DomainHelper.hasOneToRelation(field) && !isRelationOwner(field);
+        return FieldHelper.hasOneToRelation(field) && !isRelationOwner(field);
     }
 
     public static boolean isSingleClassLoopPossible(FieldEntity field, String mainEntityName) {
@@ -159,16 +156,5 @@ public class DomainHelper {
         }
 
         return mappedField;
-    }
-
-    public static ClassEntity getEntityByType(String type, List<AbstractSourceFile> entityFiles) {
-        for (AbstractSourceFile<ClassEntity> file : entityFiles) {
-            ClassEntity someEntity = file.getData();
-
-            if (type.equals(someEntity.getName())) {
-                return someEntity;
-            }
-        }
-        return null;
     }
 }

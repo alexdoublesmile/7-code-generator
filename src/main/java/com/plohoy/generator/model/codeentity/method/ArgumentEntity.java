@@ -18,17 +18,20 @@ public class ArgumentEntity extends CodeEntity {
     private EnumerationList<String> modifiers;
     private String type;
     private String name;
+    private String description;
     private EnumerationList<ArgumentAnnotationEntity> annotations;
 
     public ArgumentEntity(
             EnumerationList<String> modifiers,
             String type,
             String name,
+            String description,
             EnumerationList<ArgumentAnnotationEntity> annotations
     ) {
         this.modifiers = modifiers;
         this.type = type;
         this.name = name;
+        this.description = description;
 
         if (Objects.nonNull(annotations)) setAnnotations(annotations);
     }

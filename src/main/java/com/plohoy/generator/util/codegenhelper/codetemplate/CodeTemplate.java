@@ -1,22 +1,22 @@
 package com.plohoy.generator.util.codegenhelper.codetemplate;
 
-import com.plohoy.generator.model.file.AbstractSourceFile;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
 import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
+import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity;
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.annotation.QuotedValueList;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.*;
+import com.plohoy.generator.model.file.AbstractSourceFile;
+import com.plohoy.generator.util.domainhelper.EntityHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -153,7 +153,7 @@ public class CodeTemplate {
     public static final String URL_PROPERTIES_NAME = "url.properties";
 
     public static final String CLASSPATH = "classpath:";
-    public static final String JPA_REPO_TEMPLATE = "JpaRepository<%s, %s>";
+    public static final String JPA_REPO_TEMPLATE = "JpaRepository<%s, %s>%s";
     public static final String SPRING_BOOT_LAUNCHER_TEMPLATE = "SpringApplication.run(%s.class, args);";
 
     public static final String SPRING_BOOT_LAUNCHER_ANNOTATION = "SpringBootApplication";
@@ -245,35 +245,362 @@ public class CodeTemplate {
         return new EnumerationList<>(PRIVATE_MOD);
     }
 
-    private MethodEntity getMethodByEndPointType(EndPoint endPoint, ClassEntity dtoEntity) {
-        switch(endPoint.getType()) {
+    private MethodEntity getControllerMethod(EndPoint endPoint, ClassEntity entity, ClassEntity dtoEntity) {
+        switch (endPoint.getType()) {
+            case CONTROLLER_END_POINT:
+                break;
             case CREATE_END_POINT:
-                return new SaveMethodEntity(dtoEntity, endPoint);
+                ArgumentAnnotationEntity requestSaveAnnotation = ArgumentAnnotationEntity.builder()
+                        .name("RequestBody")
+                        .build();
+                ArgumentAnnotationEntity validSaveAnnotation = ArgumentAnnotationEntity.builder()
+                        .name("Valid")
+                        .build();
+
+                List<ArgumentAnnotationEntity> dtoSaveAnnotations = new ArrayList<>();
+                dtoSaveAnnotations.add(requestSaveAnnotation);
+                if (EntityHelper.needValidation(dtoEntity)) {
+                    dtoSaveAnnotations.add(validSaveAnnotation);
+                }
+
+                return MethodEntity.builder()
+                        .annotations(new IndentList<>(
+                                AnnotationEntity.builder()
+                                        .name("PostMapping")
+                                        .property(PropertyEntity.builder()
+                                                .name("produces")
+                                                .quotedValue("application/json")
+                                                .build())
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(dtoEntity.getName())
+                        .name("save")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .annotations(new EnumerationList<ArgumentAnnotationEntity>(DelimiterType.NONE, true, dtoSaveAnnotations))
+                                        .type(dtoEntity.getName())
+                                        .name("dto")
+                                        .build()))
+                        .exceptions(null)
+                        .body("return service.save(dto);")
+                        .endPoint(endPoint)
+                        .build();
             case FIND_ALL_END_POINT:
-                return new FindAllMethodEntity(dtoEntity, endPoint);
+                List<ArgumentEntity> args = new ArrayList<>();
+                ArgumentEntity pageableArgument = ArgumentEntity.builder()
+                        .annotations(new EnumerationList<>(
+                                ArgumentAnnotationEntity.builder()
+                                        .name("PageableDefault")
+                                        .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                PropertyEntity.builder()
+                                                        .name("sort")
+                                                        .simpleValue("{ \"id\" }")
+                                                        .build(),
+                                                PropertyEntity.builder()
+                                                        .name("direction")
+                                                        .simpleValue("Sort.Direction.DESC")
+                                                        .build()))
+                                        .build()))
+                        .type("Pageable")
+                        .name("pageable")
+                        .build();
+//                ArgumentEntity.builder()
+//                                .annotations(new EnumerationList<>(
+//                                        ArgumentAnnotationEntity.builder()
+//                                                .name("RequestParam")
+//                                                .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+//                                                        PropertyEntity.builder()
+//                                                                .name("required")
+//                                                                .simpleValue("false")
+//                                                                .build(),
+//                                                        PropertyEntity.builder()
+//                                                                .name("defaultValue")
+//                                                                .quotedValue("false")
+//                                                                .build()))
+//                                                .build()))
+//                                .type("boolean")
+//                                .name("deleted")
+//                                .build();
+
+                if (entity.isPageable()) {
+                    args.add(pageableArgument);
+                }
+
+                List<FieldEntity> filterList = entity.getFields().stream()
+                        .filter(FieldEntity::isFilter)
+                        .collect(Collectors.toList());
+
+                filterList.forEach(filter ->
+                        args.add(ArgumentEntity.builder()
+                                .annotations(new EnumerationList<>(
+                                        ArgumentAnnotationEntity.builder()
+                                                .name("RequestParam")
+                                                .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                        PropertyEntity.builder()
+                                                                .name("required")
+                                                                .simpleValue("false")
+                                                                .build()))
+                                                .build()))
+                                .type(filter.getType())
+                                .name(filter.getName())
+                                .description(filter.getSchemaDescription())
+                                .build()));
+
+                String methodName = "findAll";
+                StringBuilder methodArgs = new StringBuilder();
+
+                if (entity.isPageable()) {
+                    methodArgs.append("pageable");
+                }
+
+                if (filterList.size() > 0) {
+                    methodName = "search";
+                }
+
+                filterList.forEach(filter -> {
+                    String argument = methodArgs.toString().isEmpty()
+                            ? filter.getName()
+                            : COMMA + SPACE + filter.getName();
+                    methodArgs.append(argument);
+                });
+
+                String bodyString = String.format("return service.%s(%s);", methodName, methodArgs);
+
+                return MethodEntity.builder()
+                        .annotations(new IndentList<>(
+                                AnnotationEntity.builder()
+                                        .name("GetMapping")
+                                        .property(PropertyEntity.builder()
+                                                .name("produces")
+                                                .quotedValue("application/json")
+                                                .build())
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(String.format("%s<%s>", entity.isPageable() ? "Page" : "List", dtoEntity.getName()))
+                        .name(filterList.size() > 0 ? "search" : "findAll")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false, args))
+                        .exceptions(null)
+                        .body(bodyString)
+                        .endPoint(endPoint)
+                        .build();
             case FIND_END_POINT:
-                return new FindMethodEntity(dtoEntity, endPoint);
+                return MethodEntity.builder()
+                        .annotations(new IndentList<AnnotationEntity>(
+                                AnnotationEntity.builder()
+                                        .name("GetMapping")
+                                        .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                PropertyEntity.builder()
+                                                        .name("value")
+                                                        .quotedValue(endPoint.getPath())
+                                                        .build(),
+                                                PropertyEntity.builder()
+                                                        .name("produces")
+                                                        .quotedValue("application/json")
+                                                        .build()))
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(dtoEntity.getName())
+                        .name("find")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .annotations(new EnumerationList<>(
+                                                ArgumentAnnotationEntity.builder()
+                                                        .name("PathVariable")
+                                                        .value("id")
+                                                        .build()))
+                                        .type(dtoEntity.getIdType())
+                                        .name("id")
+                                        .build()))
+                        .exceptions(null)
+                        .body("return service.find(id);")
+                        .endPoint(endPoint)
+                        .build();
             case UPDATE_END_POINT:
-                return new UpdateMethodEntity(dtoEntity, endPoint);
+                ArgumentAnnotationEntity requestUpdateAnnotation = ArgumentAnnotationEntity.builder()
+                        .name("RequestBody")
+                        .build();
+                ArgumentAnnotationEntity validUpdateAnnotation = ArgumentAnnotationEntity.builder()
+                        .name("Valid")
+                        .build();
+
+                List<ArgumentAnnotationEntity> dtoUpdateAnnotations = new ArrayList<>();
+                dtoUpdateAnnotations.add(requestUpdateAnnotation);
+                if (EntityHelper.needValidation(dtoEntity)) {
+                    dtoUpdateAnnotations.add(validUpdateAnnotation);
+                }
+
+                return MethodEntity.builder()
+                        .annotations(new IndentList<>(
+                                AnnotationEntity.builder()
+                                        .name("PutMapping")
+                                        .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                PropertyEntity.builder()
+                                                        .name("value")
+                                                        .quotedValue(endPoint.getPath())
+                                                        .build(),
+                                                PropertyEntity.builder()
+                                                        .name("produces")
+                                                        .quotedValue("application/json")
+                                                        .build()))
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(dtoEntity.getName())
+                        .name("update")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .annotations(new EnumerationList<>(
+                                                ArgumentAnnotationEntity.builder()
+                                                        .name("PathVariable")
+                                                        .value(ID)
+                                                        .build()))
+                                        .type(dtoEntity.getIdType())
+                                        .name(ID)
+                                        .build(),
+                                ArgumentEntity.builder()
+                                        .annotations(new EnumerationList<>(DelimiterType.NONE, true, dtoUpdateAnnotations))
+                                        .type(dtoEntity.getName())
+                                        .name(DTO_SUFFIX.toLowerCase())
+                                        .build()))
+                        .exceptions(null)
+                        .body("return service.update(id, dto);")
+                        .endPoint(endPoint)
+                        .build();
             case DELETE_HARDLY_END_POINT:
                 return new DeleteHardlyMethodEntity(dtoEntity, endPoint);
             case DELETE_SOFTLY_END_POINT:
                 return new DeleteSoftlyMethodEntity(dtoEntity, endPoint);
             case RESTORE_END_POINT:
                 return new RestoreMethodEntity(dtoEntity, endPoint);
+            case SEARCH_END_POINT:
+                break;
             default:
                 return null;
         }
+        return null;
     }
 
-    private MethodEntity getMethodByEndPointType(EndPoint endPoint, ClassEntity entity, ClassEntity dtoEntity) {
+    private MethodEntity getServiceMethod(EndPoint endPoint, ClassEntity entity, ClassEntity dtoEntity) {
         switch(endPoint.getType()) {
             case CREATE_END_POINT:
                 return new SaveMethodEntity(entity, dtoEntity, endPoint);
             case FIND_ALL_END_POINT:
-                return new FindAllMethodEntity(entity, dtoEntity, endPoint);
+                List<ArgumentEntity> args = new ArrayList<>();
+                ArgumentEntity pageableArgument = ArgumentEntity.builder()
+                        .annotations(new EnumerationList<>(
+                                ArgumentAnnotationEntity.builder()
+                                        .name("PageableDefault")
+                                        .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                PropertyEntity.builder()
+                                                        .name("sort")
+                                                        .simpleValue("{ \"id\" }")
+                                                        .build(),
+                                                PropertyEntity.builder()
+                                                        .name("direction")
+                                                        .simpleValue("Sort.Direction.DESC")
+                                                        .build()))
+                                        .build()))
+                        .type("Pageable")
+                        .name("pageable")
+                        .build();
+
+                if (entity.isPageable()) {
+                    args.add(pageableArgument);
+                }
+
+                List<FieldEntity> filterList = entity.getFields().stream()
+                        .filter(FieldEntity::isFilter)
+                        .collect(Collectors.toList());
+
+                filterList.forEach(filter ->
+                        args.add(ArgumentEntity.builder()
+                                .type(filter.getType())
+                                .name(filter.getName())
+                                .build()));
+
+                String methodName = "findAll";
+                StringBuilder methodArgs = new StringBuilder();
+                String preReturnPageableString = EMPTY;
+                String postReturnString = "dtoList";
+
+                if (entity.isPageable()) {
+                    preReturnPageableString =
+                            "        int start = (int) pageable.getOffset();\n" +
+                                    "        int end = (start + pageable.getPageSize()) > dtoList.size() ? dtoList.size()\n" +
+                                    "                : (start + pageable.getPageSize());\n\n";
+                    postReturnString = "new PageImpl<>(\n" +
+                            "                dtoList.subList(start, end),\n" +
+                            "                pageable,\n" +
+                            "                dtoList.size())";
+                }
+
+                if (filterList.size() > 0) {
+                    methodName = "search";
+                }
+
+                filterList.forEach(filter -> {
+                    String argument = methodArgs.toString().isEmpty()
+                            ? filter.getName()
+                            : COMMA + SPACE + filter.getName();
+                    methodArgs.append(argument);
+                });
+
+                String returnString = String.format("%s        return %s;", preReturnPageableString, postReturnString);
+
+                String bodyString = String.format("List<%s> entitiesFromDB = repository.%s(%s);\n" +
+                        "\n" +
+                        "        List<%s> dtoList = entitiesFromDB\n" +
+                        "                .stream()\n" +
+                        "                .map(mapper::toDto)\n" +
+                        "                .collect(Collectors.toList());\n\n%s",
+                        entity.getName(),
+                        methodName,
+                        methodArgs,
+                        dtoEntity.getName(),
+                        returnString);
+
+                return MethodEntity.builder()
+                        .annotations(new IndentList<>(
+                                AnnotationEntity.builder()
+                                        .name("Transactional")
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(String.format("%s<%s>", entity.isPageable() ? "Page" : "List", dtoEntity.getName()))
+                        .name(filterList.size() > 0 ? "search" : "findAll")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false, args))
+                        .exceptions(null)
+                        .body(bodyString)
+                        .endPoint(endPoint)
+                        .build();
             case FIND_END_POINT:
-                return new FindMethodEntity(entity, dtoEntity, endPoint);
+                String methodNameString = EMPTY;
+                String methodArgsString = EMPTY;
+
+                if (EntityHelper.needSoftDeleteField(entity)) {
+                    methodNameString = "AndDeleted";
+                    methodArgsString = ", false";
+                }
+
+                String methodSignature = String.format("findById%s(id%s)", methodNameString, methodArgsString);
+
+                return MethodEntity.builder()
+                        .annotations(new IndentList<>(
+                                AnnotationEntity.builder()
+                                        .name("Transactional")
+                                        .build()))
+                        .modifiers(getPublicMod())
+                        .returnType(dtoEntity.getName())
+                        .name("find")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                                ArgumentEntity.builder()
+                                        .type(dtoEntity.getIdType())
+                                        .name("id")
+                                        .build()))
+                        .exceptions(null)
+                        .body(String.format("return mapper.toDto(\n" +
+                                "                repository.%s\n" +
+                                "                        .orElseThrow(() -> { throw new ResponseStatusException(HttpStatus.NOT_FOUND); }));", methodSignature))
+                        .endPoint(endPoint)
+                        .build();
             case UPDATE_END_POINT:
                 return new UpdateMethodEntity(entity, dtoEntity, endPoint);
             case DELETE_HARDLY_END_POINT:
@@ -371,6 +698,12 @@ public class CodeTemplate {
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".UUID")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".List")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.validation.Valid")
                         .build());
     }
 
@@ -394,12 +727,12 @@ public class CodeTemplate {
         );
     }
 
-    public IndentList<MethodEntity> getSpringRestMethods(List<EndPoint> endPoints, ClassEntity mainDtoEntity) {
+    public IndentList<MethodEntity> getSpringRestMethods(List<EndPoint> endPoints, ClassEntity mainEntity, ClassEntity mainDtoEntity) {
         List<MethodEntity> methods = new ArrayList<>();
         for (EndPoint endPoint : endPoints) {
 
             if (!CONTROLLER_END_POINT.equals(endPoint.getType())) {
-                methods.add(getMethodByEndPointType(endPoint, mainDtoEntity));
+                methods.add(getControllerMethod(endPoint, mainEntity, mainDtoEntity));
             }
         }
 
@@ -445,6 +778,12 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".data.domain.Page")
                         .build(),
                 ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.domain.Sort")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".data.web.PageableDefault")
+                        .build(),
+                ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".data.domain.Pageable")
                         .build(),
                 ImportEntity.builder()
@@ -458,6 +797,9 @@ public class CodeTemplate {
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".Objects")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".stream.Collectors")
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".UUID")
@@ -497,7 +839,7 @@ public class CodeTemplate {
         for (EndPoint endPoint : endPoints) {
 
             if (!CONTROLLER_END_POINT.equals(endPoint.getType())) {
-                methods.add(getMethodByEndPointType(endPoint, mainEntity, mainDtoEntity));
+                methods.add(getServiceMethod(endPoint, mainEntity, mainDtoEntity));
             }
         }
 
@@ -524,38 +866,230 @@ public class CodeTemplate {
         );
     }
 
+    public IndentList<ImportEntity> getCriteriaRepoImports(String corePackageName, String entityName) {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".List")
+                        .build()
+        );
+    }
+
+    public IndentList<ImportEntity> getCriteriaImplRepoImports(String corePackageName, String entityName) {
+        return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                ImportEntity.builder()
+                        .value(corePackageName + DOT + ENTITY_SUFFIX.toLowerCase() + DOT  + entityName)
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".List")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".ArrayList")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".beans.factory.annotation.Autowired")
+                        .build(),
+                ImportEntity.builder()
+                        .value(SPRING_MAIN_PACKAGE + ".util.StringUtils")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.EntityManager")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.TypedQuery")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.criteria.CriteriaBuilder")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.criteria.CriteriaQuery")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.criteria.Predicate")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.persistence.criteria.Root")
+                        .build()
+        );
+    }
+
     public String getSpringDataJpaRepoClassName(ClassEntity mainEntity) {
+        String criteriaRepo = EMPTY;
+
+        if (mainEntity.getFields().stream()
+                .anyMatch(FieldEntity::isFilter)) {
+            criteriaRepo = String.format(", %sCriteriaRepository", mainEntity.getName());
+        }
+
         return String.format(
                 JPA_REPO_TEMPLATE,
                 mainEntity.getName(),
-                mainEntity.getIdType());
+                mainEntity.getIdType(),
+                criteriaRepo);
     }
 
     public IndentList<MethodEntity> getSpringDataJpaDeleteMethods(ClassEntity mainEntity) {
+        String methodName = "findById";
+        ArgumentEntity idArg = ArgumentEntity.builder()
+                .type(mainEntity.getIdType())
+                .name(ID)
+                .build();
+
+        List<ArgumentEntity> args = new ArrayList<>();
+        args.add(idArg);
+
+        if (EntityHelper.needSoftDeleteField(mainEntity)) {
+            methodName += "AndDeleted";
+            args.add(ArgumentEntity.builder()
+                    .type(BOOLEAN)
+                    .name(DELETED)
+                    .build());
+        }
+
         return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
                 MethodEntity.builder()
-                        .returnType(String.format(LIST_TEMPLATE, mainEntity.getName()))
-                        .name(FIND_BY_DELETED_METHOD)
-                        .args(new EnumerationList<ArgumentEntity>(false,
-                                ArgumentEntity.builder()
-                                        .type(BOOLEAN)
-                                        .name(DELETED)
-                                        .build()))
-                        .build(),
-                MethodEntity.builder()
                         .returnType(String.format(OPTIONAL_TEMPLATE, mainEntity.getName()))
-                        .name(FIND_BY_ID_AND_DELETED_METHOD)
-                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
-                                ArgumentEntity.builder()
-                                        .type(mainEntity.getIdType())
-                                        .name(ID)
-                                        .build(),
-                                ArgumentEntity.builder()
-                                        .type(BOOLEAN)
-                                        .name(DELETED)
-                                        .build()))
+                        .name(methodName)
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false, args))
                         .build()
         );
+    }
+
+    public IndentList<MethodEntity> getCriteriaRepoMethods(ClassEntity entity) {
+        List<ArgumentEntity> args = new ArrayList<>();
+        List<FieldEntity> filterList = entity.getFields().stream()
+                .filter(FieldEntity::isFilter)
+                .collect(Collectors.toList());
+
+        filterList.forEach(filter ->
+                args.add(ArgumentEntity.builder()
+                        .type(filter.getType())
+                        .name(filter.getName())
+                        .build()));
+
+        return new IndentList<MethodEntity>(DelimiterType.SEMICOLON, true, true,
+                MethodEntity.builder()
+                        .returnType(String.format(LIST_TEMPLATE, entity.getName()))
+                        .name("search")
+                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false, args))
+                        .build()
+        );
+    }
+
+    public IndentList<MethodEntity> getCriteriaImplRepoMethods(ClassEntity entity) {
+        List<MethodEntity> methods = new ArrayList<>();
+
+        List<ArgumentEntity> args = new ArrayList<>();
+        List<FieldEntity> filterList = entity.getFields().stream()
+                .filter(FieldEntity::isFilter)
+                .collect(Collectors.toList());
+
+        filterList.forEach(filter ->
+                args.add(ArgumentEntity.builder()
+                        .type(filter.getType())
+                        .name(filter.getName())
+                        .build()));
+
+        StringBuilder criteriaString = new StringBuilder();
+
+        filterList.forEach(filter -> {
+            String criteriaConditionTab = criteriaString.toString().isEmpty()
+                    ? "        " : EMPTY;
+
+            criteriaString.append(String.format("" +
+                    "%sif (%s) {\n" +
+                    "            predicates.add(builder.%s);\n" +
+                    "        }\n" +
+                    "        ",
+                    criteriaConditionTab,
+                    getProperCriteriaCondition(filter),
+                    getProperCriteriaString(filter)));
+        });
+
+
+        String criteriaBody = String.format(
+                "CriteriaBuilder builder = em.getCriteriaBuilder();\n" +
+                "        CriteriaQuery query = builder.createQuery();\n" +
+                "        Root<%s> from = query.from(%s.class);\n" +
+                "\n" +
+                "        List<Predicate> predicates = new ArrayList<>();\n%s" +
+                "Long total = getTotal(builder, query, from, predicates);\n" +
+                "        List<%s> listFromDB = new ArrayList<>();\n" +
+                "        if (total > 0) {\n" +
+                "            listFromDB = em.createQuery(query.select(from)\n" +
+                "                    .where(builder.and(predicates.toArray(new Predicate[]{}))))\n" +
+                "                    .getResultList();\n" +
+                "        }\n" +
+                "\n" +
+                "        return listFromDB;",
+                entity.getName(),
+                entity.getName(),
+                criteriaString,
+                entity.getName());
+
+        MethodEntity criteriaMethod = MethodEntity.builder()
+                .annotations(new IndentList<AnnotationEntity>(AnnotationEntity.builder().name("Override").build()))
+                .modifiers(getPublicMod())
+                .returnType(String.format(LIST_TEMPLATE, entity.getName()))
+                .name("search")
+                .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false, args))
+                .body(criteriaBody)
+                .build();
+
+        MethodEntity totalMethod = MethodEntity.builder()
+                .modifiers(getPrivateMod())
+                .returnType(StringUtils.capitalize(LONG))
+                .name("getTotal")
+                .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                        ArgumentEntity.builder()
+                                .type("CriteriaBuilder")
+                                .name("builder")
+                                .build(),
+                        ArgumentEntity.builder()
+                                .type("CriteriaQuery")
+                                .name("query")
+                                .build(),
+                        ArgumentEntity.builder()
+                                .type(String.format("Root<%s>", entity.getName()))
+                                .name("from")
+                                .build(),
+                        ArgumentEntity.builder()
+                                .type(String.format(LIST_TEMPLATE, "Predicate"))
+                                .name("predicates")
+                                .build()))
+                .body("TypedQuery typedQuery = em.createQuery(query.select(builder.count(from)).where(builder.and(predicates.toArray(new Predicate[]{}))));\n" +
+                        "        return (Long) typedQuery.getSingleResult();")
+                .build();
+
+        methods.add(criteriaMethod);
+        methods.add(totalMethod);
+
+        return new IndentList<MethodEntity>(DelimiterType.INDENT, true, methods);
+    }
+
+    private String getProperCriteriaCondition(FieldEntity filter) {
+        switch (filter.getType()) {
+            case "String": return String.format("StringUtils.hasText(%s)", filter.getName());
+            case "boolean":
+            case "Boolean": return String.format("!%s", filter.getName());
+            case "int":
+            case "Integer":
+            default: return String.format("%s != NULL", filter.getName());
+        }
+    }
+
+    private String getProperCriteriaString(FieldEntity filter) {
+        switch (filter.getType()) {
+            case "String":
+                return "like(builder.lower(from.get(\"" + filter.getName() + "\")), \"%\" + " + filter.getName() + ".toLowerCase() + \"%\")";
+            case "boolean":
+            case "Boolean": return String.format("isFalse(from.get(\"%s\"))", filter.getName());
+            case "int":
+            case "Integer":
+            default: return String.format("equal(from.get(\"%s\"), %s)", filter.getName(), filter.getName());
+        }
     }
 
     public IndentList<ImportEntity> getMapStructImports(
@@ -707,28 +1241,28 @@ public class CodeTemplate {
 
         mainEntity.getFields()
                 .stream()
-                .filter(DomainHelper::hasAnyRelations)
-                .filter(field -> DomainHelper.isExternalTypeField(field, mainEntity.getName())
-                                || DomainHelper.isSingleClassLoopPossible(field, mainEntity.getName()))
+                .filter(FieldHelper::hasAnyRelations)
+                .filter(field -> FieldHelper.isExternalTypeField(field, mainEntity.getName())
+                                || FieldHelper.isSingleClassLoopPossible(field, mainEntity.getName()))
                 .forEach(field -> {
                     loopFieldsMap.put(
                             field,
-                            DomainHelper.getMappedFieldFromFiles(field, mainEntity.getName(), entityFiles));
+                            FieldHelper.getMappedFieldFromFiles(field, mainEntity.getName(), entityFiles));
 
-                    if (DomainHelper.isExternalTypeField(field, mainEntity.getName())) {
-                        loopPossibleEntities.add(DomainHelper.getEntityByType(field.getType(), entityFiles));
+                    if (FieldHelper.isExternalTypeField(field, mainEntity.getName())) {
+                        loopPossibleEntities.add(EntityHelper.getEntityByType(field.getType(), entityFiles));
                     }
                 });
 
         for (ClassEntity loopPossibleEntity : loopPossibleEntities) {
             loopPossibleEntity.getFields().stream()
-                    .filter(DomainHelper::hasAnyRelations)
-                    .filter(field -> DomainHelper.isExternalTypeField(field, mainEntity.getName()))
-                    .filter(field -> DomainHelper.isExternalTypeField(field, loopPossibleEntity.getName())
-                            || DomainHelper.isSingleClassLoopPossible(field, loopPossibleEntity.getName()))
+                    .filter(FieldHelper::hasAnyRelations)
+                    .filter(field -> FieldHelper.isExternalTypeField(field, mainEntity.getName()))
+                    .filter(field -> FieldHelper.isExternalTypeField(field, loopPossibleEntity.getName())
+                            || FieldHelper.isSingleClassLoopPossible(field, loopPossibleEntity.getName()))
                     .forEach(field -> loopFieldsMap.put(
                             field,
-                            DomainHelper.getMappedFieldFromFiles(field, loopPossibleEntity.getName(), entityFiles)));
+                            FieldHelper.getMappedFieldFromFiles(field, loopPossibleEntity.getName(), entityFiles)));
         }
 
         return loopFieldsMap;
@@ -857,6 +1391,12 @@ public class CodeTemplate {
                         .build(),
                 ImportEntity.builder()
                         .value(JAVA_UTIL_PACKAGE + ".*")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.validation.constraints.*")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.validation.Valid")
                         .build()
         );
     }
@@ -882,16 +1422,20 @@ public class CodeTemplate {
                     .modifiers(getPrivateMod())
                     .type(requestField.getType())
                     .name(requestField.getName())
+                    .schemaDescription(requestField.getSchemaDescription())
                     .relation(requestField.getRelation())
+                    .filter(requestField.isFilter())
                     .array(requestField.isArray())
+                    .validationList(requestField.getValidationList())
                     .build());
         }
 
-        if (DomainHelper.needSoftDeleteField(entity)) {
+        if (EntityHelper.needSoftDeleteField(entity)) {
             fields.add(FieldEntity.builder()
                     .modifiers(getPrivateMod())
-                    .type(StringUtils.capitalize(BOOLEAN))
+                    .type(BOOLEAN)
                     .name("deleted")
+                    .filter(true)
                     .build());
         }
 
@@ -910,10 +1454,11 @@ public class CodeTemplate {
                     .relation(requestField.getRelation())
                     .schemaDescription(requestField.getSchemaDescription())
                     .array(requestField.isArray())
+                    .validationList(requestField.getValidationList())
                     .build());
         }
 
-        if (DomainHelper.needSoftDeleteField(dtoEntity)) {
+        if (EntityHelper.needSoftDeleteField(dtoEntity)) {
             dtoFields.add(FieldEntity.builder()
                     .modifiers(getPrivateMod())
                     .type(StringUtils.capitalize(BOOLEAN))
@@ -930,13 +1475,7 @@ public class CodeTemplate {
     public IndentList<ImportEntity> getExceptionHandlerImports() {
         return new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".http.HttpHeaders")
-                        .build(),
-                ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".http.HttpStatus")
-                        .build(),
-                ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".http.ResponseEntity")
                         .build(),
                 ImportEntity.builder()
                         .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ControllerAdvice")
@@ -945,13 +1484,19 @@ public class CodeTemplate {
                         .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ExceptionHandler")
                         .build(),
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".web.context.request.WebRequest")
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ResponseBody")
                         .build(),
                 ImportEntity.builder()
-                        .value(SPRING_MAIN_PACKAGE + ".web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler")
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.annotation.ResponseStatus")
                         .build(),
                 ImportEntity.builder()
-                        .value("javax.persistence.EntityNotFoundException")
+                        .value(SPRING_MAIN_PACKAGE + ".web.bind.MethodArgumentNotValidException")
+                        .build(),
+                ImportEntity.builder()
+                        .value(JAVA_UTIL_PACKAGE + ".stream.Collectors")
+                        .build(),
+                ImportEntity.builder()
+                        .value("javax.validation.ConstraintViolationException")
                         .build()
         );
     }
@@ -964,28 +1509,74 @@ public class CodeTemplate {
     }
 
     public IndentList<MethodEntity> getExceptionMethods() {
-        return new IndentList<MethodEntity>(DelimiterType.INDENT, true,
-                MethodEntity.builder()
-                        .annotations(new IndentList<AnnotationEntity>(
-                                AnnotationEntity.builder()
-                                        .name("ExceptionHandler")
-                                        .property(PropertyEntity.builder().simpleValue("EntityNotFoundException.class").build())
-                                        .build()))
-                        .modifiers(new EnumerationList<String>(PROTECTED_MOD))
-                        .returnType("ResponseEntity<Object>")
-                        .name("handleEntityNotFoundException")
-                        .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
-                                ArgumentEntity.builder()
-                                        .type("EntityNotFoundException")
-                                        .name("ex")
-                                        .build(),
-                                ArgumentEntity.builder()
-                                        .type("WebRequest")
-                                        .name("request")
-                                        .build()))
-                        .body("return handleExceptionInternal(\n" +
-                                "                ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);")
-                        .build());
+        List<MethodEntity> exceptionMethods = new ArrayList<>();
+
+        MethodEntity constraintValidationMethod = MethodEntity.builder()
+                .annotations(new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                                .name("ExceptionHandler")
+                                .property(PropertyEntity.builder().simpleValue("ConstraintViolationException.class").build())
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("ResponseStatus")
+                                .property(PropertyEntity.builder().simpleValue("HttpStatus.BAD_REQUEST").build())
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("ResponseBody")
+                                .build()))
+                .returnType("ValidationErrorResponse")
+                .name("onConstraintValidationException")
+                .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                        ArgumentEntity.builder()
+                                .type("ConstraintViolationException")
+                                .name("e")
+                                .build()))
+                .body("return ValidationErrorResponse.builder()\n" +
+                        "                .violations(e.getConstraintViolations()\n" +
+                        "                        .stream()\n" +
+                        "                        .map(violation -> Violation.builder()\n" +
+                        "                                .fieldName(violation.getPropertyPath().toString())\n" +
+                        "                                .message(violation.getMessage())\n" +
+                        "                                .build())\n" +
+                        "                        .collect(Collectors.toList()))\n" +
+                        "                .build();")
+                .build();
+
+        MethodEntity argumentValidationMethod = MethodEntity.builder()
+                .annotations(new IndentList<AnnotationEntity>(
+                        AnnotationEntity.builder()
+                                .name("ExceptionHandler")
+                                .property(PropertyEntity.builder().simpleValue("MethodArgumentNotValidException.class").build())
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("ResponseStatus")
+                                .property(PropertyEntity.builder().simpleValue("HttpStatus.BAD_REQUEST").build())
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("ResponseBody")
+                                .build()))
+                .returnType("ValidationErrorResponse")
+                .name("onMethodArgumentNotValidException")
+                .args(new EnumerationList<ArgumentEntity>(DelimiterType.COMMA, false,
+                        ArgumentEntity.builder()
+                                .type("MethodArgumentNotValidException")
+                                .name("e")
+                                .build()))
+                .body("return ValidationErrorResponse.builder()\n" +
+                        "                .violations(e.getBindingResult().getFieldErrors()\n" +
+                        "                        .stream()\n" +
+                        "                        .map(error -> Violation.builder()\n" +
+                        "                                .fieldName(error.getField())\n" +
+                        "                                .message(error.getDefaultMessage())\n" +
+                        "                                .build())\n" +
+                        "                        .collect(Collectors.toList()))\n" +
+                        "                .build();")
+                .build();
+
+        exceptionMethods.add(constraintValidationMethod);
+        exceptionMethods.add(argumentValidationMethod);
+        
+        return new IndentList<MethodEntity>(DelimiterType.INDENT, true, exceptionMethods);
     }
 
     public HashMap<String, String> getAppProperties() {
@@ -993,6 +1584,7 @@ public class CodeTemplate {
         propertiesMap.put("server.port", "8080");
         propertiesMap.put("spring.jpa.generate-ddl", "false");
         propertiesMap.put("spring.jpa.hibernate.ddl-auto", "none");
+        propertiesMap.put("spring.jpa.properties.hibernate.validator.apply_to_ddl", "false");
         propertiesMap.put("spring.liquibase.change-log", "classpath:db/changelog/db.changelog-master.yml");
         return propertiesMap;
     }
@@ -1020,7 +1612,7 @@ public class CodeTemplate {
         propertiesMap.put("spring.datasource.url", "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}?sslmode=${DB_SSL_MODE:disable}&prepareThreshold=${DB_PREPARE_THRESHOLD:5}");
         propertiesMap.put("spring.datasource.username", "${DB_USERNAME:postgres}");
         propertiesMap.put("spring.datasource.password", "${DB_PASSWORD:mysecretpassword}");
-        propertiesMap.put("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQL9Dialect");
+        propertiesMap.put("spring.jpa.database-platform", "org.hibernate.dialect.PostgreSQLDialect");
         return propertiesMap;
     }
 
@@ -1050,7 +1642,7 @@ public class CodeTemplate {
     private Collection<? extends MethodEntity> setListRelationMethods(FieldEntity field, String entityName, List<ClassEntity> entities, boolean isManyToMany) {
         List<MethodEntity> relationMethods = new ArrayList<>();
 
-        FieldEntity mappedField = DomainHelper.getMappedFieldFromEntities(field, entityName, entities);
+        FieldEntity mappedField = FieldHelper.getMappedFieldFromEntities(field, entityName, entities);
         String mappedFieldName = mappedField.getName();
         String mappedFieldType = mappedField.getType();
         String fieldName = field.getName();
@@ -1110,7 +1702,7 @@ public class CodeTemplate {
     private Collection<? extends MethodEntity> setOneToRelationMethods(FieldEntity field, String entityName, List<ClassEntity> entities, boolean isManyToOne) {
         List<MethodEntity> relationMethods = new ArrayList<>();
 
-        FieldEntity mappedField = DomainHelper.getMappedFieldFromEntities(field, entityName, entities);
+        FieldEntity mappedField = FieldHelper.getMappedFieldFromEntities(field, entityName, entities);
         String mappedFieldName = mappedField.getName();
         String mappedFieldType = mappedField.getType();
         String fieldName = field.getName();

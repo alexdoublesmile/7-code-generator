@@ -4,6 +4,9 @@ import com.plohoy.generator.controller.SourceController;
 import com.plohoy.generator.model.ArchitectureType;
 import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.ResponseCode;
+import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
+import com.plohoy.generator.model.codeentity.field.ValidationEntity;
+import com.plohoy.generator.model.codeentity.field.ValidationEntityType;
 import com.plohoy.generator.model.tool.AbstractTool;
 import com.plohoy.generator.model.tool.ToolType;
 import com.plohoy.generator.model.tool.impl.doc.JavaDocTool;
@@ -79,6 +82,7 @@ public class GeneratorApplication {
                 .fields(getTestPersonFields())
                 .description("Персона")
                 .endPoints(getTestPersonEndPoints())
+//                .pageable(true)
                 .build();
 
         RequestEntity detailsRequestEntity = RequestEntity.builder()
@@ -97,6 +101,7 @@ public class GeneratorApplication {
                 .name("Address")
                 .fields(getTestAddressFields())
                 .endPoints(getTestEndPoints())
+                .pageable(true)
                 .build();
 
         entities.add(personRequestEntity);
@@ -115,22 +120,59 @@ public class GeneratorApplication {
                 .description("Идентификатор персоны в БД")
                 .build();
 
+
+        ArrayList<ValidationEntity> nameValidations = new ArrayList<>();
+        nameValidations.add(ValidationEntity.builder()
+                .type(ValidationEntityType.MIN)
+                .properties(Arrays.asList(PropertyEntity.builder()
+                        .simpleValue("5")
+                        .build()))
+                .build());
+        nameValidations.add(ValidationEntity.builder()
+                .type(ValidationEntityType.DIGITS)
+                .properties(Arrays.asList(
+                        PropertyEntity.builder()
+                                .name("integer")
+                                .simpleValue("2")
+                                .build(),
+                        PropertyEntity.builder()
+                                .name("fraction")
+                                .simpleValue("3")
+                                .build()))
+                .build());
+        nameValidations.add(ValidationEntity.builder()
+                .type(ValidationEntityType.SIZE)
+                .properties(Arrays.asList(
+                        PropertyEntity.builder()
+                                .name("min")
+                                .simpleValue("5")
+                                .build(),
+                        PropertyEntity.builder()
+                                .name("max")
+                                .simpleValue("50")
+                                .build()))
+                .build());
+
         RequestEntityField firstNameField = RequestEntityField.builder()
                 .type("String")
                 .name("firstName")
                 .description("Имя персоны")
+                .filter(true)
+                .validationList(nameValidations)
                 .build();
 
         RequestEntityField lastNameField = RequestEntityField.builder()
                 .type("String")
                 .name("lastName")
                 .description("Фамилия персоны")
+                .filter(true)
                 .build();
 
         RequestEntityField patronymicField = RequestEntityField.builder()
                 .type("String")
                 .name("patronymic")
                 .description("Отчество персоны")
+                .filter(true)
                 .build();
 
         RequestEntityField detailsField = RequestEntityField.builder()
@@ -237,18 +279,28 @@ public class GeneratorApplication {
         fields.add(detailsField);
         fields.add(passportsField);
         fields.add(addressesField);
-        fields.add(childrenField);
-        fields.add(parentField);
-        fields.add(mentorField);
-        fields.add(studentField);
-        fields.add(subscribersField);
-        fields.add(subscriptionsField);
+//        fields.add(childrenField);
+//        fields.add(parentField);
+//        fields.add(mentorField);
+//        fields.add(studentField);
+//        fields.add(subscribersField);
+//        fields.add(subscriptionsField);
 
         return fields;
     }
 
     private static List<RequestEntityField> getTestDetailsFields() {
         List<RequestEntityField> passportFields = new ArrayList<>();
+
+        ArrayList<ValidationEntity> weightValidationList = new ArrayList<>();
+        weightValidationList.add(ValidationEntity.builder()
+                .type(ValidationEntityType.PATTERN)
+                .properties(Arrays.asList(PropertyEntity.builder()
+                        .name("regexp")
+                        .quotedValue("[0-9]+")
+                        .build()))
+                .build());
+
         RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
@@ -265,6 +317,7 @@ public class GeneratorApplication {
                 .type("String")
                 .name("weight")
                 .description("Вес")
+                .validationList(weightValidationList)
                 .build();
 
         RequestEntityField heightField = RequestEntityField.builder()
@@ -424,6 +477,7 @@ public class GeneratorApplication {
         tools.put(ToolType.MAVEN, mavenTool);
         tools.put(ToolType.SPRING, springTool);
         tools.put(ToolType.SPRING_BOOT, springBootTool);
+        tools.put(ToolType.SPRING_ACTUATOR, springBootTool);
         tools.put(ToolType.LOMBOK, lombokTool);
         tools.put(ToolType.MAPSTRUCT, mapstructTool);
         tools.put(ToolType.JACKSON, jacksonTool);
@@ -547,14 +601,14 @@ public class GeneratorApplication {
                 EndPoint.builder()
                         .type(DELETE_HARDLY_END_POINT)
                         .build());
-        endPoints.add(
-                EndPoint.builder()
-                        .type(DELETE_SOFTLY_END_POINT)
-                        .build());
-        endPoints.add(
-                EndPoint.builder()
-                        .type(RESTORE_END_POINT)
-                        .build());
+//        endPoints.add(
+//                EndPoint.builder()
+//                        .type(DELETE_SOFTLY_END_POINT)
+//                        .build());
+//        endPoints.add(
+//                EndPoint.builder()
+//                        .type(RESTORE_END_POINT)
+//                        .build());
 
         return endPoints;
 

@@ -18,12 +18,14 @@ public class RequestEntity {
     private List<RequestEntityField> dtoFields;
     private String description;
     private List<EndPoint> endPoints;
+    private boolean pageable;
 
-    public RequestEntity(String name, List<RequestEntityField> fields, List<RequestEntityField> dtoFields, String description, List<EndPoint> endPoints) {
+    public RequestEntity(String name, List<RequestEntityField> fields, List<RequestEntityField> dtoFields, String description, List<EndPoint> endPoints, boolean pageable) {
         this.name = name;
         this.fields = fields;
         this.dtoFields = dtoFields;
         this.description = description;
+        this.pageable = pageable;
 
         if (Objects.nonNull(endPoints)) setEndPoints(endPoints);
     }

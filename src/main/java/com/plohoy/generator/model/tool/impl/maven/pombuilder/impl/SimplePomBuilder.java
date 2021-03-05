@@ -13,8 +13,7 @@ import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static com.plohoy.generator.model.tool.ToolType.MAVEN;
-import static com.plohoy.generator.model.tool.ToolType.SPRING_BOOT;
+import static com.plohoy.generator.model.tool.ToolType.*;
 import static com.plohoy.generator.model.tool.impl.maven.MavenTemplate.*;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.DEFAULT_VERSION;
 import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.JAVA;
@@ -34,7 +33,7 @@ public class SimplePomBuilder implements PomBuilder {
 
         IndentList<CodeEntity> propertyList = getPropertiesFromTools(tools);
         propertyList.add(new PropertyTag(JAVA, source.getJdkVersion()));
-        propertyList.add(new PropertyTag("hibernate_validator", "6.1.6.Final"));
+        propertyList.add(new PropertyTag("hibernate_validator", "7.0.0.Final"));
 
         IndentList<CodeEntity> dependencyList = getDependenciesFromTools(tools);
         dependencyList.add(getSpringBootWebStarter());
@@ -42,6 +41,9 @@ public class SimplePomBuilder implements PomBuilder {
         dependencyList.add(getSpringBootDataJpaStarter());
         dependencyList.add(getHibernateValidator());
 
+        if (tools.containsKey(SPRING_ACTUATOR)) {
+            dependencyList.add(getSpringBootActuator());
+        }
         properties.setInnerTags(propertyList);
 
         dependencies.setInnerTags(dependencyList);

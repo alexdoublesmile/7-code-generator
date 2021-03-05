@@ -154,4 +154,12 @@ public class StringUtil {
         }
         return result;
     }
+
+    public static String getCriteriaFileName(String rootName) {
+        return StringUtil.toCamelCase(rootName + "CriteriaRepository");
+    }
+
+    public static String getCriteriaImplFileName(String rootName) {
+        return StringUtil.toCamelCase(rootName + "CriteriaRepositoryImpl");
+    }
 }

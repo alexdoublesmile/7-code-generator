@@ -9,10 +9,10 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 @Data
 @Builder
 public class ConstraintEntity extends CodeEntity<ConstraintEntity> {
-    private static final String ALTER_TABLE_WORD = "alter table";
-    private static final String ADD_CONSTRAINT_WORD = "add constraint";
-    private static final String FOREIGN_KEY_WORD = "foreign key";
-    private static final String REFERENCES_WORD = "references";
+    private static final String ALTER_TABLE_WORD = "ALTER TABLE";
+    private static final String ADD_CONSTRAINT_WORD = "ADD CONSTRAINT";
+    private static final String FOREIGN_KEY_WORD = "FOREIGN KEY";
+    private static final String REFERENCES_WORD = "REFERENCES";
     private static final String FOREIGN_KEY_PREFIX = "fk_";
     private String currentTableName;
     private String referencedTableName;

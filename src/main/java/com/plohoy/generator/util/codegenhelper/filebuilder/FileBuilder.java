@@ -2,6 +2,7 @@ package com.plohoy.generator.util.codegenhelper.filebuilder;
 
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
+import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.file.*;
 import com.plohoy.generator.util.codegenhelper.codebuilder.CodeBuilder;
 import com.plohoy.generator.util.stringhelper.StringUtil;
@@ -30,66 +31,110 @@ public class FileBuilder {
         return this;
     }
 
-    public FileBuilder addSimpleController(List<ClassEntity> mainEntities) {
-        for (ClassEntity entity : mainEntities) {
-            String fileName = StringUtil.getControllerFileName(entity.getName());
+    public FileBuilder addSimpleController() {
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(ENTITY);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity entity = file.getData();
 
-            source.getSourceData()
-                    .get(CONTROLLER)
-                    .add(ControllerFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + CONTROLLER_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildControllerCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
-                            .build()
-                    );
+            if (entity.hasAnyEndPoint()) {
+                String fileName = StringUtil.getControllerFileName(entity.getName());
+
+                source.getSourceData()
+                        .get(CONTROLLER)
+                        .add(ControllerFile.builder()
+                                .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+                                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + CONTROLLER_SUFFIX.toLowerCase() + SLASH)
+                                .data(codeBuilder.buildControllerCode(source, fileName, entity, findDtoFromSourceData(entity.getName())))
+                                .build()
+                        );
+            }
         }
         return this;
     }
 
-    public FileBuilder addSimpleService(List<ClassEntity> mainEntities) {
-        for (ClassEntity entity : mainEntities) {
-            String fileName = StringUtil.getServiceFileName(entity.getName());
+    public FileBuilder addSimpleService() {
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(ENTITY);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity entity = file.getData();
 
-            source.getSourceData()
-                    .get(SERVICE)
-                    .add(ServiceFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildServiceCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
-                            .build()
-                    );
+            if (entity.hasAnyEndPoint()) {
+                String fileName = StringUtil.getServiceFileName(entity.getName());
+
+                source.getSourceData()
+                        .get(SERVICE)
+                        .add(ServiceFile.builder()
+                                .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+                                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + SERVICE_SUFFIX.toLowerCase() + SLASH)
+                                .data(codeBuilder.buildServiceCode(source, fileName, entity, findDtoFromSourceData(entity.getName())))
+                                .build()
+                        );
+            }
         }
         return this;
     }
 
-    public FileBuilder addSimpleRepository(List<ClassEntity> mainEntities) {
-        for (ClassEntity entity : mainEntities) {
-            String fileName = StringUtil.getRepoFileName(entity.getName());
+    public FileBuilder addSimpleRepository() {
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(ENTITY);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity entity = file.getData();
 
-            source.getSourceData()
-                    .get(REPOSITORY)
-                    .add(RepositoryFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildRepositoryCode(source, fileName, entity))
-                            .build()
-                    );
+            if (entity.hasAnyEndPoint()) {
+                String fileName = StringUtil.getRepoFileName(entity.getName());
+
+                source.getSourceData()
+                        .get(REPOSITORY)
+                        .add(RepositoryFile.builder()
+                                .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+                                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH)
+                                .data(codeBuilder.buildRepositoryCode(source, fileName, entity))
+                                .build()
+                        );
+
+                if (entity.getFields().stream()
+                        .anyMatch(FieldEntity::isFilter)) {
+                    String criteriaFileName = StringUtil.getCriteriaFileName(entity.getName());
+                    String criteriaImplFileName = StringUtil.getCriteriaImplFileName(entity.getName());
+
+                    source.getSourceData()
+                            .get(REPOSITORY)
+                            .add(RepositoryFile.builder()
+                                    .fileName(criteriaFileName + DEFAULT_JAVA_EXTENSION)
+                                    .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH)
+                                    .data(codeBuilder.buildCriteriaRepoCode(source, criteriaFileName, entity))
+                                    .build()
+                            );
+
+                    source.getSourceData()
+                            .get(REPOSITORY)
+                            .add(RepositoryFile.builder()
+                                    .fileName(criteriaImplFileName + DEFAULT_JAVA_EXTENSION)
+                                    .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + REPO_SUFFIX.toLowerCase() + SLASH)
+                                    .data(codeBuilder.buildCriteriaImplRepoCode(source, criteriaImplFileName, entity))
+                                    .build()
+                            );
+                }
+            }
         }
         return this;
     }
 
-    public FileBuilder addMapper(List<ClassEntity> mainEntities) {
-        for (ClassEntity entity : mainEntities) {
-            String fileName = StringUtil.getMapperFileName(entity.getName());
+    public FileBuilder addMapper() {
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(ENTITY);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity entity = file.getData();
 
-            source.getSourceData()
-                    .get(MAPPER)
-                    .add(MapperFile.builder()
-                            .fileName(fileName + DEFAULT_JAVA_EXTENSION)
-                            .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH)
-                            .data(codeBuilder.buildMapperCode(source, fileName, entity, findDtoByEntityName(entity.getName())))
-                            .build()
-                    );
+            if (entity.hasAnyEndPoint()) {
+                String fileName = StringUtil.getMapperFileName(entity.getName());
+
+                source.getSourceData()
+                        .get(MAPPER)
+                        .add(MapperFile.builder()
+                                .fileName(fileName + DEFAULT_JAVA_EXTENSION)
+                                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + MAPPER_SUFFIX.toLowerCase() + SLASH)
+                                .data(codeBuilder.buildMapperCode(source, fileName, entity, findDtoFromSourceData(entity.getName())))
+                                .build()
+                        );
+            }
         }
         return this;
     }
@@ -115,7 +160,7 @@ public class FileBuilder {
                         .add(DTOFile.builder()
                                 .fileName(dtoFileName + DEFAULT_JAVA_EXTENSION)
                                 .path(source.getPath() + source.getArtifactName() + source.getDtoPackagePath() + DTO_SUFFIX.toLowerCase() + SLASH)
-                                .data(codeBuilder.buildDtoCode(source, dtoFileName, findDtoByEntityName(entity.getName())))
+                                .data(codeBuilder.buildDtoCode(source, dtoFileName, findDtoFromRequestSource(entity.getName())))
                                 .build()
                         );
             }
@@ -124,14 +169,27 @@ public class FileBuilder {
     }
 
     public FileBuilder addException() {
-        source.getSourceData()
-                .get(EXCEPTION)
-                .add(ExceptionFile.builder()
-                        .fileName("GlobalExceptionHandler" + DEFAULT_JAVA_EXTENSION)
-                        .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
-                        .data(codeBuilder.buildDefaultExceptionHandler(source))
-                        .build()
-                );
+        List<AbstractSourceFile> exceptionSourceFiles = source.getSourceData()
+                .get(EXCEPTION);
+
+        exceptionSourceFiles.add(ExceptionFile.builder()
+                .fileName("ValidationExceptionHandler" + DEFAULT_JAVA_EXTENSION)
+                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
+                .data(codeBuilder.buildValidationExceptionHandler(source))
+                .build()
+        );
+        exceptionSourceFiles.add(ExceptionFile.builder()
+                .fileName("ValidationErrorResponse" + DEFAULT_JAVA_EXTENSION)
+                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
+                .data(codeBuilder.buildValidationErrorResponse(source))
+                .build()
+        );
+        exceptionSourceFiles.add(ExceptionFile.builder()
+                .fileName("Violation" + DEFAULT_JAVA_EXTENSION)
+                .path(source.getPath() + source.getArtifactName() + source.getCorePackagePath() + EXCEPTION_SUFFIX.toLowerCase() + SLASH)
+                .data(codeBuilder.buildViolation(source))
+                .build()
+        );
 
         return this;
     }
@@ -185,7 +243,7 @@ public class FileBuilder {
         return source;
     }
 
-    private ClassEntity findDtoByEntityName(String mainEntityName) {
+    private ClassEntity findDtoFromRequestSource(String mainEntityName) {
         ClassEntity mainDtoEntity = null;
 
         for (ClassEntity dtoEntity : source.getDtoEntities()) {
@@ -193,6 +251,21 @@ public class FileBuilder {
                 mainDtoEntity = dtoEntity;
             }
         }
+        return mainDtoEntity;
+    }
+
+    private ClassEntity findDtoFromSourceData(String mainEntityName) {
+        ClassEntity mainDtoEntity = null;
+
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(DTO);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity dtoEntity = file.getData();
+
+            if ((mainEntityName + DTO_SUFFIX).equals(dtoEntity.getName())) {
+                mainDtoEntity = dtoEntity;
+            }
+        }
+
         return mainDtoEntity;
     }
 }

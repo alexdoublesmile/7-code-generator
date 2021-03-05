@@ -15,7 +15,7 @@ import com.plohoy.generator.model.tool.impl.liquibase.changelog.ChangeLogSqlEnti
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.ConstraintEntity;
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.DBFieldEntity;
 import com.plohoy.generator.model.tool.impl.liquibase.changelog.sqlentity.DBTableEntity;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -115,14 +115,14 @@ public class LiquibaseTool extends AbstractTool {
             );
 
             List<FieldEntity> manyToManyFields = entity.getFields().stream()
-                    .filter(DomainHelper::hasManyToManyRelation)
-                    .filter(DomainHelper::isRelationOwner)
+                    .filter(FieldHelper::hasManyToManyRelation)
+                    .filter(FieldHelper::isRelationOwner)
                     .collect(Collectors.toList());
 
             for (FieldEntity manyToManyField : manyToManyFields) {
                 String manyToManyOwnerName = StringUtil.toSnakeCase(manyToManyField.getName());
                 String manyToManyInverseEndName = StringUtil.toSnakeCase(
-                        DomainHelper.getMappedFieldFromFiles(manyToManyField, entity.getName(), entityFiles)
+                        FieldHelper.getMappedFieldFromFiles(manyToManyField, entity.getName(), entityFiles)
                                 .getName());
 
                 String manyToManyTableName = getManyToManyTableName(manyToManyOwnerName, manyToManyInverseEndName);
@@ -215,8 +215,8 @@ public class LiquibaseTool extends AbstractTool {
         List<DBFieldEntity> dbFields = new ArrayList<>();
 
         for (FieldEntity fieldEntity : fields) {
-            if (!DomainHelper.isOneToBackReference(fieldEntity)
-                    && !DomainHelper.hasManyToManyRelation(fieldEntity)) {
+            if (!FieldHelper.isOneToBackReference(fieldEntity)
+                    && !FieldHelper.hasManyToManyRelation(fieldEntity)) {
                 dbFields.add(mapFieldToDB(fieldEntity, idType));
             }
         }
@@ -240,36 +240,37 @@ public class LiquibaseTool extends AbstractTool {
     }
 
     private EnumerationList<String> setDBProperties(FieldEntity fieldEntity) {
-        return ID.equals(fieldEntity.getName()) ? new EnumerationList<String>(false, "not NULL") : null;
+        return ID.equals(fieldEntity.getName()) ? new EnumerationList<String>(false, "NOT NULL") : null;
     }
 
     private EnumerationList<String> setNullDBProperty() {
-        return new EnumerationList<String>(false, "not NULL");
+        return new EnumerationList<String>(false, "NOT NULL");
     }
 
     private String mapFieldTypeToDB(String type) {
         switch (type) {
-            case "UUID": return "uuid";
+            case "UUID": return "UUID";
             case "byte":
-            case "Byte": return "byte";
+            case "Byte": return "BYTE";
             case "short":
-            case "Short": return "int2";
+            case "Short": return "SMALLINT";
             case "int":
-            case "Integer": return "int4";
+            case "Integer": return "INT";
             case "long":
-            case "Long": return "int8";
+            case "Long": return "BIGINT";
             case "float":
-            case "Float": return "float4";
+            case "Float": return "REAL";
             case "double":
-            case "Double": return "float8";
-            case "BigInteger": return "bigint";
+            case "Double": return "DOUBLE PRECISION";
+            case "BigInteger": return "BIGINT";
             case "boolean":
-            case "Boolean": return "boolean";
+            case "Boolean": return "BOOLEAN";
             case "char":
-            case "Character": return "varchar(5)";
-            case "String": return "varchar(255)";
-            case "LocalDate": return "date";
-            case "LocalDateTime": return "timestamp";
+            case "Character": return "CHAR(1)";
+            case "String": return "TEXT";
+            case "LocalDate": return "DATE";
+            case "LocalDateTime": return "TIMESTAMP";
+            case "LocalTime": return "TIME";
             default: return null;
         }
     }
@@ -279,8 +280,8 @@ public class LiquibaseTool extends AbstractTool {
 
         for (ClassEntity entity : source.getEntities()) {
             List<FieldEntity> needConstraintFields = entity.getFields().stream()
-                    .filter(DomainHelper::hasOneToRelation)
-                    .filter(DomainHelper::isRelationOwner)
+                    .filter(FieldHelper::hasOneToRelation)
+                    .filter(FieldHelper::isRelationOwner)
                     .collect(Collectors.toList());
 
             for (FieldEntity field : needConstraintFields) {

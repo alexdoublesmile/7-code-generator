@@ -3,13 +3,21 @@ package com.plohoy.generator.util.codegenhelper.codebuilder;
 import com.plohoy.generator.model.EndPoint;
 import com.plohoy.generator.model.Source;
 import com.plohoy.generator.model.codeentity.AppPropertiesEntity;
+import com.plohoy.generator.model.codeentity.CodeEntity;
+import com.plohoy.generator.model.codeentity.annotation.AnnotationEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassType;
+import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
 import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
+import com.plohoy.generator.util.stringhelper.list.DelimiterType;
+import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
+import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.plohoy.generator.model.EndPointType.CONTROLLER_END_POINT;
 import static com.plohoy.generator.model.file.FileType.ENTITY;
@@ -50,7 +58,7 @@ public class CodeBuilder {
                 .name(fileName)
                 .schemaDescription(mainEntity.getSchemaDescription())
                 .fields(codeTemplate.getSpringRestFields(mainEntity))
-                .methods(codeTemplate.getSpringRestMethods(mainEntity.getEndPoints(), mainDtoEntity))
+                .methods(codeTemplate.getSpringRestMethods(mainEntity.getEndPoints(), mainEntity, mainDtoEntity))
                 .build();
     }
 
@@ -85,10 +93,10 @@ public class CodeBuilder {
         HashMap<FieldEntity, FieldEntity> loopPossibleWithMappedFields = new HashMap<>();
 
         mainEntity.getFields().stream()
-                .filter(DomainHelper::hasAnyRelations)
+                .filter(FieldHelper::hasAnyRelations)
                 .forEach(field -> loopPossibleWithMappedFields.put(
                         field,
-                        DomainHelper.getMappedFieldFromFiles(field, mainEntity.getName(), source.getSourceData().get(ENTITY))));
+                        FieldHelper.getMappedFieldFromFiles(field, mainEntity.getName(), source.getSourceData().get(ENTITY))));
 
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
@@ -114,6 +122,9 @@ public class CodeBuilder {
                 .name(fileName)
                 .fields(codeTemplate.getEntityFields(entity))
                 .methods(codeTemplate.getEntityMethods(entity, source.getEntities()))
+                .endPoints(entity.getEndPoints())
+                .schemaDescription(entity.getSchemaDescription())
+                .pageable(entity.isPageable())
                 .build();
     }
 
@@ -129,11 +140,12 @@ public class CodeBuilder {
                 .name(dtoFileName)
                 .schemaDescription(dtoEntity.getSchemaDescription())
                 .fields(codeTemplate.getDTOFields(dtoEntity))
+                .endPoints(dtoEntity.getEndPoints())
 //                .methods(codeTemplate.getEqualsAndHashMethods(dtoEntity.getName()))
                 .build();
     }
 
-    public ClassEntity buildDefaultExceptionHandler(Source source) {
+    public ClassEntity buildValidationExceptionHandler(Source source) {
         return ClassEntity.builder()
                 .packageString(codeTemplate.getPackageString(
                         source.getCorePackageName() + DOT + EXCEPTION_SUFFIX.toLowerCase()))
@@ -141,9 +153,67 @@ public class CodeBuilder {
                 .annotations(codeTemplate.getExceptionHandlerAnnotations())
                 .modifiers(codeTemplate.getPublicMod())
                 .classType(ClassType.CLASS)
-                .name("GlobalExceptionHandler")
-                .extendsClass("ResponseEntityExceptionHandler")
+                .name("ValidationExceptionHandler")
                 .methods(codeTemplate.getExceptionMethods())
+                .build();
+    }
+
+    public ClassEntity buildValidationErrorResponse(Source source) {
+        return ClassEntity.builder()
+                .packageString(codeTemplate.getPackageString(
+                        source.getCorePackageName() + DOT + EXCEPTION_SUFFIX.toLowerCase()))
+                .imports(new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                        ImportEntity.builder()
+                                .value(LOMBOK_MAIN_PACKAGE + ".Builder")
+                                .build(),
+                        ImportEntity.builder()
+                                .value(LOMBOK_MAIN_PACKAGE + ".Getter")
+                                .build(),
+                        ImportEntity.builder()
+                                .value(JAVA_UTIL_PACKAGE + ".List")
+                                .build()))
+                .annotations(new IndentList<>(
+                        AnnotationEntity.builder()
+                                .name("Builder")
+                                .build(),
+                        AnnotationEntity.builder()
+                                .name("Getter")
+                                .build()))
+                .modifiers(codeTemplate.getPublicMod())
+                .classType(ClassType.CLASS)
+                .name("ValidationErrorResponse")
+                .fields(new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
+                        FieldEntity.builder()
+                                .modifiers(new EnumerationList<>(PRIVATE_MOD, FINAL_MOD))
+                                .type(String.format(LIST_TEMPLATE, "Violation"))
+                                .name("violations")
+                                .build()))
+                .build();
+    }
+
+    public ClassEntity buildViolation(Source source) {
+        return ClassEntity.builder()
+                .packageString(codeTemplate.getPackageString(
+                        source.getCorePackageName() + DOT + EXCEPTION_SUFFIX.toLowerCase()))
+                .imports(new IndentList<ImportEntity>(DelimiterType.SEMICOLON, true, true,
+                        ImportEntity.builder()
+                                .value(LOMBOK_MAIN_PACKAGE + ".Builder")
+                                .build()))
+                .annotations(new IndentList<>(AnnotationEntity.builder().name("Builder").build()))
+                .modifiers(codeTemplate.getPublicMod())
+                .classType(ClassType.CLASS)
+                .name("Violation")
+                .fields(new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
+                        FieldEntity.builder()
+                                .modifiers(new EnumerationList<>(PRIVATE_MOD, FINAL_MOD))
+                                .type("String")
+                                .name("fieldName")
+                                .build(),
+                        FieldEntity.builder()
+                                .modifiers(new EnumerationList<>(PRIVATE_MOD, FINAL_MOD))
+                                .type("String")
+                                .name("message")
+                                .build()))
                 .build();
     }
 
@@ -168,6 +238,39 @@ public class CodeBuilder {
     public AppPropertiesEntity buildDBProperty() {
         return AppPropertiesEntity.builder()
                 .propertiesMap(codeTemplate.getDBProperties())
+                .build();
+    }
+
+    public CodeEntity buildCriteriaRepoCode(Source source, String fileName, ClassEntity entity) {
+        return ClassEntity.builder()
+                .packageString(codeTemplate.getPackageString(
+                        source.getCorePackageName() + DOT + REPO_SUFFIX.toLowerCase()))
+                .imports(codeTemplate.getCriteriaRepoImports(source.getCorePackageName(), entity.getName()))
+                .modifiers(codeTemplate.getPublicMod())
+                .classType(ClassType.INTERFACE)
+                .name(fileName)
+                .methods(codeTemplate.getCriteriaRepoMethods(entity))
+                .build();
+    }
+
+    public CodeEntity buildCriteriaImplRepoCode(Source source, String fileName, ClassEntity entity) {
+        return ClassEntity.builder()
+                .packageString(codeTemplate.getPackageString(
+                        source.getCorePackageName() + DOT + REPO_SUFFIX.toLowerCase()))
+                .imports(codeTemplate.getCriteriaImplRepoImports(source.getCorePackageName(), entity.getName()))
+                .modifiers(codeTemplate.getPublicMod())
+                .classType(ClassType.CLASS)
+                .name(fileName)
+                .implInterfaces(new EnumerationList<String>(false,
+                        fileName.substring(0, fileName.length() - 4)))
+                .fields(new IndentList<FieldEntity>(DelimiterType.SEMICOLON, true, true,
+                        FieldEntity.builder()
+                                .annotations(new IndentList<AnnotationEntity>(AnnotationEntity.builder().name("Autowired").build()))
+                                .modifiers(getPublicMod())
+                                .type("EntityManager")
+                                .name("em")
+                                .build()))
+                .methods(codeTemplate.getCriteriaImplRepoMethods(entity))
                 .build();
     }
 }

@@ -1,0 +1,31 @@
+package com.plohoy.generator.model.codeentity.field;
+
+public enum ValidationEntityType {
+    NULL,
+    NOT_NULL,
+    NOT_EMPTY,
+    NOT_BLANK,
+//    LENGTH,
+    PATTERN,
+    EMAIL,
+//    URL,
+    SIZE,
+    MIN,
+    MAX,
+    NEGATIVE,
+    NEGATIVE_OR_ZERO,
+    POSITIVE_OR_ZERO,
+    POSITIVE,
+    DIGITS,
+    DECIMAL_MIN,
+    DECIMAL_MAX,
+//    RANGE,
+    PAST,
+    PAST_OR_PRESENT,
+    FUTURE,
+    FUTURE_OR_PRESENT,
+//    DURATION_MIN,
+//    DURATION_MAX,
+    ASSERT_TRUE,
+    ASSERT_FALSE
+}

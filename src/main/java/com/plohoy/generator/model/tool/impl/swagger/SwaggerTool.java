@@ -9,6 +9,7 @@ import com.plohoy.generator.model.codeentity.annotation.ArgumentAnnotationEntity
 import com.plohoy.generator.model.codeentity.annotation.PropertyEntity;
 import com.plohoy.generator.model.codeentity.clazz.ClassEntity;
 import com.plohoy.generator.model.codeentity.clazz.ImportEntity;
+import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.ArgumentEntity;
 import com.plohoy.generator.model.codeentity.method.MethodEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
@@ -22,9 +23,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.plohoy.generator.model.EndPointType.FIND_ALL_END_POINT;
 import static com.plohoy.generator.model.file.FileType.DTO;
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.DTO_SUFFIX;
-import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.ID;
+import static com.plohoy.generator.model.file.FileType.ENTITY;
+import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.*;
 
 public class SwaggerTool extends AbstractTool {
 
@@ -43,6 +45,7 @@ public class SwaggerTool extends AbstractTool {
     public Source generateCode(Source source) {
         List<AbstractSourceFile> controllerFiles = source.getSourceData().get(FileType.CONTROLLER);
         List<AbstractSourceFile> dtoEntityFiles = source.getSourceData().get(DTO);
+        List<AbstractSourceFile> entityFiles = source.getSourceData().get(ENTITY);
 
         for (AbstractSourceFile<ClassEntity> controllerFile : controllerFiles) {
             ClassEntity controller = controllerFile.getData();
@@ -75,6 +78,50 @@ public class SwaggerTool extends AbstractTool {
                                 annotation.setParentEntity(method)));
 
                 setParameterDescriptions(method);
+            }
+
+            MethodEntity searchMethod = controller.getMethods()
+                    .stream()
+                    .filter(method -> FIND_ALL_END_POINT.equals(method.getEndPoint().getType()))
+                    .findAny()
+                    .orElseGet(() -> MethodEntity.builder().build());
+
+            List<ArgumentEntity> searchMethodArguments = new ArrayList<>();
+
+            if (Objects.nonNull(searchMethod.getName())) {
+                searchMethodArguments = searchMethod
+                        .getArgs()
+                        .stream()
+                        .filter(argument -> !"pageable".equals(argument.getName()))
+                        .collect(Collectors.toList());
+            }
+
+            if (searchMethodArguments.size() > 0) {
+                searchMethodArguments.stream()
+                        .forEach(arg -> {
+                            if (Objects.isNull(arg.getAnnotations())) {
+                                arg.setAnnotations(new EnumerationList<>());
+                            }
+
+                            String argDescription = arg.getDescription();
+                            if (Objects.isNull(argDescription) || argDescription.isEmpty()) {
+                                argDescription = BOOLEAN.equals(arg.getType())
+                                        ? "Включая записи, помеченные как удаленные"
+                                        : arg.getName();
+                            }
+
+                            arg.getAnnotations().add(
+                                    ArgumentAnnotationEntity.builder()
+                                            .name("Parameter")
+                                            .properties(new EnumerationList<PropertyEntity>(DelimiterType.COMMA, false,
+                                                    PropertyEntity.builder()
+                                                            .name("description")
+                                                            .quotedValue(argDescription)
+                                                            .build()))
+                                            .build()
+                                            .setParentEntity(arg)
+                            );
+                        });
             }
         }
 
@@ -126,6 +173,19 @@ public class SwaggerTool extends AbstractTool {
         }
 
         return source;
+    }
+
+    private ClassEntity getEntityByControllerName(Source source, String controllerName) {
+        List<AbstractSourceFile> abstractSourceFiles = source.getSourceData().get(ENTITY);
+        for (AbstractSourceFile<ClassEntity> file : abstractSourceFiles) {
+            ClassEntity entity = file.getData();
+
+            if (controllerName.substring(0, controllerName.length() - 10).equals(entity.getName())) {
+                return entity;
+            }
+        }
+
+        return null;
     }
 
     private void setParameterDescriptions(MethodEntity method) {

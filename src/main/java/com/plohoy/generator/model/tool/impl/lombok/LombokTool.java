@@ -8,7 +8,7 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.method.MethodEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
 import lombok.Getter;
 
@@ -58,9 +58,9 @@ public class LombokTool extends AbstractTool {
                     field.setAnnotations(new IndentList<AnnotationEntity>());
                 }
 
-                if ((DomainHelper.isOneToOneBackReference(field)
-                            || DomainHelper.hasManyToOneRelation(field)
-                            || DomainHelper.isManyToManyBackReference(field))
+                if ((FieldHelper.isOneToOneBackReference(field)
+                            || FieldHelper.hasManyToOneRelation(field)
+                            || FieldHelper.isManyToManyBackReference(field))
                         && !hasExcludeAnnotations(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()

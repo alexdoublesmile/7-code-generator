@@ -28,7 +28,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
     private ClassType classType;
     private String name;
     private String extendsClass;
-    private EnumerationList<ClassEntity> implInterfaces;
+    private EnumerationList<String> implInterfaces;
     private String idType;
     private IndentList<FieldEntity> fields;
     private IndentList<BlockEntity> blocks;
@@ -38,6 +38,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
     private String schemaDescription;
     private List<EndPoint> endPoints;
     private boolean restEntity;
+    private boolean pageable;
 
     public ClassEntity(
             String packageString,
@@ -47,7 +48,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
             ClassType classType,
             String name,
             String extendsClass,
-            EnumerationList<ClassEntity> implInterfaces,
+            EnumerationList<String> implInterfaces,
             String idType,
             IndentList<FieldEntity> fields,
             IndentList<BlockEntity> blocks,
@@ -56,7 +57,8 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
             IndentList<ClassEntity> innerClasses,
             String schemaDescription,
             List<EndPoint> endPoints,
-            boolean restEntity
+            boolean restEntity,
+            boolean pageable
     ) {
         this.packageString = packageString;
         this.modifiers = modifiers;
@@ -68,6 +70,7 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
         this.schemaDescription = schemaDescription;
         this.endPoints = endPoints;
         this.restEntity = restEntity;
+        this.pageable = pageable;
 
         if (Objects.nonNull(imports)) setImports(imports);
         if (Objects.nonNull(annotations)) setAnnotations(annotations);
@@ -76,6 +79,10 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
         if (Objects.nonNull(constructors)) setConstructors(constructors);
         if (Objects.nonNull(methods)) setMethods(methods);
         if (Objects.nonNull(innerClasses)) setInnerClasses(innerClasses);
+    }
+
+    public boolean hasAnyEndPoint() {
+        return Objects.nonNull(endPoints) && endPoints.size() > 0;
     }
 
     public void setImports(IndentList<ImportEntity> imports) {
@@ -142,10 +149,10 @@ public class ClassEntity extends CodeEntity<ClassEntity> {
                         + StringUtil.checkForNull(imports, imports + getIndent())
                         + annotations
                         + modifiers
-                        + StringUtil.checkForNull(classType, classType.getTypeName() + SPACE)
+                        + (Objects.nonNull(classType) ? classType.getTypeName() + SPACE : EMPTY)
                         + name + SPACE
                         + StringUtil.checkForNull(extendsClass, EXTENDS + SPACE + extendsClass + SPACE)
-                        + implInterfaces
+                        + StringUtil.checkForNull(implInterfaces, IMPLEMENTS + SPACE + implInterfaces + SPACE)
                         + OPEN_BODY_BRACKET + getIndent()
                         + StringUtil.checkForNull(fields, fields + INDENT)
                         + blocks

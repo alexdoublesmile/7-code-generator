@@ -22,16 +22,16 @@ public class RestSimpleStrategy implements Strategy {
 
         List<ClassEntity> mainEntities = source.getEntities()
                 .stream()
-                .filter(entity -> Objects.nonNull(entity.getEndPoints()))
+                .filter(ClassEntity::hasAnyEndPoint)
                 .collect(Collectors.toList());
 
         return fileBuilder
                 .registerSource(source)
                 .addDomain()
-                .addSimpleController(mainEntities)
-                .addSimpleService(mainEntities)
-                .addSimpleRepository(mainEntities)
-                .addMapper(mainEntities)
+                .addSimpleController()
+                .addSimpleService()
+                .addSimpleRepository()
+                .addMapper()
                 .addException()
                 .addSpringBootLauncher()
                 .addProperties()

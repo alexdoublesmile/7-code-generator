@@ -9,7 +9,7 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.codeentity.field.FieldRelation;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
 import com.plohoy.generator.util.stringhelper.StringUtil;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
@@ -152,7 +152,7 @@ public class HibernateTool extends AbstractTool {
                                     PropertyEntity.builder()
                                             .name("mappedBy")
                                             .quotedValue(
-                                                    DomainHelper
+                                                    FieldHelper
                                                         .getMappedFieldFromFiles(field, entity.getName(), entityFiles)
                                                         .getName())
                                             .build()))
@@ -172,7 +172,7 @@ public class HibernateTool extends AbstractTool {
                                 PropertyEntity.builder()
                                         .name("mappedBy")
                                         .quotedValue(
-                                                DomainHelper
+                                                FieldHelper
                                                         .getMappedFieldFromFiles(field, entity.getName(), entityFiles)
                                                         .getName())
                                         .build(),
@@ -222,7 +222,7 @@ public class HibernateTool extends AbstractTool {
     }
 
     private List<AnnotationEntity> getAnnotationsForManyToMany(FieldEntity field, ClassEntity entity, List<AbstractSourceFile> entityFiles) {
-        FieldEntity mappedField = DomainHelper
+        FieldEntity mappedField = FieldHelper
                 .getMappedFieldFromFiles(field, entity.getName(), entityFiles);
 
         boolean isRelationOwner = field.getRelation().isRelationOwner();

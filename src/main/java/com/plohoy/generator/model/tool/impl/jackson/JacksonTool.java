@@ -9,7 +9,7 @@ import com.plohoy.generator.model.codeentity.field.FieldEntity;
 import com.plohoy.generator.model.file.AbstractSourceFile;
 import com.plohoy.generator.model.file.FileType;
 import com.plohoy.generator.model.tool.AbstractTool;
-import com.plohoy.generator.util.domainhelper.DomainHelper;
+import com.plohoy.generator.util.domainhelper.FieldHelper;
 import com.plohoy.generator.util.stringhelper.list.DelimiterType;
 import com.plohoy.generator.util.stringhelper.list.impl.EnumerationList;
 import com.plohoy.generator.util.stringhelper.list.impl.IndentList;
@@ -67,8 +67,8 @@ public class JacksonTool extends AbstractTool {
                                     .build()
                                     .setParentEntity(field)
                     );
-                } else if (DomainHelper.isOneToOneBackReference(field)
-                        || DomainHelper.hasManyToOneRelation(field)) {
+                } else if (FieldHelper.isOneToOneBackReference(field)
+                        || FieldHelper.hasManyToOneRelation(field)) {
                     field.getAnnotations().add(
                             AnnotationEntity.builder()
                                     .name("JsonIgnore")

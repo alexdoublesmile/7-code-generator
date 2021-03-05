@@ -82,6 +82,7 @@ public class RequestMapper {
                     .fields(mapRequestFieldsToSource(requestEntity, false))
                     .endPoints(requestEntity.getEndPoints())
                     .schemaDescription(requestEntity.getDescription())
+                    .pageable(requestEntity.isPageable())
                     .build();
 
             entities.add(entity);
@@ -102,6 +103,7 @@ public class RequestMapper {
                     .endPoints(requestEntity.getEndPoints())
 //                    .restEntity(Objects.nonNull(requestEntity.getEndPoints()))
                     .schemaDescription(requestEntity.getDescription())
+                    .pageable(requestEntity.isPageable())
                     .build();
 
             dtoEntities.add(dtoEntity);
@@ -131,6 +133,8 @@ public class RequestMapper {
                     .schemaDescription(requestField.getDescription())
                     .relation(mapRequestRelationToFieldRelation(requestField.getRelation()))
                     .array(requestField.isArray())
+                    .filter(requestField.isFilter())
+                    .validationList(requestField.getValidationList())
                     .build();
 
             fields.add(field);

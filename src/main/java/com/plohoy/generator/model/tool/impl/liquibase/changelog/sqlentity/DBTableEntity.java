@@ -11,8 +11,8 @@ import static com.plohoy.generator.util.codegenhelper.codetemplate.CodeTemplate.
 @Data
 @Builder
 public class DBTableEntity extends CodeEntity<DBTableEntity> {
-    private static final String CREATE_TABLE_WORD = "create table";
-    private static final String PRIMARY_KEY_WORD = "primary key";
+    private static final String CREATE_TABLE_WORD = "CREATE TABLE";
+    private static final String PRIMARY_KEY_WORD = "PRIMARY KEY";
 
     private String tableName;
     private IndentList<DBFieldEntity> fields;
