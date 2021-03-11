@@ -30,6 +30,17 @@ import com.plohoy.generator.view.request.RequestEntityField;
 import com.plohoy.generator.view.request.RequestEntityRelation;
 import com.plohoy.generator.view.request.SourceRequest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,16 +50,28 @@ import java.util.List;
 import static com.plohoy.generator.model.EndPointType.*;
 import static com.plohoy.generator.model.codeentity.field.RelationType.*;
 
+@SpringBootApplication
 public class GeneratorApplication {
 
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext ctx =
-                new AnnotationConfigApplicationContext();
-//        ctx.register(AppConfig.class);
-        ctx.scan("com.plohoy.generator");
-        ctx.refresh();
+        SpringApplication.run(GeneratorApplication.class, args);
 
-        test(ctx);
+//        AnnotationConfigApplicationContext ctx =
+//                new AnnotationConfigApplicationContext();
+//        ctx.register(AppConfig.class);
+//        ctx.scan("com.plohoy.generator");
+//        ctx.refresh();
+
+//        test(ctx);
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components())
+                .info(new Info()
+                        .title("Code Generator")
+                        .description("Code Generation Service"));
     }
 
     private static void test(AnnotationConfigApplicationContext ctx) {
@@ -61,10 +84,10 @@ public class GeneratorApplication {
     private static SourceRequest getTestRequest() {
         return SourceRequest.builder()
                 .author("Alex Plohoy")
-                .sourcePath("../uploads/generated/")
+                .sourcePath("C://generated/")
                 .groupName("com.plohoy")
-                .artifactName("person-service")
-                .description("Микросервис по созданию персон")
+//                .artifactName("person-service")
+//                .description("Микросервис по созданию персон")
                 .jdkVersion("11")
                 .architecture(ArchitectureType.REST_SIMPLE)
                 .dtoModuleExists(true)
@@ -81,7 +104,7 @@ public class GeneratorApplication {
                 .name("Person")
                 .fields(getTestPersonFields())
                 .description("Персона")
-                .endPoints(getTestPersonEndPoints())
+                .endPoints(getTestEndPoints())
 //                .pageable(true)
                 .build();
 
@@ -117,7 +140,11 @@ public class GeneratorApplication {
         RequestEntityField idField = RequestEntityField.builder()
                 .type("UUID")
                 .name("id")
-                .description("Идентификатор персоны в БД")
+                .description("Идентификатор в БД")
+                .array(false)
+                .filter(false)
+                .relation(null)
+                .validationList(null)
                 .build();
 
 
@@ -601,14 +628,14 @@ public class GeneratorApplication {
                 EndPoint.builder()
                         .type(DELETE_HARDLY_END_POINT)
                         .build());
-//        endPoints.add(
-//                EndPoint.builder()
-//                        .type(DELETE_SOFTLY_END_POINT)
-//                        .build());
-//        endPoints.add(
-//                EndPoint.builder()
-//                        .type(RESTORE_END_POINT)
-//                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(DELETE_SOFTLY_END_POINT)
+                        .build());
+        endPoints.add(
+                EndPoint.builder()
+                        .type(RESTORE_END_POINT)
+                        .build());
 
         return endPoints;
 

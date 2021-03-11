@@ -38,4 +38,8 @@ public class RequestEntity {
     public String getDescription() {
         return Optional.ofNullable(description).orElseGet(() -> name);
     }
+
+    public boolean hasEndpoints() {
+        return Objects.nonNull(endPoints) && endPoints.size() > 0;
+    }
 }
